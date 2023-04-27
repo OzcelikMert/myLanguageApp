@@ -2,31 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/pageScaffold.dart';
+import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/lib/element.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 
 import '../components/elements/button.dart';
 
-class PageStudy extends StatefulWidget {
-  final int type;
-
-  const PageStudy({Key? key, required this.type}) : super(key: key);
+class PageStudySettings extends StatefulWidget {
+  const PageStudySettings({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _PageStudyState();
+  State<StatefulWidget> createState() => _PageStudySettingsState();
 }
 
-class _PageStudyState extends State<PageStudy> {
-  late int _type = 0;
+class _PageStudySettingsState extends State<PageStudySettings> {
+  String selectedVoiceGenderRadio = "male";
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  @override
-  void initState() {
-    super.initState();
-    _type = widget.type;
-  }
-
-  void onClickApprove() {
+  void onClickSave() {
     if (_formKey.currentState!.validate()) {
       (ElementLib(context)).showMessageBox(
           title: "Are you sure?",
@@ -37,25 +30,11 @@ class _PageStudyState extends State<PageStudy> {
     }
   }
 
-  void onClickBack() {
-    if (_formKey.currentState!.validate()) {
-      (ElementLib(context)).showMessageBox(
-          title: "Are you sure?",
-          content: "You have selected 'daily'. Are you sure about this?",
-          onPressedOkay: () {
-            RouteLib(context).change(target: "/study/plan");
-          });
-    }
-  }
-
-  void onClickSettings() {
-    if (_formKey.currentState!.validate()) {
-      (ElementLib(context)).showMessageBox(
-          title: "Are you sure?",
-          content: "You have selected 'daily'. Are you sure about this?",
-          onPressedOkay: () {
-            RouteLib(context).change(target: "/study/settings");
-          });
+  void onChangeVoiceGenderRadio(String? value) {
+    if (value != null) {
+      setState(() {
+        selectedVoiceGenderRadio = value;
+      });
     }
   }
 
@@ -69,55 +48,42 @@ class _PageStudyState extends State<PageStudy> {
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
-        title: "Study",
-        hideAppBar: true,
+        title: "Settings",
         hideSidebar: true,
         withScroll: true,
         body: Column(
           children: <Widget>[
-            const SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  child: ComponentIconButton(
-                      onPressed: onClickBack,
-                      icon: Icons.arrow_back,
-                  ),
-                ),
-                Container(
-                  child: ComponentIconButton(
-                      onPressed: onClickSettings,
-                      icon: Icons.settings
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(height: 100),
-            const Text(
-              "[word]",
-              style: TextStyle(fontSize: 35),
-            ),
             const SizedBox(height: 50),
-            const Text(
-              "[comment]",
-              style: TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 75),
             ComponentForm(
               formKey: _formKey,
-              onSubmit: onClickApprove,
-              submitButtonText: "Approve",
-              submitButtonIcon: Icons.check,
+              onSubmit: onClickSave,
+              submitButtonText: "Save",
+              submitButtonIcon: Icons.save,
               children: <Widget>[
-                const Text("[Native or Target Language Name]"),
+                const Center(
+                    child:
+                        Text("Text To Speech", style: TextStyle(fontSize: 25))),
+                const SizedBox(height: 25),
+                const Text("Language Code"),
                 TextFormField(
                   decoration: const InputDecoration(
-                    hintText: '...',
+                    hintText: 'en-UK',
                   ),
                   validator: onValidator,
                 ),
+                const SizedBox(height: 16),
+                ComponentRadio<String>(
+                  title: 'Male',
+                  value: 'male',
+                  groupValue: selectedVoiceGenderRadio,
+                  onChanged: onChangeVoiceGenderRadio,
+                ),
+                ComponentRadio<String>(
+                  title: 'Female',
+                  value: 'female',
+                  groupValue: selectedVoiceGenderRadio,
+                  onChanged: onChangeVoiceGenderRadio,
+                )
               ],
             ),
           ],

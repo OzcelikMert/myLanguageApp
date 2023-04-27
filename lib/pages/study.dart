@@ -26,6 +26,17 @@ class _PageStudyState extends State<PageStudy> {
     _type = widget.type;
   }
 
+  void onClickNext() {
+    if (_formKey.currentState!.validate()) {
+      (ElementLib(context)).showMessageBox(
+          title: "Are you sure?",
+          content: "You have selected 'daily'. Are you sure about this?",
+          onPressedOkay: () {
+            Navigator.pushNamed(context, '/study/daily');
+          });
+    }
+  }
+
   void onClickApprove() {
     if (_formKey.currentState!.validate()) {
       (ElementLib(context)).showMessageBox(
@@ -49,14 +60,7 @@ class _PageStudyState extends State<PageStudy> {
   }
 
   void onClickSettings() {
-    if (_formKey.currentState!.validate()) {
-      (ElementLib(context)).showMessageBox(
-          title: "Are you sure?",
-          content: "You have selected 'daily'. Are you sure about this?",
-          onPressedOkay: () {
-            RouteLib(context).change(target: "/study/settings");
-          });
-    }
+    RouteLib(context).change(target: "/study/settings", safeHistory: true);
   }
 
   String? onValidator(String? value) {
@@ -119,6 +123,14 @@ class _PageStudyState extends State<PageStudy> {
                   validator: onValidator,
                 ),
               ],
+            ),
+            const SizedBox(height: 50),
+            ComponentButton(
+              onPressed: onClickNext,
+              text: "Skip Next",
+              icon: Icons.arrow_forward,
+              bgColor: Colors.blueGrey,
+              reverseIconAlign: true,
             ),
           ],
         ));

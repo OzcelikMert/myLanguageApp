@@ -6,8 +6,9 @@ class ComponentButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color? bgColor;
   final ButtonStyle? style;
+  final bool? reverseIconAlign;
 
-  const ComponentButton({Key? key, required this.text, required this.onPressed, this.icon, this.bgColor, this.style}) : super(key: key);
+  const ComponentButton({Key? key, required this.text, required this.onPressed, this.icon, this.bgColor, this.style, this.reverseIconAlign}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +19,9 @@ class ComponentButton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon),
+          reverseIconAlign == true ? Text(text) : Icon(icon),
           const SizedBox(width: 10),
-          Text(text),
+          reverseIconAlign == true ? Icon(icon) : Text(text),
         ],
       ) : Text(text),
       style: ElevatedButton.styleFrom(
