@@ -4,13 +4,12 @@ import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/pageScaffold.dart';
 import 'package:my_language_app/lib/element.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
-
 import '../components/elements/button.dart';
 
 class PageStudy extends StatefulWidget {
   final int type;
 
-  const PageStudy({Key? key, required this.type}) : super(key: key);
+  PageStudy({Key? key, required this.type}) : super(key: key) {}
 
   @override
   State<StatefulWidget> createState() => _PageStudyState();
@@ -49,14 +48,13 @@ class _PageStudyState extends State<PageStudy> {
   }
 
   void onClickBack() {
-    if (_formKey.currentState!.validate()) {
       (ElementLib(context)).showMessageBox(
           title: "Are you sure?",
           content: "You have selected 'daily'. Are you sure about this?",
           onPressedOkay: () {
             RouteLib(context).change(target: "/study/plan");
           });
-    }
+
   }
 
   void onClickSettings() {

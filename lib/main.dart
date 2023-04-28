@@ -10,11 +10,11 @@ import 'package:my_language_app/pages/wordList.dart';
 import 'package:my_language_app/pages/studyPlan.dart';
 
 void main() {
-  runApp(const MyLanguageApp());
+  runApp(MyLanguageApp());
 }
 
 class MyLanguageApp extends StatelessWidget {
-  const MyLanguageApp({Key? key}) : super(key: key);
+  MyLanguageApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +29,10 @@ class MyLanguageApp extends StatelessWidget {
         "/word/add": (context) => const PageWordAdd(),
         "/word/list": (context) => const PageWordList(),
         "/study/plan": (context) => const PageStudyPlan(),
-        "/study/daily": (context) => const PageStudy(type: StudyTypes.Daily),
-        "/study/weekly": (context) => const PageStudy(type: StudyTypes.Weekly),
-        "/study/monthly": (context) => const PageStudy(type: StudyTypes.Monthly),
-        "/study/settings": (context) => const PageStudySettings(),
+        "/study/daily": (context) => PageStudy(type: StudyTypes.Daily),
+        "/study/weekly": (context) => PageStudy(type: StudyTypes.Weekly),
+        "/study/monthly": (context) => PageStudy(type: StudyTypes.Monthly),
+        "/study/settings": (context) => PageStudySettings(),
       }
     );
   }

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/components/elements/dropdown.dart';
 import 'package:my_language_app/components/elements/form.dart';
-import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/pageScaffold.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/lib/element.lib.dart';
-import 'package:my_language_app/lib/route.lib.dart';
-
-import '../components/elements/button.dart';
+import 'package:my_language_app/models/dependencies/tts/voice.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:my_language_app/myLib/variable/array.dart';
 
 class PageStudySettings extends StatefulWidget {
-  const PageStudySettings({Key? key}) : super(key: key);
+  PageStudySettings({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PageStudySettingsState();
@@ -18,6 +18,33 @@ class PageStudySettings extends StatefulWidget {
 class _PageStudySettingsState extends State<PageStudySettings> {
   String selectedVoiceGenderRadio = "male";
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late List<TTSVoiceModel> _ttsVoices = [];
+
+  FlutterTts flutterTts = FlutterTts();
+
+  Future<List<TTSVoiceModel>> getVoices() async {
+    List<TTSVoiceModel> voices = [];
+    var rows = await flutterTts.getVoices;
+    for(var row in rows) {
+      var map = MyLibraryArray.convertLinkedHashMapToMap(row);
+      print(map);
+      voices.add(TTSVoiceModel(map["name"].toString(), map["locale"].toString()));
+    }
+    return voices;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateState();
+  }
+
+  void _updateState() async {
+    var voices = await getVoices();
+    setState(() {
+      _ttsVoices = voices;
+    });
+  }
 
   void onClickSave() {
     if (_formKey.currentState!.validate()) {
@@ -65,11 +92,11 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                         Text("Text To Speech", style: TextStyle(fontSize: 25))),
                 const SizedBox(height: 25),
                 const Text("Language Code"),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'en-UK',
-                  ),
-                  validator: onValidator,
+                ComponentDropdown<TTSVoiceModel>(
+                  items: _ttsVoices,
+                  itemAsString: (TTSVoiceModel u) =>  "${u.name} - ${u.locale}",
+                  onChanged: (TTSVoiceModel? data) => print({data?.name, data?.locale}),
+                  hintText: "country in menu mode",
                 ),
                 const SizedBox(height: 16),
                 ComponentRadio<String>(
