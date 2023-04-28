@@ -19,157 +19,9 @@ class _PageHomeState extends State<PageHome> {
 
   List<Map<String, dynamic>> _data = [
     {
-      'kategori': 'Elektronik',
-      'ürün': 'Akıllı Telefon',
-      'marka': 'Samsung',
-      'renk': 'Siyah',
-      'fiyat': 3000,
-      'stokDurumu': 'Stokta',
+      'id': '123',
+      'name': 'Akıllı Telefon',
     },
-    {
-      'kategori': 'Giyim',
-      'ürün': 'Gömlek',
-      'marka': 'Zara',
-      'renk': 'Beyaz',
-      'fiyat': 200,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Kozmetik',
-      'ürün': 'Ruj',
-      'marka': 'MAC',
-      'renk': 'Kırmızı',
-      'fiyat': 150,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Kitap',
-      'ürün': 'Roman',
-      'marka': 'Can Yayınları',
-      'renk': '-',
-      'fiyat': 30,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    }
   ];
 
   void _sort<T>(Comparable<T> Function(Map<String, dynamic> d) getField,
@@ -185,6 +37,10 @@ class _PageHomeState extends State<PageHome> {
       _sortColumnIndex = columnIndex;
       _sortAscending = ascending;
     });
+  }
+
+  void onClickSelect() {
+    RouteLib(context).change(target: '/study/plan');
   }
 
   void onClickMonthly() {
@@ -207,33 +63,36 @@ class _PageHomeState extends State<PageHome> {
               text: "Add New",
             ),
             const Padding(padding: EdgeInsets.all(16)),
-            PaginatedDataTable(
-              header: const Text('List'),
-              rowsPerPage: _rowsPerPage,
-              source: _DataSource(context, _data),
-              sortColumnIndex: _sortColumnIndex,
-              sortAscending: _sortAscending,
-              columns: [
-                DataColumn(
-                  label: const Text('ID'),
-                  onSort: (columnIndex, ascending) {
-                    _sort<String>((d) => d['kategori'], columnIndex, ascending);
-                  },
-                ),
-                DataColumn(
-                  label: const Text('Language'),
-                  onSort: (columnIndex, ascending) {
-                    _sort<String>((d) => d['ürün'], columnIndex, ascending);
-                  },
-                ),
-                DataColumn(
-                  label: const Text('Select'),
-                ),
-                DataColumn(
-                  label: const Text('Delete'),
-                ),
-              ],
-            ),
+            Container(
+              width: double.infinity,
+              child: PaginatedDataTable(
+                header: const Center(child: Text('Select a language')),
+                rowsPerPage: _rowsPerPage,
+                source: _DataSource(context, _data),
+                sortColumnIndex: _sortColumnIndex,
+                sortAscending: _sortAscending,
+                columns: [
+                  DataColumn(
+                    label: const Text('ID'),
+                    onSort: (columnIndex, ascending) {
+                      _sort<String>((d) => d['id'], columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Text('Language'),
+                    onSort: (columnIndex, ascending) {
+                      _sort<String>((d) => d['name'], columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: Text("Select"),
+                  ),
+                  DataColumn(
+                    label: Text("Delete"),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),
@@ -257,10 +116,21 @@ class _DataSource extends DataTableSource {
     return DataRow.byIndex(
       index: index,
       cells: [
-        DataCell(Text(row['kategori'])),
-        DataCell(Text(row['ürün'])),
-        DataCell(Text(row['marka'])),
-        DataCell(Text(row['renk'])),
+        DataCell(Text(row['id'])),
+        DataCell(Text(row['name'])),
+        DataCell(ComponentButton(
+          text: "Select",
+          onPressed: () {},
+          icon: Icons.check,
+          buttonSize: ComponentButtonSize.sm,
+        )),
+        DataCell(ComponentButton(
+          text: "Delete",
+          bgColor: Colors.pink,
+          onPressed: () {},
+          icon: Icons.delete_forever,
+          buttonSize: ComponentButtonSize.sm,
+        )),
       ],
     );
   }

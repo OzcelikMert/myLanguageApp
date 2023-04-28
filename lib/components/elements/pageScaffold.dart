@@ -18,6 +18,11 @@ class ComponentPageScaffold extends StatelessWidget {
       this.withScroll})
       : super(key: key);
 
+  Widget _getBody() {
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25), child: body);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,10 +31,9 @@ class ComponentPageScaffold extends StatelessWidget {
             : AppBar(
                 title: Text(title),
               ),
-        body: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child:
-                withScroll == true ? SingleChildScrollView(child: body) : body),
+        body: withScroll == true
+            ? SingleChildScrollView(child: _getBody())
+            : _getBody(),
         drawer: hideSidebar == true ? null : const ComponentSideBar());
   }
 }

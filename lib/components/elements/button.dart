@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+enum ComponentButtonSize {
+  sm,
+  md,
+  lg
+}
+
 class ComponentButton extends StatelessWidget {
   final String text;
   final IconData? icon;
@@ -7,8 +13,31 @@ class ComponentButton extends StatelessWidget {
   final Color? bgColor;
   final ButtonStyle? style;
   final bool? reverseIconAlign;
+  final ComponentButtonSize? buttonSize;
 
-  const ComponentButton({Key? key, required this.text, required this.onPressed, this.icon, this.bgColor, this.style, this.reverseIconAlign}) : super(key: key);
+  const ComponentButton({Key? key, required this.text, required this.onPressed, this.icon, this.bgColor, this.style, this.reverseIconAlign, this.buttonSize}) : super(key: key);
+
+  double _getIconTextPadding() {
+    double value = 10;
+    if(buttonSize != null){
+      switch(buttonSize) {
+        case ComponentButtonSize.lg: value = 15; break;
+        case ComponentButtonSize.sm: value = 5; break;
+      }
+    }
+    return value;
+  }
+
+  double _getStyleVerticalPadding() {
+    double value = 25;
+    if(buttonSize != null){
+      switch(buttonSize) {
+        case ComponentButtonSize.lg: value = 35; break;
+        case ComponentButtonSize.sm: value = 15; break;
+      }
+    }
+    return value;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +49,12 @@ class ComponentButton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           reverseIconAlign == true ? Text(text) : Icon(icon),
-          const Padding(padding: EdgeInsets.all(10)),
+          Padding(padding: EdgeInsets.all(_getIconTextPadding())),
           reverseIconAlign == true ? Icon(icon) : Text(text),
         ],
       ) : Text(text),
       style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 25),
+        padding: EdgeInsets.symmetric(vertical: _getStyleVerticalPadding(), horizontal: 25),
         minimumSize: Size(double.infinity, 0),
         primary: bgColor ?? Colors.deepPurpleAccent, // change button color here
         onPrimary: Colors.white, // change text color here
