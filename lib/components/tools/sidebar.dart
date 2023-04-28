@@ -51,6 +51,16 @@ class ComponentSideBar extends StatelessWidget {
               },
             ),
           ),
+          Container(
+            color: getActiveBG(routeName, "/settings"),
+            child: ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                RouteLib(context).change(target: '/settings');
+              },
+            ),
+          ),
         ],
       ),
     );

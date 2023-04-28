@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/constants/studyTypes.const.dart';
+import 'package:my_language_app/pages/settings.dart';
 import 'package:my_language_app/pages/study.dart';
 import 'package:my_language_app/pages/studySettings.dart';
 import 'package:my_language_app/pages/wordAdd.dart';
@@ -25,6 +26,7 @@ class MyLanguageApp extends StatelessWidget {
       initialRoute: "/",
       routes: {
         "/": (context) => const PageHome(),
+        "/settings": (context) => PageSettings(),
         "/language/add": (context) => const PageLanguageAdd(),
         "/word/add": (context) => const PageWordAdd(),
         "/word/list": (context) => const PageWordList(),

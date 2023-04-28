@@ -20,7 +20,7 @@ class ComponentButton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           reverseIconAlign == true ? Text(text) : Icon(icon),
-          const SizedBox(width: 10),
+          const Padding(padding: EdgeInsets.all(10)),
           reverseIconAlign == true ? Icon(icon) : Text(text),
         ],
       ) : Text(text),

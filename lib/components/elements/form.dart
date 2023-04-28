@@ -26,7 +26,7 @@ class ComponentForm extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ...children,
-          const SizedBox(height: 16),
+          const Padding(padding: EdgeInsets.all(16)),
           ComponentButton(
             onPressed: () => onSubmit(),
             text: submitButtonText ?? "Submit",

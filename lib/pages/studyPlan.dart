@@ -38,13 +38,13 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                 text: "Daily",
                 bgColor: Colors.teal,
             ),
-            const SizedBox(height: 16),
+            const Padding(padding: EdgeInsets.all(16)),
             ComponentButton(
               onPressed: () => onClickStudy(StudyTypes.Weekly),
               text: "Weekly",
               bgColor: Colors.blue,
             ),
-            const SizedBox(height: 16),
+            const Padding(padding: EdgeInsets.all(16)),
             ComponentButton(
               onPressed: () => onClickStudy(StudyTypes.Monthly),
               text: "Monthly",

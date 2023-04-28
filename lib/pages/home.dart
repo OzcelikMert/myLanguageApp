@@ -201,12 +201,12 @@ class _PageHomeState extends State<PageHome> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
+            const Padding(padding: EdgeInsets.all(16)),
             ComponentButton(
               onPressed: () => onClickMonthly(),
               text: "Add New",
             ),
-            const SizedBox(height: 16),
+            const Padding(padding: EdgeInsets.all(16)),
             PaginatedDataTable(
               header: const Text('List'),
               rowsPerPage: _rowsPerPage,

@@ -77,7 +77,7 @@ class _PageStudyState extends State<PageStudy> {
         withScroll: true,
         body: Column(
           children: <Widget>[
-            const SizedBox(height: 25),
+            const Padding(padding: EdgeInsets.all(25)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
@@ -96,17 +96,17 @@ class _PageStudyState extends State<PageStudy> {
                 )
               ],
             ),
-            const SizedBox(height: 100),
+            const Padding(padding: EdgeInsets.all(100)),
             const Text(
               "[word]",
               style: TextStyle(fontSize: 35),
             ),
-            const SizedBox(height: 50),
+            const Padding(padding: EdgeInsets.all(50)),
             const Text(
               "[comment]",
               style: TextStyle(fontSize: 20),
             ),
-            const SizedBox(height: 75),
+            const Padding(padding: EdgeInsets.all(75)),
             ComponentForm(
               formKey: _formKey,
               onSubmit: onClickApprove,
@@ -122,7 +122,7 @@ class _PageStudyState extends State<PageStudy> {
                 ),
               ],
             ),
-            const SizedBox(height: 50),
+            const Padding(padding: EdgeInsets.all(50)),
             ComponentButton(
               onPressed: onClickNext,
               text: "Skip Next",

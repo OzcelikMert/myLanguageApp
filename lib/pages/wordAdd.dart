@@ -50,7 +50,7 @@ class _PageWordAddState extends State<PageWordAdd> {
               ),
               validator: onValidator,
             ),
-            const SizedBox(height: 16),
+            const Padding(padding: EdgeInsets.all(16)),
             const Text("Native Language"),
             TextFormField(
               decoration: const InputDecoration(
@@ -58,7 +58,7 @@ class _PageWordAddState extends State<PageWordAdd> {
               ),
               validator: onValidator,
             ),
-            const SizedBox(height: 16),
+            const Padding(padding: EdgeInsets.all(16)),
             const Text("Comment"),
             TextFormField(
               decoration: const InputDecoration(
