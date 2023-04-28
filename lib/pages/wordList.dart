@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/elements/pageScaffold.dart';
 import 'package:my_language_app/lib/element.lib.dart';
+import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
+import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
 
 import '../components/elements/button.dart';
 
@@ -12,180 +15,6 @@ class PageWordList extends StatefulWidget {
 }
 
 class _PageWordListState extends State<PageWordList> {
-  int _rowsPerPage = 15;
-  int _sortColumnIndex = 0;
-  bool _sortAscending = true;
-
-  List<Map<String, dynamic>> _data = [
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Akıllı Telefon',
-      'marka': 'Samsung',
-      'renk': 'Siyah',
-      'fiyat': 3000,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Giyim',
-      'ürün': 'Gömlek',
-      'marka': 'Zara',
-      'renk': 'Beyaz',
-      'fiyat': 200,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Kozmetik',
-      'ürün': 'Ruj',
-      'marka': 'MAC',
-      'renk': 'Kırmızı',
-      'fiyat': 150,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Kitap',
-      'ürün': 'Roman',
-      'marka': 'Can Yayınları',
-      'renk': '-',
-      'fiyat': 30,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    },
-    {
-      'kategori': 'Yiyecek',
-      'ürün': 'Çikolata',
-      'marka': 'Nestle',
-      'renk': 'Bitter',
-      'fiyat': 10,
-      'stokDurumu': 'Stokta',
-    },
-    {
-      'kategori': 'Elektronik',
-      'ürün': 'Laptop',
-      'marka': 'Dell',
-      'renk': 'Gümüş',
-      'fiyat': 5000,
-      'stokDurumu': 'Tükendi',
-    }
-  ];
-
-  void _sort<T>(Comparable<T> Function(Map<String, dynamic> d) getField,
-      int columnIndex, bool ascending) {
-    _data.sort((a, b) {
-      final aValue = getField(a);
-      final bValue = getField(b);
-      return ascending
-          ? Comparable.compare(aValue, bValue)
-          : Comparable.compare(bValue, aValue);
-    });
-    setState(() {
-      _sortColumnIndex = columnIndex;
-      _sortAscending = ascending;
-    });
-  }
-
   void onClickEdit() {
     (ElementLib(context)).showMessageBox(
         title: "Are you sure?",
@@ -206,84 +35,61 @@ class _PageWordListState extends State<PageWordList> {
 
   @override
   Widget build(BuildContext context) {
+    List<Map<String, dynamic>> _data = [];
+    for(var i = 0; i < 35; i++){
+      _data.add({"id": i, "name": "qwe - ${i}"});
+    }
+
     return ComponentPageScaffold(
       title: "Edit",
       withScroll: true,
-      body: PaginatedDataTable(
-        header: const Text('List'),
-        rowsPerPage: _rowsPerPage,
-        source: _DataSource(context, _data),
-        sortColumnIndex: _sortColumnIndex,
-        sortAscending: _sortAscending,
+      body: ComponentDataTable<Map<String, dynamic>>(
+        title: "List of words",
+        data: _data,
         columns: [
-          DataColumn(
-            label: const Text('Target Langauge'),
-            onSort: (columnIndex, ascending) {
-              _sort<String>((d) => d['kategori'], columnIndex, ascending);
-            },
+          ComponentDataColumnModule(
+            title: "ID",
+            sortKeyName: "id",
+            sortable: true,
           ),
-          DataColumn(
-            label: const Text('Native Language'),
-            onSort: (columnIndex, ascending) {
-              _sort<String>((d) => d['ürün'], columnIndex, ascending);
-            },
+          ComponentDataColumnModule(
+            title: "Name",
+            sortKeyName: "name",
+            sortable: true,
           ),
-          DataColumn(
-            label: const Text('Status'),
-            onSort: (columnIndex, ascending) {
-              _sort<String>((d) => d['marka'], columnIndex, ascending);
-            },
+          ComponentDataColumnModule(
+            title: "Select",
           ),
-          DataColumn(
-            label: const Text('Last Date'),
-            onSort: (columnIndex, ascending) {
-              _sort<String>((d) => d['renk'], columnIndex, ascending);
-            },
-          ),
-          DataColumn(
-            label: const Text('Edit'),
-          ),
-          DataColumn(
-            label: const Text('Delete'),
-          ),
+          ComponentDataColumnModule(
+            title: "Delete",
+          )
         ],
-      ),
+        cells: [
+          ComponentDataCellModule(
+            child: (row) => Text(row["id"].toString()),
+          ),
+          ComponentDataCellModule(
+            child: (row) => Text(row["name"].toString()),
+          ),
+          ComponentDataCellModule(
+            child: (row) => ComponentButton(
+              text: "Select",
+              onPressed: onClickEdit,
+              icon: Icons.check,
+              buttonSize: ComponentButtonSize.sm,
+            ),
+          ),
+          ComponentDataCellModule(
+            child: (row) => ComponentButton(
+              text: "Delete",
+              bgColor: Colors.pink,
+              onPressed: onClickDelete,
+              icon: Icons.delete_forever,
+              buttonSize: ComponentButtonSize.sm,
+            ),
+          )
+        ],
+      )
     );
   }
-}
-
-class _DataSource extends DataTableSource {
-  _DataSource(this.context, this.data);
-
-  final BuildContext context;
-  final List<Map<String, dynamic>> data;
-
-  @override
-  DataRow getRow(int index) {
-    assert(index >= 0);
-    if (index >= data.length) {
-      return null!;
-    }
-    final row = data[index];
-    return DataRow.byIndex(
-      index: index,
-      cells: [
-        DataCell(Text(row['kategori'])),
-        DataCell(Text(row['ürün'])),
-        DataCell(Text(row['marka'])),
-        DataCell(Text(row['renk'])),
-        DataCell(Text('${row['fiyat']} TL')),
-        DataCell(Text(row['stokDurumu'])),
-      ],
-    );
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => data.length;
-
-  @override
-  int get selectedRowCount => 0;
 }

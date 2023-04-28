@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ComponentDataCell<T>  {
+class ComponentDataCellModule<T>  {
   final Widget Function(T row) child;
 
-  const ComponentDataCell({required this.child});
+  const ComponentDataCellModule({required this.child});
 }

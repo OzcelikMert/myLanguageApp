@@ -4,9 +4,9 @@ import 'package:my_language_app/models/components/elements/dataTable/dataColumn.
 
 class ComponentDataTable<T> extends StatefulWidget {
   final String? title;
-  final List<Map<String, T>> data;
+  final List<T> data;
   final List<ComponentDataColumnModule> columns;
-  final List<ComponentDataCell<T>> cells;
+  final List<ComponentDataCellModule<T>> cells;
 
   const ComponentDataTable(
       {Key? key,
@@ -17,15 +17,15 @@ class ComponentDataTable<T> extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _ComponentDataTableState();
+  State<StatefulWidget> createState() => _ComponentDataTableState<T>();
 }
 
-class _ComponentDataTableState extends State<ComponentDataTable> {
+class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
   int _rowsPerPage = 15;
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
 
-  void _sort<T>(Comparable<T> Function(Map<String, dynamic> d) getField,
+  void _sort<P>(Comparable<P> Function(T d) getField,
       int columnIndex, bool ascending) {
     widget.data.sort((a, b) {
       final aValue = getField(a);
@@ -49,7 +49,7 @@ class _ComponentDataTableState extends State<ComponentDataTable> {
           onSort: column.sortable == true
               ? (columnIndex, ascending) {
                   _sort<String>(
-                      (d) => d[column.sortKeyName], columnIndex, ascending);
+                      (dynamic d) => d[column.sortKeyName], columnIndex, ascending);
                 }
               : null));
     }
@@ -65,7 +65,7 @@ class _ComponentDataTableState extends State<ComponentDataTable> {
               ? Center(child: Text(widget.title.toString()))
               : null,
           rowsPerPage: _rowsPerPage,
-          source: _DataSource(
+          source: _DataSource<T>(
               context: context, data: widget.data, cells: widget.cells),
           sortColumnIndex: _sortColumnIndex,
           sortAscending: _sortAscending,
@@ -74,14 +74,14 @@ class _ComponentDataTableState extends State<ComponentDataTable> {
   }
 }
 
-class _DataSource extends DataTableSource {
+class _DataSource<T> extends DataTableSource {
   final BuildContext context;
-  final List<Map<String, dynamic>> data;
-  final List<ComponentDataCell> cells;
+  final List<T> data;
+  final List<ComponentDataCellModule<T>> cells;
 
   _DataSource({required this.context, required this.data, required this.cells});
 
-  List<DataCell> _getCells(dynamic row) {
+  List<DataCell> _getCells(T row) {
     List<DataCell> dataCells = [];
     for (var cell in cells) {
       dataCells.add(DataCell(cell.child(row)));
