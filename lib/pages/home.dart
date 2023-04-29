@@ -7,6 +7,8 @@ import 'package:my_language_app/lib/element.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
+import 'package:my_language_app/models/services/language.model.dart';
+import 'package:my_language_app/myLib/variable/array.dart';
 
 import '../components/elements/button.dart';
 
@@ -18,13 +20,28 @@ class PageHome extends StatefulWidget {
 }
 
 class _PageHomeState extends State<PageHome> {
+  late bool _stateIsLoading = true;
+
   List<Map<String, dynamic>> _data = [
     {'id': '123', 'name': 'Akıllı Telefon'},
     {'id': '444', 'name': 'QWEQWE'},
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _pageInit();
+  }
+
+  _pageInit() async {
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _stateIsLoading = false;
+    });
+  }
+
   void onClickSelect() {
-    RouteLib(context).change(target: '/study/plan');
+     RouteLib(context).change(target: '/study/plan');
   }
 
   void onClickMonthly() {
@@ -34,6 +51,7 @@ class _PageHomeState extends State<PageHome> {
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
+      isLoading: _stateIsLoading,
       title: "Select Language",
       hideSidebar: true,
       withScroll: true,
