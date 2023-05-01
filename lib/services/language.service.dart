@@ -1,21 +1,35 @@
+import 'package:my_language_app/config/db/conn.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class LanguageService {
-  Future<List<LanguageResultModel>> get(Database db) async {
-    return (await db.query(DBTableLanguages.tableName)) as List<LanguageResultModel>;
+  static Future<List<Map<String, dynamic>>> get() async {
+    var db = await DBConn.instance.database;
+    return (await db.query(DBTableLanguages.tableName));
   }
 
-  Future<int> add(Database db, LanguageAddParamModel params) async {
+  static Future<int> add(LanguageAddParamModel params) async {
+    var db = await DBConn.instance.database;
     return await db.insert(DBTableLanguages.tableName, params.toJson());
   }
 
-  Future<List<Object?>> addMulti(Database db, List<LanguageAddParamModel> listParams) async {
+  static Future<List<Object?>> addMulti(List<LanguageAddParamModel> listParams) async {
+    var db = await DBConn.instance.database;
     final Batch batch = db.batch();
     for (var params in listParams) {
       batch.insert(DBTableLanguages.tableName, params.toJson());
     }
     return await batch.commit();
+  }
+
+  static Future<int> update(LanguageAddParamModel params) async {
+    var db = await DBConn.instance.database;
+    return await db.update(DBTableLanguages.tableName, params.toJson());
+  }
+
+  static Future<int> delete(LanguageDeleteParamModel params) async {
+    var db = await DBConn.instance.database;
+    return await db.delete(DBTableLanguages.tableName, where: "${DBTableLanguages.columnId} = ?}", whereArgs: [params]);
   }
 }

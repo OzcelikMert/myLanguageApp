@@ -24,20 +24,24 @@ class LanguageResultModel {
 
 class LanguageAddParamModel {
   final String languageName;
-  final String languageTTSArtist;
-  final String languageTTSArtistGender;
 
   LanguageAddParamModel({
-    required this.languageName,
-    required this.languageTTSArtist,
-    required this.languageTTSArtistGender,
+    required this.languageName
   });
 
-  Map<String, dynamic> toJson() => {
-    'languageName': languageName,
-    'languageTTSArtist': languageTTSArtist,
-    'languageTTSArtistGender': languageTTSArtistGender,
-  };
+  Map<String, dynamic> toJson() {
+    var date = DateTime.now().toUtc().toString();
+    return {
+      'languageName': languageName,
+      'languageCreatedAt': date,
+      'languageUpdatedAt': date,
+      'languageTTSArtist': "",
+      'languageTTSArtistGender': "",
+      'languageDailyUpdatedAt': date,
+      'languageWeeklyUpdatedAt': date,
+      'languageMonthlyUpdatedAt': date
+    };
+  }
 }
 
 class LanguageUpdateParamModel {
@@ -59,15 +63,16 @@ class LanguageUpdateParamModel {
     this.languageMonthlyUpdatedAt
   });
 
-  Map<String, dynamic> toJson() => {
-    'languageId': languageId,
-    'languageName': languageName,
-    'languageTTSArtist': languageTTSArtist,
-    'languageTTSArtistGender': languageTTSArtistGender,
-    'languageDailyUpdatedAt': languageDailyUpdatedAt,
-    'languageWeeklyUpdatedAt': languageWeeklyUpdatedAt,
-    'languageMonthlyUpdatedAt': languageMonthlyUpdatedAt,
-  };
+  Map<String, dynamic> toJson() =>
+      {
+        'languageId': languageId,
+        'languageName': languageName,
+        'languageTTSArtist': languageTTSArtist,
+        'languageTTSArtistGender': languageTTSArtistGender,
+        'languageDailyUpdatedAt': languageDailyUpdatedAt,
+        'languageWeeklyUpdatedAt': languageWeeklyUpdatedAt,
+        'languageMonthlyUpdatedAt': languageMonthlyUpdatedAt,
+      };
 }
 
 class LanguageDeleteParamModel {
@@ -77,7 +82,8 @@ class LanguageDeleteParamModel {
     required this.languageId
   });
 
-  Map<String, dynamic> toJson() => {
-    'languageId': languageId
-  };
+  Map<String, dynamic> toJson() =>
+      {
+        'languageId': languageId
+      };
 }

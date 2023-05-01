@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/tools/preLoader.dart';
 
-import '../tools/sidebar.dart';
+import 'sidebar.dart';
 
 class ComponentPageScaffold extends StatelessWidget {
   final String title;
@@ -40,7 +40,7 @@ class ComponentPageScaffold extends StatelessWidget {
             (withScroll == true && !isLoading
                 ? SingleChildScrollView(child: _getBody())
                 : _getBody()),
-            ComponentPreLoader(isLoading: isLoading)
+            //ComponentPreLoader(isLoading: isLoading)
           ],
         ),
         drawer:

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
-import 'package:my_language_app/components/elements/pageScaffold.dart';
-import 'package:my_language_app/lib/element.lib.dart';
+import 'package:my_language_app/components/tools/pageScaffold.dart';
+import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
 
@@ -16,7 +16,7 @@ class PageWordList extends StatefulWidget {
 
 class _PageWordListState extends State<PageWordList> {
   void onClickEdit() {
-    (ElementLib(context)).showMessageBox(
+    (DialogLib(context)).showMessage(
         title: "Are you sure?",
         content: "You have selected 'daily'. Are you sure about this?",
         onPressedOkay: () {
@@ -25,7 +25,7 @@ class _PageWordListState extends State<PageWordList> {
   }
 
   void onClickDelete() {
-    (ElementLib(context)).showMessageBox(
+    (DialogLib(context)).showMessage(
         title: "Are you sure?",
         content: "You have selected 'daily'. Are you sure about this?",
         onPressedOkay: () {

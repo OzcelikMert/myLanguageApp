@@ -17,6 +17,13 @@ class ComponentForm extends StatelessWidget {
       required this.children, this.submitButtonIcon})
       : super(key: key);
 
+  void _onPressed() {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState?.save();
+      onSubmit();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -28,7 +35,7 @@ class ComponentForm extends StatelessWidget {
           ...children,
           const Padding(padding: EdgeInsets.all(16)),
           ComponentButton(
-            onPressed: () => onSubmit(),
+            onPressed: () => _onPressed(),
             text: submitButtonText ?? "Submit",
             icon: submitButtonIcon,
           ),

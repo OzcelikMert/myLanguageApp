@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
-import 'package:my_language_app/components/elements/pageScaffold.dart';
-import 'package:my_language_app/lib/element.lib.dart';
-
-import '../components/elements/button.dart';
+import 'package:my_language_app/components/tools/pageScaffold.dart';
+import 'package:my_language_app/lib/dialog.lib.dart';
 
 class PageWordAdd extends StatefulWidget {
   const PageWordAdd({Key? key}) : super(key: key);
@@ -17,7 +15,7 @@ class _PageWordAddState extends State<PageWordAdd> {
 
   void onClickAdd() {
     if (_formKey.currentState!.validate()) {
-      (ElementLib(context)).showMessageBox(
+      (DialogLib(context)).showMessage(
           title: "Are you sure?",
           content: "You have selected 'daily'. Are you sure about this?",
           onPressedOkay: () {

@@ -2,13 +2,13 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
-import 'package:my_language_app/components/elements/pageScaffold.dart';
-import 'package:my_language_app/lib/element.lib.dart';
+import 'package:my_language_app/components/tools/pageScaffold.dart';
+import 'package:my_language_app/config/db/conn.dart';
+import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
-import 'package:my_language_app/models/services/language.model.dart';
-import 'package:my_language_app/myLib/variable/array.dart';
+import 'package:my_language_app/services/language.service.dart';
 
 import '../components/elements/button.dart';
 
@@ -21,11 +21,7 @@ class PageHome extends StatefulWidget {
 
 class _PageHomeState extends State<PageHome> {
   late bool _stateIsLoading = true;
-
-  List<Map<String, dynamic>> _data = [
-    {'id': '123', 'name': 'Akıllı Telefon'},
-    {'id': '444', 'name': 'QWEQWE'},
-  ];
+  late List<Map<String, dynamic>> _stateLanguages = [];
 
   @override
   void initState() {
@@ -34,9 +30,11 @@ class _PageHomeState extends State<PageHome> {
   }
 
   _pageInit() async {
-    await Future.delayed(Duration(seconds: 1));
+    var languages = await LanguageService.get();
+
     setState(() {
       _stateIsLoading = false;
+      _stateLanguages = languages;
     });
   }
 
@@ -44,7 +42,7 @@ class _PageHomeState extends State<PageHome> {
      RouteLib(context).change(target: '/study/plan');
   }
 
-  void onClickMonthly() {
+  void onClickAdd() {
     RouteLib(context).change(target: '/language/add', safeHistory: true);
   }
 
@@ -61,22 +59,17 @@ class _PageHomeState extends State<PageHome> {
           children: [
             const Padding(padding: EdgeInsets.all(16)),
             ComponentButton(
-              onPressed: () => onClickMonthly(),
+              onPressed: () => onClickAdd(),
               text: "Add New",
             ),
             const Padding(padding: EdgeInsets.all(16)),
             ComponentDataTable<Map<String, dynamic>>(
               title: "Select a language",
-              data: _data,
-              columns: [
-                ComponentDataColumnModule(
-                  title: "ID",
-                  sortKeyName: "id",
-                  sortable: true,
-                ),
+              data: _stateLanguages,
+              columns: const [
                 ComponentDataColumnModule(
                   title: "Name",
-                  sortKeyName: "name",
+                  sortKeyName: DBTableLanguages.columnName,
                   sortable: true,
                 ),
                 ComponentDataColumnModule(
@@ -88,10 +81,7 @@ class _PageHomeState extends State<PageHome> {
               ],
               cells: [
                 ComponentDataCellModule(
-                  child: (row) => Text(row["id"].toString()),
-                ),
-                ComponentDataCellModule(
-                  child: (row) => Text(row["name"].toString()),
+                  child: (row) => Text(row[DBTableLanguages.columnName].toString()),
                 ),
                 ComponentDataCellModule(
                   child: (row) => ComponentButton(

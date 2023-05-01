@@ -5,11 +5,11 @@ class RouteLib {
 
   RouteLib(this.context);
 
-  change({required String target, bool? safeHistory}) {
+  change({required String target, bool? safeHistory}) async {
     if(safeHistory == true){
-      Navigator.pushNamed(context, target);
+      return await Navigator.pushNamed(context, target);
     }else {
-      Navigator.pushNamedAndRemoveUntil(context, target, (r) => false);
+      return await Navigator.pushNamedAndRemoveUntil(context, target, (r) => false);
     }
   }
 }

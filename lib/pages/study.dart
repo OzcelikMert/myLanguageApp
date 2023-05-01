@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
-import 'package:my_language_app/components/elements/pageScaffold.dart';
-import 'package:my_language_app/lib/element.lib.dart';
+import 'package:my_language_app/components/tools/pageScaffold.dart';
+import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import '../components/elements/button.dart';
 
@@ -27,7 +27,7 @@ class _PageStudyState extends State<PageStudy> {
 
   void onClickNext() {
     if (_formKey.currentState!.validate()) {
-      (ElementLib(context)).showMessageBox(
+      (DialogLib(context)).showMessage(
           title: "Are you sure?",
           content: "You have selected 'daily'. Are you sure about this?",
           onPressedOkay: () {
@@ -38,7 +38,7 @@ class _PageStudyState extends State<PageStudy> {
 
   void onClickApprove() {
     if (_formKey.currentState!.validate()) {
-      (ElementLib(context)).showMessageBox(
+      (DialogLib(context)).showMessage(
           title: "Are you sure?",
           content: "You have selected 'daily'. Are you sure about this?",
           onPressedOkay: () {
@@ -48,7 +48,7 @@ class _PageStudyState extends State<PageStudy> {
   }
 
   void onClickBack() {
-      (ElementLib(context)).showMessageBox(
+    (DialogLib(context)).showMessage(
           title: "Are you sure?",
           content: "You have selected 'daily'. Are you sure about this?",
           onPressedOkay: () {

@@ -1,8 +1,7 @@
-
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/elements/pageScaffold.dart';
+import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/constants/studyTypes.const.dart';
-import 'package:my_language_app/lib/element.lib.dart';
+import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 
 import '../components/elements/button.dart';
@@ -16,7 +15,7 @@ class PageStudyPlan extends StatefulWidget {
 
 class _PageStudyPlanState extends State<PageStudyPlan> {
   void onClickStudy(int type) {
-    (ElementLib(context)).showMessageBox(
+    (DialogLib(context)).showMessage(
         title: "Are you sure?",
         content: "You have selected '"+StudyTypes.getTypeName(type)+"'. Are you sure about this?",
         onPressedOkay: () {

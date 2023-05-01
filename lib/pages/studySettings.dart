@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/elements/dropdown.dart';
 import 'package:my_language_app/components/elements/form.dart';
-import 'package:my_language_app/components/elements/pageScaffold.dart';
+import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/constants/studyTypes.const.dart';
-import 'package:my_language_app/lib/element.lib.dart';
-import 'package:my_language_app/models/dependencies/tts/voice.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:my_language_app/myLib/variable/array.dart';
+import 'package:my_language_app/lib/dialog.lib.dart';
 
 class PageStudySettings extends StatefulWidget {
   PageStudySettings({Key? key}) : super(key: key);
@@ -32,7 +28,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
 
   void onClickSave() {
     if (_formKey.currentState!.validate()) {
-      (ElementLib(context)).showMessageBox(
+      (DialogLib(context)).showMessage(
           title: "Are you sure?",
           content: "You have selected 'daily'. Are you sure about this?",
           onPressedOkay: () {
