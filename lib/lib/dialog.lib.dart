@@ -36,7 +36,7 @@ class DialogLib {
               onPressed: () { Navigator.of(context).pop(); if(onPressedNo != null) onPressedNo(); },
             ),
             TextButton(
-              child: Text('Okay'),
+              child: Text('Yes'),
               onPressed: () { Navigator.of(context).pop(); if(onPressedOkay != null) onPressedOkay(); },
             ),
           ],

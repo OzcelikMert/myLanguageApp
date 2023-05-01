@@ -7,7 +7,7 @@ class DBTableLanguages {
   static const columnCreatedAt = 'languageCreatedAt';
   static const columnUpdatedAt = 'languageUpdatedAt';
   static const columnTTSArtist = 'languageTTSArtist';
-  static const columnTTSGender = 'languageTTSArtistGender';
+  static const columnTTSGender = 'languageTTSGender';
   static const columnDailyUpdatedAt = 'languageDailyUpdatedAt';
   static const columnWeeklyUpdatedAt = 'languageWeeklyUpdatedAt';
   static const columnMonthlyUpdatedAt = 'languageMonthlyUpdatedAt';

@@ -11,26 +11,16 @@ class ComponentPreLoader extends StatefulWidget {
 }
 
 class _ComponentPreLoaderState extends State<ComponentPreLoader> {
-  late bool _isAnimationEnd = false;
-
   @override
   Widget build(BuildContext context) {
-    return !_isAnimationEnd ? AbsorbPointer(
-      absorbing: widget.isLoading,
-      child: AnimatedOpacity(
-        onEnd: () => setState(() {
-          _isAnimationEnd = true;
-        }),
-        curve: Curves.easeInOut,
-        opacity: widget.isLoading ? 1.0 : 0.0,
-        duration: Duration(milliseconds: 500),
-        child: Container(
-          color: Colors.black12,
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
+    return widget.isLoading ? AbsorbPointer(
+      absorbing: true,
+      child: Container(
+        color: Colors.black12,
+        child: Center(
+          child: CircularProgressIndicator(),
         ),
       ),
-    ) : Container();
+    ) : Visibility(visible: false, child: Text(""));
   }
 }

@@ -16,6 +16,7 @@ class PageStudy extends StatefulWidget {
 }
 
 class _PageStudyState extends State<PageStudy> {
+  late bool _statePageIsLoading = true;
   late int _type = 0;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -23,6 +24,13 @@ class _PageStudyState extends State<PageStudy> {
   void initState() {
     super.initState();
     _type = widget.type;
+    _pageInit();
+  }
+
+  _pageInit() async {
+    setState(() {
+      _statePageIsLoading = false;
+    });
   }
 
   void onClickNext() {
@@ -71,6 +79,7 @@ class _PageStudyState extends State<PageStudy> {
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
+        isLoading: _statePageIsLoading,
         title: "Study",
         hideAppBar: true,
         hideSidebar: true,

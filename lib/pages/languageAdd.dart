@@ -13,9 +13,11 @@ class PageLanguageAdd extends StatefulWidget {
 }
 
 class _PageLanguageAddState extends State<PageLanguageAdd> {
-  late bool _stateIsLoading = true;
+  late bool _statePageIsLoading = true;
   final _nameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late bool _isAdded = false;
+
 
   @override
   void initState() {
@@ -25,7 +27,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
 
   _pageInit() async {
     setState(() {
-      _stateIsLoading = false;
+      _statePageIsLoading = false;
     });
   }
 
@@ -35,13 +37,16 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
         content: "Are you sure want to add '${_nameController.text}' as a language ?",
         onPressedOkay: () async {
           DialogLib(context).showLoader();
-          await Future.delayed(Duration(seconds: 1));
           var result = await LanguageService.add(LanguageAddParamModel(
             languageName: _nameController.text,
           ));
           DialogLib(context).hide();
 
           if(result > 0){
+            setState(() {
+              _isAdded = true;
+            });
+            _nameController.text = "";
             DialogLib(context).showSuccess(content: "'${_nameController.text}' added!");
           }else {
             DialogLib(context).showError(content: "It couldn't add!");
@@ -59,8 +64,9 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
+      leadingArgs: _isAdded,
+      isLoading: _statePageIsLoading,
       title: "Add New",
-      isLoading: _stateIsLoading,
       hideSidebar: true,
       body: Center(
         child: ComponentForm(

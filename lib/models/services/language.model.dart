@@ -28,27 +28,13 @@ class LanguageAddParamModel {
   LanguageAddParamModel({
     required this.languageName
   });
-
-  Map<String, dynamic> toJson() {
-    var date = DateTime.now().toUtc().toString();
-    return {
-      'languageName': languageName,
-      'languageCreatedAt': date,
-      'languageUpdatedAt': date,
-      'languageTTSArtist': "",
-      'languageTTSArtistGender': "",
-      'languageDailyUpdatedAt': date,
-      'languageWeeklyUpdatedAt': date,
-      'languageMonthlyUpdatedAt': date
-    };
-  }
 }
 
 class LanguageUpdateParamModel {
   final int languageId;
   final String? languageName;
   final String? languageTTSArtist;
-  final String? languageTTSArtistGender;
+  final String? languageTTSGender;
   final String? languageDailyUpdatedAt;
   final String? languageWeeklyUpdatedAt;
   final String? languageMonthlyUpdatedAt;
@@ -57,22 +43,11 @@ class LanguageUpdateParamModel {
     required this.languageId,
     this.languageName,
     this.languageTTSArtist,
-    this.languageTTSArtistGender,
+    this.languageTTSGender,
     this.languageDailyUpdatedAt,
     this.languageWeeklyUpdatedAt,
     this.languageMonthlyUpdatedAt
   });
-
-  Map<String, dynamic> toJson() =>
-      {
-        'languageId': languageId,
-        'languageName': languageName,
-        'languageTTSArtist': languageTTSArtist,
-        'languageTTSArtistGender': languageTTSArtistGender,
-        'languageDailyUpdatedAt': languageDailyUpdatedAt,
-        'languageWeeklyUpdatedAt': languageWeeklyUpdatedAt,
-        'languageMonthlyUpdatedAt': languageMonthlyUpdatedAt,
-      };
 }
 
 class LanguageDeleteParamModel {
@@ -81,9 +56,4 @@ class LanguageDeleteParamModel {
   LanguageDeleteParamModel({
     required this.languageId
   });
-
-  Map<String, dynamic> toJson() =>
-      {
-        'languageId': languageId
-      };
 }

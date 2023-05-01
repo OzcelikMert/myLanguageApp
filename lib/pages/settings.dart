@@ -16,6 +16,7 @@ class PageSettings extends StatefulWidget {
 }
 
 class _PageSettingsState extends State<PageSettings> {
+  late bool _statePageIsLoading = true;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late List<TTSVoiceModel> _stateTTSVoices = [];
   String _stateSelectedVoiceGenderRadio = "male";
@@ -36,12 +37,13 @@ class _PageSettingsState extends State<PageSettings> {
   @override
   void initState() {
     super.initState();
-    _updateState();
+    _pageInit();
   }
 
-  void _updateState() async {
+  void _pageInit() async {
     var voices = await getVoices();
     setState(() {
+      _statePageIsLoading = false;
       _stateTTSVoices = voices;
       _stateSelectedVoice = voices[0];
     });
@@ -76,6 +78,7 @@ class _PageSettingsState extends State<PageSettings> {
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
+        isLoading: _statePageIsLoading,
         title: "Settings",
         withScroll: true,
         body: Column(

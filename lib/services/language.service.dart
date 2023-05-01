@@ -10,26 +10,63 @@ class LanguageService {
   }
 
   static Future<int> add(LanguageAddParamModel params) async {
+    var date = DateTime.now().toUtc().toString();
+
     var db = await DBConn.instance.database;
-    return await db.insert(DBTableLanguages.tableName, params.toJson());
+    return await db.insert(DBTableLanguages.tableName, {
+      'languageName': params.languageName,
+      'languageCreatedAt': date,
+      'languageUpdatedAt': date,
+      'languageTTSArtist': "",
+      'languageTTSArtistGender': "",
+      'languageDailyUpdatedAt': date,
+      'languageWeeklyUpdatedAt': date,
+      'languageMonthlyUpdatedAt': date
+    });
   }
 
-  static Future<List<Object?>> addMulti(List<LanguageAddParamModel> listParams) async {
-    var db = await DBConn.instance.database;
-    final Batch batch = db.batch();
-    for (var params in listParams) {
-      batch.insert(DBTableLanguages.tableName, params.toJson());
+  static Future<int> update(LanguageUpdateParamModel params) async {
+    String set = "";
+    List<dynamic> setArgs= [];
+
+    if(params.languageName != null){
+      set += "${DBTableLanguages.columnName} = ?,";
+      setArgs.add(params.languageName);
     }
-    return await batch.commit();
-  }
 
-  static Future<int> update(LanguageAddParamModel params) async {
+    if(params.languageTTSArtist != null){
+      set += "${DBTableLanguages.columnTTSArtist} = ?,";
+      setArgs.add(params.languageTTSArtist);
+    }
+
+    if(params.languageTTSGender != null){
+      set += "${DBTableLanguages.columnTTSGender} = ?,";
+      setArgs.add(params.languageTTSGender);
+    }
+
+    if(params.languageDailyUpdatedAt != null){
+      set += "${DBTableLanguages.columnDailyUpdatedAt} = ?,";
+      setArgs.add(params.languageDailyUpdatedAt);
+    }
+
+    if(params.languageWeeklyUpdatedAt != null){
+      set += "${DBTableLanguages.columnWeeklyUpdatedAt} = ?,";
+      setArgs.add(params.languageWeeklyUpdatedAt);
+    }
+
+    if(params.languageMonthlyUpdatedAt != null){
+      set += "${DBTableLanguages.columnMonthlyUpdatedAt} = ?,";
+      setArgs.add(params.languageMonthlyUpdatedAt);
+    }
+
+    set = set.substring(0, -1);
+
     var db = await DBConn.instance.database;
-    return await db.update(DBTableLanguages.tableName, params.toJson());
+    return await db.rawUpdate("UPDATE ${DBTableLanguages.tableName} SET ${set} WHERE ${DBTableLanguages.columnId} = ?",  [...setArgs, params.languageId]);
   }
 
   static Future<int> delete(LanguageDeleteParamModel params) async {
     var db = await DBConn.instance.database;
-    return await db.delete(DBTableLanguages.tableName, where: "${DBTableLanguages.columnId} = ?}", whereArgs: [params]);
+    return await db.delete(DBTableLanguages.tableName, where: "${DBTableLanguages.columnId} = ?", whereArgs: [params.languageId]);
   }
 }

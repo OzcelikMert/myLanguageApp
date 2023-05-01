@@ -1,15 +1,18 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/tools/preLoader.dart';
 
 import 'sidebar.dart';
 
-class ComponentPageScaffold extends StatelessWidget {
+class ComponentPageScaffold<T> extends StatelessWidget {
   final String title;
   final Widget body;
   final bool? hideAppBar;
   final bool? hideSidebar;
   final bool? withScroll;
   final bool isLoading;
+  final T? leadingArgs;
 
   const ComponentPageScaffold(
       {Key? key,
@@ -18,7 +21,7 @@ class ComponentPageScaffold extends StatelessWidget {
       this.hideAppBar,
       this.hideSidebar,
       this.withScroll,
-      this.isLoading = true})
+      required this.isLoading, this.leadingArgs})
       : super(key: key);
 
   Widget _getBody() {
@@ -33,14 +36,20 @@ class ComponentPageScaffold extends StatelessWidget {
         appBar: hideAppBar == true || isLoading
             ? null
             : AppBar(
+                centerTitle: true,
                 title: Text(title),
+                leading: Navigator.canPop(context) ? BackButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(leadingArgs);
+                  },
+                ) : null,
               ),
         body: Stack(
           children: [
+            ComponentPreLoader(isLoading: isLoading),
             (withScroll == true && !isLoading
                 ? SingleChildScrollView(child: _getBody())
                 : _getBody()),
-            //ComponentPreLoader(isLoading: isLoading)
           ],
         ),
         drawer:

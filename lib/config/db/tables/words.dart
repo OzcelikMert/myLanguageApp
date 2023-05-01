@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 class DBTableWords {
   static const tableName = 'words';
   static const columnId = 'wordId';
+  static const columnLanguageId = 'wordLanguageId';
   static const columnText = 'wordText';
   static const columnComment = 'wordComment';
   static const columnCreatedAt = 'wordCreatedAt';
@@ -16,6 +17,7 @@ class DBTableWords {
     await db.execute('''
       CREATE TABLE $tableName (
         $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
+        $columnLanguageId INTEGER NOT NULL,
         $columnText TEXT NOT NULL,
         $columnCreatedAt TEXT NOT NULL,
         $columnUpdatedAt TEXT NOT NULL,

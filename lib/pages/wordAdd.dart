@@ -11,7 +11,20 @@ class PageWordAdd extends StatefulWidget {
 }
 
 class _PageWordAddState extends State<PageWordAdd> {
+  late bool _statePageIsLoading = true;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _pageInit();
+  }
+
+  _pageInit() async {
+    setState(() {
+      _statePageIsLoading = false;
+    });
+  }
 
   void onClickAdd() {
     if (_formKey.currentState!.validate()) {
@@ -34,6 +47,7 @@ class _PageWordAddState extends State<PageWordAdd> {
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
+      isLoading: _statePageIsLoading,
       title: "Add New",
       body: Center(
         child: ComponentForm(

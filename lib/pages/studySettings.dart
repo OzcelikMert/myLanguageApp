@@ -13,17 +13,20 @@ class PageStudySettings extends StatefulWidget {
 }
 
 class _PageStudySettingsState extends State<PageStudySettings> {
+  late bool _statePageIsLoading = true;
   int _stateSelectedStudyType = StudyTypes.Daily;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _updateState();
+    _pageInit();
   }
 
-  void _updateState() async {
-
+  _pageInit() async {
+    setState(() {
+      _statePageIsLoading = false;
+    });
   }
 
   void onClickSave() {
@@ -55,6 +58,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
+        isLoading: _statePageIsLoading,
         title: "Study Settings",
         hideSidebar: true,
         withScroll: true,
