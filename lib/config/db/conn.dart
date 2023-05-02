@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 class DBConn {
   static const _databaseName = 'myLanguageApp.db';
-  static const _databaseVersion = 4;
+  static const _databaseVersion = 5;
 
   DBConn._privateConstructor();
   static final DBConn instance = DBConn._privateConstructor();

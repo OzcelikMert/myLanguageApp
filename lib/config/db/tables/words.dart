@@ -8,7 +8,8 @@ class DBTableWords {
   static const columnComment = 'wordComment';
   static const columnCreatedAt = 'wordCreatedAt';
   static const columnUpdatedAt = 'wordUpdatedAt';
-  static const columnStatus = 'wordStatus';
+  static const columnStudyType = 'wordStudyType';
+  static const columnIsStudy = 'wordIsStudy';
 
   final Database db;
   DBTableWords(this.db);
@@ -22,7 +23,8 @@ class DBTableWords {
         $columnCreatedAt TEXT NOT NULL,
         $columnUpdatedAt TEXT NOT NULL,
         $columnComment TEXT NOT NULL,
-        $columnStatus INTEGER NOT NULL,
+        $columnStudyType INTEGER NOT NULL,
+        $columnIsStudy INTEGER NOT NULL,
       )
       ''');
   }

@@ -1,49 +1,58 @@
 import 'package:my_language_app/config/db/conn.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
-import 'package:my_language_app/models/services/language.model.dart';
+import 'package:my_language_app/config/db/tables/words.dart';
+import 'package:my_language_app/models/services/word.model.dart';
 
-class LanguageService {
-  static Future<List<Map<String, dynamic>>> get(LanguageGetParamModel params) async {
+class WordService {
+  static Future<List<Map<String, dynamic>>> get(WordGetParamModel params) async {
     String whereString = "";
     List<dynamic> whereArgs= [];
 
-    if(params.languageId != null){
-      whereString += "${DBTableLanguages.columnId} = ? AND ";
-      whereArgs.add(params.languageId);
+    if(params.wordId != null){
+      whereString += "${DBTableWords.columnId} = ? AND ";
+      whereArgs.add(params.wordId);
     }
 
-    if(params.languageIsSelected != null){
-      whereString += "${DBTableLanguages.columnIsSelected} = ? AND ";
-      whereArgs.add(params.languageIsSelected);
+    if(params.wordLanguageId != null){
+      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
+      whereArgs.add(params.wordLanguageId);
     }
+
+    if(params.wordStudyType != null){
+      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
+      whereArgs.add(params.wordStudyType);
+    }
+
+    if(params.wordLanguageId != null){
+      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
+      whereArgs.add(params.wordLanguageId);
+    }
+
 
     var db = await DBConn.instance.database;
-    return (await db.query(DBTableLanguages.tableName,
+    return (await db.query(DBTableWords.tableName,
         where: whereString.isNotEmpty ? whereString.substring(0, whereString.length - 4) : null,
         whereArgs: whereArgs.isNotEmpty ? whereArgs : null
     ));
   }
 
-  static Future<int> add(LanguageAddParamModel params) async {
+  static Future<int> add(WordAddParamModel params) async {
     var date = DateTime.now().toUtc().toString();
 
     var db = await DBConn.instance.database;
-    return await db.insert(DBTableLanguages.tableName, {
-      DBTableLanguages.columnName: params.languageName,
-      DBTableLanguages.columnCreatedAt: date,
-      DBTableLanguages.columnUpdatedAt: date,
-      DBTableLanguages.columnTTSArtist: "",
-      DBTableLanguages.columnTTSGender: "",
-      DBTableLanguages.columnDailyUpdatedAt: date,
-      DBTableLanguages.columnWeeklyUpdatedAt: date,
-      DBTableLanguages.columnMonthlyUpdatedAt: date,
-      DBTableLanguages.columnIsSelected: 0
+    return await db.insert(DBTableWords.tableName, {
+      DBTableWords.columnLanguageId: params.wordLanguageId,
+      DBTableWords.columnText: params.wordText,
+      DBTableWords.columnComment: params.wordComment,
+      DBTableWords.columnCreatedAt: date,
+      DBTableWords.columnUpdatedAt: date,
+      DBTableWords.columnStudyType: params.wordStudyType,
+      DBTableWords.columnIsStudy: 0,
     });
   }
 
-  static Future<int> update(LanguageUpdateParamModel params) async {
+  static Future<int> update(WordUpdateParamModel params) async {
     var date = DateTime.now().toUtc().toString();
-    String setString = "${DBTableLanguages.columnUpdatedAt} = ?,";
+    String setString = "${DBTableWords.columnUpdatedAt} = ?,";
     List<dynamic> setArgs = [date];
 
     if(params.languageName != null){
