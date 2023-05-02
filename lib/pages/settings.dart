@@ -28,7 +28,7 @@ class _PageSettingsState extends State<PageSettings> {
     List<TTSVoiceModel> voices = [];
     var rows = await flutterTts.getVoices;
     for(var row in rows) {
-      var map = MyLibraryArray.convertLinkedHashMapToMap(row);
+      var map = MyLibArray.convertLinkedHashMapToMap(row);
       voices.add(TTSVoiceModel(map["name"].toString(), map["locale"].toString()));
     }
     return voices;

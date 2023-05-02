@@ -1,7 +1,86 @@
 import 'dart:collection';
+import 'dart:convert';
 
-class MyLibraryArray {
-  static Map<String, String> convertLinkedHashMapToMap(LinkedHashMap linkedHashMap) {
+enum SortType { asc, desc }
+
+class MyLibArray {
+  static _convertQueryData(dynamic data) {
+    return jsonEncode({"d": data is int ? data.toString() : data});
+  }
+
+  static T? findSingle<T>(List<T> array, String key, dynamic value) {
+    var finds = array.where((data) {
+      bool query = false;
+      if (value != null) {
+        dynamic _data = data as Map<String, dynamic>;
+        if (key.length > 0) {
+          for (var subKey in key.split(".")) {
+            try {
+              if (_data[subKey] != null) {
+                _data = _data[subKey];
+              }
+            } catch (ex) {}
+          }
+        }
+        query = _convertQueryData(_data) == _convertQueryData(value);
+      }
+      return query;
+    }).toList();
+
+    return finds.isNotEmpty ? finds[0] : null;
+  }
+
+  static List<T> findMulti<T>(List<T> array, String key, dynamic value,
+      bool? isLike) {
+    isLike = isLike ?? true;
+
+    return array.where((data) {
+      bool query = false;
+
+      if (value != null) {
+        dynamic _data = data as Map<String, dynamic>;
+        if (key.length > 0) {
+          for (var subKey in key.split(".")) {
+            try {
+              if (_data[subKey] != null) {
+                _data = _data[subKey];
+              }
+            } catch (ex) {}
+          }
+        }
+        if (value is List) {
+          query = value
+              .map((v) => _convertQueryData(v))
+              .contains(_convertQueryData(_data));
+        } else {
+          query = _convertQueryData(_data) == _convertQueryData(value);
+        }
+      }
+      return query == isLike;
+    }).toList();
+  }
+
+  sort(List<Map<String, dynamic>> array, String key, SortType? sortType) {
+    sortType = sortType ?? SortType.asc;
+
+    List<Map<String, dynamic>> sortedList =
+        List<Map<String, dynamic>>.from(array);
+    sortedList.sort((a, b) {
+      var varA = a[key] ?? a;
+      var varB = b[key] ?? b;
+
+      if (sortType == SortType.asc) {
+        return varA.compareTo(varB);
+      } else {
+        return varB.compareTo(varA);
+      }
+    });
+
+    return sortedList;
+  }
+
+  static Map<String, String> convertLinkedHashMapToMap(
+      LinkedHashMap linkedHashMap) {
     Map<String, String> result = {};
     linkedHashMap.forEach((key, value) {
       result[key.toString()] = value.toString();

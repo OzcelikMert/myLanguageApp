@@ -3,14 +3,17 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
-import 'package:my_language_app/config/db/conn.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
+import 'package:my_language_app/config/index.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
+import 'package:my_language_app/models/components/provider/index.dart';
 import 'package:my_language_app/models/services/language.model.dart';
+import 'package:my_language_app/myLib/variable/array.dart';
 import 'package:my_language_app/services/language.service.dart';
+import 'package:provider/provider.dart';
 
 import '../components/elements/button.dart';
 
@@ -32,16 +35,23 @@ class _PageHomeState extends State<PageHome> {
   }
 
   _pageInit() async {
-    var languages = await LanguageService.get();
+    var languages = await LanguageService.get(LanguageGetParamModel());
+
+    if(languages.length > 0){
+      var findLanguage = MyLibArray.findSingle(languages, DBTableLanguages.columnIsSelected, 1);
+      if(findLanguage != null){
+        final providerModel = Provider.of<ProviderModel>(context, listen: false);
+        providerModel.languageId = findLanguage[DBTableLanguages.columnId];
+        providerModel.languageName = findLanguage[DBTableLanguages.columnName];
+        RouteLib(context).change(target: '/study/plan');
+        return;
+      }
+    }
 
     setState(() {
       _stateLanguages = languages;
       _statePageIsLoading = false;
     });
-  }
-
-  void onClickSelect() {
-     RouteLib(context).change(target: '/study/plan');
   }
 
   void onClickAdd() async {
@@ -51,6 +61,21 @@ class _PageHomeState extends State<PageHome> {
         _statePageIsLoading = true;
       });
       await _pageInit();
+    }
+  }
+
+  void onClickSelect(Map<String, dynamic> row) async {
+    DialogLib(context).showLoader();
+    var result = await LanguageService.update(LanguageUpdateParamModel(
+        languageId: row[DBTableLanguages.columnId],
+        languageIsSelected: 1
+    ));
+    DialogLib(context).hide();
+    if(result > 0){
+      final providerModel = Provider.of<ProviderModel>(context, listen: false);
+      providerModel.languageId = row[DBTableLanguages.columnId];
+      providerModel.languageName = row[DBTableLanguages.columnName];
+      RouteLib(context).change(target: '/study/plan');
     }
   }
 
@@ -115,7 +140,7 @@ class _PageHomeState extends State<PageHome> {
                 ComponentDataCellModule(
                   child: (row) => ComponentButton(
                     text: "Select",
-                    onPressed: onClickSelect,
+                    onPressed: () => onClickSelect(row),
                     icon: Icons.check,
                     buttonSize: ComponentButtonSize.sm,
                   ),

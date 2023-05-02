@@ -11,6 +11,7 @@ class DBTableLanguages {
   static const columnDailyUpdatedAt = 'languageDailyUpdatedAt';
   static const columnWeeklyUpdatedAt = 'languageWeeklyUpdatedAt';
   static const columnMonthlyUpdatedAt = 'languageMonthlyUpdatedAt';
+  static const columnIsSelected = 'languageIsSelected';
 
   final Database db;
   DBTableLanguages(this.db);
@@ -26,7 +27,8 @@ class DBTableLanguages {
         $columnTTSGender TEXT NOT NULL,
         $columnDailyUpdatedAt TEXT NOT NULL,
         $columnWeeklyUpdatedAt TEXT NOT NULL,
-        $columnMonthlyUpdatedAt TEXT NOT NULL
+        $columnMonthlyUpdatedAt TEXT NOT NULL,
+        $columnIsSelected INTEGER NOT NULL
       )
       ''');
   }

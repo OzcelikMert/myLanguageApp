@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/config/index.dart';
+import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
+import 'package:my_language_app/models/components/provider/index.dart';
+import 'package:my_language_app/models/services/language.model.dart';
+import 'package:my_language_app/services/language.service.dart';
+import 'package:provider/provider.dart';
 
 class ComponentSideBar extends StatelessWidget {
   const ComponentSideBar({Key? key}) : super(key: key);
 
   Color? getActiveBG(String? routeName, String itemRouteName) {
     return routeName == itemRouteName ? Colors.black26 : null;
+  }
+
+  void onClickReturnHome(BuildContext context) async {
+    DialogLib(context).showLoader();
+    final providerModel = Provider.of<ProviderModel>(context);
+    var result = await LanguageService.update(LanguageUpdateParamModel(
+        languageId: providerModel.languageId,
+        languageIsSelected: 0
+    ));
+    DialogLib(context).hide();
+    if(result > 0){
+      RouteLib(context).change(target: '/');
+    }
   }
 
   @override
@@ -15,8 +34,8 @@ class ComponentSideBar extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          const DrawerHeader(
-            child: Center(child: Text('My Language App')),
+          DrawerHeader(
+            child: Center(child: Text(Provider.of<ProviderModel>(context, listen: false).languageName)),
             decoration: BoxDecoration(
               color: Colors.deepPurpleAccent,
             ),
@@ -24,7 +43,7 @@ class ComponentSideBar extends StatelessWidget {
           Container(
             color: getActiveBG(routeName, "/study/plan"),
             child: ListTile(
-              leading: const Icon(Icons.home),
+              leading: const Icon(Icons.workspace_premium),
               title: const Text('Study Plan'),
               onTap: () {
                 RouteLib(context).change(target: '/study/plan');
@@ -59,6 +78,14 @@ class ComponentSideBar extends StatelessWidget {
               onTap: () {
                 RouteLib(context).change(target: '/settings');
               },
+            ),
+          ),
+          Container(
+            color: getActiveBG(routeName, "/"),
+            child: ListTile(
+              leading: const Icon(Icons.keyboard_return),
+              title: const Text('Return Home'),
+              onTap: () => onClickReturnHome(context),
             ),
           ),
         ],

@@ -46,8 +46,8 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
             setState(() {
               _isAdded = true;
             });
-            _nameController.text = "";
             DialogLib(context).showSuccess(content: "'${_nameController.text}' added!");
+            _nameController.text = "";
           }else {
             DialogLib(context).showError(content: "It couldn't add!");
           }

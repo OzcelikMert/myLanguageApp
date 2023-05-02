@@ -1,24 +1,10 @@
-class LanguageResultModel {
-  final int languageId;
-  final String languageName;
-  final String languageCreatedAt;
-  final String languageUpdatedAt;
-  final String languageTTSArtist;
-  final String languageTTSArtistGender;
-  final String languageDailyUpdatedAt;
-  final String languageWeeklyUpdatedAt;
-  final String languageMonthlyUpdatedAt;
+class LanguageGetParamModel {
+  final int? languageId;
+  final int? languageIsSelected;
 
-  LanguageResultModel({
-    required this.languageId,
-    required this.languageName,
-    required this.languageCreatedAt,
-    required this.languageUpdatedAt,
-    required this.languageTTSArtist,
-    required this.languageTTSArtistGender,
-    required this.languageDailyUpdatedAt,
-    required this.languageWeeklyUpdatedAt,
-    required this.languageMonthlyUpdatedAt
+  LanguageGetParamModel({
+    this.languageId,
+    this.languageIsSelected
   });
 }
 
@@ -38,6 +24,7 @@ class LanguageUpdateParamModel {
   final String? languageDailyUpdatedAt;
   final String? languageWeeklyUpdatedAt;
   final String? languageMonthlyUpdatedAt;
+  final int? languageIsSelected;
 
   LanguageUpdateParamModel({
     required this.languageId,
@@ -46,7 +33,8 @@ class LanguageUpdateParamModel {
     this.languageTTSGender,
     this.languageDailyUpdatedAt,
     this.languageWeeklyUpdatedAt,
-    this.languageMonthlyUpdatedAt
+    this.languageMonthlyUpdatedAt,
+    this.languageIsSelected
   });
 }
 

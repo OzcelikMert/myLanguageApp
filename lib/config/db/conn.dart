@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:path/path.dart';
@@ -8,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 class DBConn {
   static const _databaseName = 'myLanguageApp.db';
-  static const _databaseVersion = 3;
+  static const _databaseVersion = 4;
 
   DBConn._privateConstructor();
   static final DBConn instance = DBConn._privateConstructor();
