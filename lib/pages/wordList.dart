@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
+import 'package:my_language_app/config/db/tables/words.dart';
+import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/studyTypes.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
+import 'package:my_language_app/models/services/word.model.dart';
+import 'package:my_language_app/services/word.service.dart';
 
 import '../components/elements/button.dart';
 
@@ -16,6 +22,7 @@ class PageWordList extends StatefulWidget {
 
 class _PageWordListState extends State<PageWordList> {
   late bool _statePageIsLoading = true;
+  late List<Map<String, dynamic>> _stateWords = [];
 
   @override
   void initState() {
@@ -24,7 +31,10 @@ class _PageWordListState extends State<PageWordList> {
   }
 
   _pageInit() async {
+    var words = await WordService.get(WordGetParamModel(wordLanguageId: Values.getLanguageId));
+
     setState(() {
+      _stateWords = words;
       _statePageIsLoading = false;
     });
   }
@@ -38,42 +48,64 @@ class _PageWordListState extends State<PageWordList> {
         });
   }
 
-  void onClickDelete() {
-    (DialogLib(context)).showMessage(
+  void onClickDelete(Map<String, dynamic> row) {
+    DialogLib(context).showMessage(
         title: "Are you sure?",
-        content: "You have selected 'daily'. Are you sure about this?",
-        onPressedOkay: () {
-          Navigator.pushNamed(context, '/study/daily');
+        content: "Are you sure want to delete '${row[DBTableWords.columnTextNative]}'?",
+        onPressedOkay: () async {
+          DialogLib(context).showLoader();
+          var result = await WordService.delete(WordDeleteParamModel(
+              wordId: row[DBTableWords.columnId]
+          ));
+          DialogLib(context).hide();
+
+          if(result > 0){
+            setState(() {
+              _stateWords = _stateWords.where((element) => element[DBTableWords.columnId] != row[DBTableWords.columnId]).toList();
+            });
+            DialogLib(context).showSuccess(content: "'${row[DBTableWords.columnTextNative]}' successfully deleted!");
+          }else {
+            DialogLib(context).showError(content: "It couldn't delete!");
+          }
         });
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> _data = [];
-    for (var i = 0; i < 35; i++) {
-      _data.add({"id": i, "name": "qwe - ${i}"});
-    }
-
     return ComponentPageScaffold(
         isLoading: _statePageIsLoading,
-        title: "Edit",
+        title: "List of Words",
         withScroll: true,
         body: ComponentDataTable<Map<String, dynamic>>(
-          title: "List of words",
-          data: _data,
+          data: _stateWords,
           columns: [
             ComponentDataColumnModule(
-              title: "ID",
-              sortKeyName: "id",
+              title: "Native",
+              sortKeyName: DBTableWords.columnTextNative,
               sortable: true,
             ),
             ComponentDataColumnModule(
-              title: "Name",
-              sortKeyName: "name",
+              title: "Target (${Values.getLanguageName})",
+              sortKeyName: DBTableWords.columnTextTarget,
               sortable: true,
             ),
             ComponentDataColumnModule(
-              title: "Select",
+              title: "Create Date",
+              sortKeyName: DBTableWords.columnCreatedAt,
+              sortable: true,
+            ),
+            ComponentDataColumnModule(
+              title: "Study Type",
+              sortKeyName: DBTableWords.columnStudyType,
+              sortable: true,
+            ),
+            ComponentDataColumnModule(
+              title: "Is Study",
+              sortKeyName: DBTableWords.columnIsStudy,
+              sortable: true,
+            ),
+            ComponentDataColumnModule(
+              title: "Edit",
             ),
             ComponentDataColumnModule(
               title: "Delete",
@@ -81,14 +113,23 @@ class _PageWordListState extends State<PageWordList> {
           ],
           cells: [
             ComponentDataCellModule(
-              child: (row) => Text(row["id"].toString()),
+              child: (row) => Text(row[DBTableWords.columnTextNative].toString()),
             ),
             ComponentDataCellModule(
-              child: (row) => Text(row["name"].toString()),
+              child: (row) => Text(row[DBTableWords.columnTextTarget].toString()),
+            ),
+            ComponentDataCellModule(
+              child: (row) => Text(DateFormat.yMd().add_Hm().format(DateTime.parse(row[DBTableWords.columnCreatedAt].toString()).toLocal())),
+            ),
+            ComponentDataCellModule(
+              child: (row) => Text(StudyTypes.getTypeName(row[DBTableWords.columnStudyType])),
+            ),
+            ComponentDataCellModule(
+              child: (row) => Text(row[DBTableWords.columnIsStudy] == 1 ? "Yes" : "No"),
             ),
             ComponentDataCellModule(
               child: (row) => ComponentButton(
-                text: "Select",
+                text: "Edit",
                 onPressed: onClickEdit,
                 icon: Icons.check,
                 buttonSize: ComponentButtonSize.sm,
@@ -98,7 +139,7 @@ class _PageWordListState extends State<PageWordList> {
               child: (row) => ComponentButton(
                 text: "Delete",
                 bgColor: Colors.pink,
-                onPressed: onClickDelete,
+                onPressed: () => onClickDelete(row),
                 icon: Icons.delete_forever,
                 buttonSize: ComponentButtonSize.sm,
               ),

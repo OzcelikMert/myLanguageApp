@@ -21,7 +21,7 @@ class DBTableLanguages {
       CREATE TABLE $tableName (
         $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
         $columnName TEXT NOT NULL,
-        $columnCreatedAt TEXT DEFAULT "" NOT NULL,
+        $columnCreatedAt TEXT  NOT NULL,
         $columnUpdatedAt TEXT NOT NULL,
         $columnTTSArtist TEXT NOT NULL,
         $columnTTSGender TEXT NOT NULL,

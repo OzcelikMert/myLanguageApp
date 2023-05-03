@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
+import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
+import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/studyTypes.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
+import 'package:my_language_app/models/services/word.model.dart';
+import 'package:my_language_app/services/word.service.dart';
 
 class PageWordAdd extends StatefulWidget {
   const PageWordAdd({Key? key}) : super(key: key);
@@ -12,7 +17,11 @@ class PageWordAdd extends StatefulWidget {
 
 class _PageWordAddState extends State<PageWordAdd> {
   late bool _statePageIsLoading = true;
+  int _stateSelectedStudyType = StudyTypes.Daily;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _controllerTextNative = TextEditingController();
+  final _controllerTextTarget = TextEditingController();
+  final _controllerComment = TextEditingController();
 
   @override
   void initState() {
@@ -26,14 +35,40 @@ class _PageWordAddState extends State<PageWordAdd> {
     });
   }
 
-  void onClickAdd() {
-    if (_formKey.currentState!.validate()) {
-      (DialogLib(context)).showMessage(
-          title: "Are you sure?",
-          content: "You have selected 'daily'. Are you sure about this?",
-          onPressedOkay: () {
-            Navigator.pushNamed(context, '/study/daily');
-          });
+  void onClickAdd() async {
+    (DialogLib(context)).showMessage(
+        title: "Are you sure?",
+        content: "Do you want to add '${_controllerTextNative.text}' as a new word for your '${StudyTypes.getTypeName(_stateSelectedStudyType)}' study?",
+        onPressedOkay: () async {
+          DialogLib(context).showLoader();
+          var result = await WordService.add(WordAddParamModel(
+            wordLanguageId: Values.getLanguageId,
+            wordTextNative: _controllerTextNative.text,
+            wordTextTarget: _controllerTextTarget.text,
+            wordComment: _controllerComment.text,
+            wordStudyType: _stateSelectedStudyType
+          ));
+          DialogLib(context).hide();
+
+          if(result > 0){
+            DialogLib(context).showSuccess(content: "'${_controllerTextNative.text}' successfully added!");
+            _controllerTextNative.text = "";
+            _controllerTextTarget.text = "";
+            _controllerComment.text = "";
+            setState(() {
+              _stateSelectedStudyType = StudyTypes.Daily;
+            });
+          }else {
+            DialogLib(context).showError(content: "It couldn't add!");
+          }
+        });
+  }
+
+  void onChangeStudyType(int? value) {
+    if (value != null) {
+      setState(() {
+        _stateSelectedStudyType = value;
+      });
     }
   }
 
@@ -48,19 +83,21 @@ class _PageWordAddState extends State<PageWordAdd> {
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
       isLoading: _statePageIsLoading,
-      title: "Add New",
+      title: "Add New Word",
+      withScroll: true,
       body: Center(
         child: ComponentForm(
           formKey: _formKey,
           onSubmit: onClickAdd,
           submitButtonText: "Add",
           children: <Widget>[
-            const Text("Target Language"),
+            Text("Target Language (${Values.getLanguageName})"),
             TextFormField(
               decoration: const InputDecoration(
                 hintText: 'Word, Sentence or Question',
               ),
               validator: onValidator,
+              controller: _controllerTextTarget,
             ),
             const Padding(padding: EdgeInsets.all(16)),
             const Text("Native Language"),
@@ -69,6 +106,7 @@ class _PageWordAddState extends State<PageWordAdd> {
                 hintText: 'Word, Sentence or Question',
               ),
               validator: onValidator,
+              controller: _controllerTextNative,
             ),
             const Padding(padding: EdgeInsets.all(16)),
             const Text("Comment"),
@@ -76,7 +114,28 @@ class _PageWordAddState extends State<PageWordAdd> {
               decoration: const InputDecoration(
                 hintText: '...',
               ),
+              controller: _controllerComment,
             ),
+            const Padding(padding: EdgeInsets.all(16)),
+            const Text("Study Type"),
+            ComponentRadio<int>(
+              title: StudyTypes.getTypeName(StudyTypes.Daily),
+              value: StudyTypes.Daily,
+              groupValue: _stateSelectedStudyType,
+              onChanged: onChangeStudyType,
+            ),
+            ComponentRadio<int>(
+              title: StudyTypes.getTypeName(StudyTypes.Weekly),
+              value: StudyTypes.Weekly,
+              groupValue: _stateSelectedStudyType,
+              onChanged: onChangeStudyType,
+            ),
+            ComponentRadio<int>(
+              title: StudyTypes.getTypeName(StudyTypes.Monthly),
+              value: StudyTypes.Monthly,
+              groupValue: _stateSelectedStudyType,
+              onChanged: onChangeStudyType,
+            )
           ],
         ),
       ),

@@ -8,7 +8,8 @@ class MyLibArray {
     return jsonEncode({"d": data is int ? data.toString() : data});
   }
 
-  static T? findSingle<T>(List<T> array, String key, dynamic value) {
+  static T? findSingle<T>(
+      {required List<T> array, required String key, required dynamic value}) {
     var finds = array.where((data) {
       bool query = false;
       if (value != null) {
@@ -30,10 +31,11 @@ class MyLibArray {
     return finds.isNotEmpty ? finds[0] : null;
   }
 
-  static List<T> findMulti<T>(List<T> array, String key, dynamic value,
-      bool? isLike) {
-    isLike = isLike ?? true;
-
+  static List<T> findMulti<T>(
+      {required List<T> array,
+      required String key,
+      required dynamic value,
+      bool isLike = true}) {
     return array.where((data) {
       bool query = false;
 
@@ -60,7 +62,10 @@ class MyLibArray {
     }).toList();
   }
 
-  sort(List<Map<String, dynamic>> array, String key, SortType? sortType) {
+  sort(
+      {required List<Map<String, dynamic>> array,
+      required String key,
+      required SortType? sortType}) {
     sortType = sortType ?? SortType.asc;
 
     List<Map<String, dynamic>> sortedList =

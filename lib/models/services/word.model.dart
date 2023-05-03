@@ -1,25 +1,36 @@
 class WordGetParamModel {
   final int? wordId;
-  final int? wordLanguageId;
+  final int wordLanguageId;
   final int? wordStudyType;
   final int? wordIsStudy;
 
   WordGetParamModel({
+    required this.wordLanguageId,
     this.wordId,
-    this.wordLanguageId,
     this.wordStudyType,
     this.wordIsStudy
   });
 }
 
+class WordGetCountReportParamModel {
+  final int wordLanguageId;
+
+  WordGetCountReportParamModel({
+    required this.wordLanguageId
+  });
+}
+
+
 class WordAddParamModel {
   final int wordLanguageId;
-  final String wordText;
+  final String wordTextTarget;
+  final String wordTextNative;
   final String wordComment;
   final int wordStudyType;
 
   WordAddParamModel({
-    required this.wordText,
+    required this.wordTextTarget,
+    required this.wordTextNative,
     required this.wordLanguageId,
     required this.wordComment,
     required this.wordStudyType
@@ -28,14 +39,16 @@ class WordAddParamModel {
 
 class WordUpdateParamModel {
   final int wordId;
-  final String? wordText;
+  final String? wordTextTarget;
+  final String? wordTextNative;
   final String? wordComment;
   final int? wordStudyType;
   final int? wordIsStudy;
 
   WordUpdateParamModel({
     required this.wordId,
-    this.wordText,
+    this.wordTextTarget,
+    this.wordTextNative,
     this.wordComment,
     this.wordStudyType,
     this.wordIsStudy
@@ -43,9 +56,11 @@ class WordUpdateParamModel {
 }
 
 class WordDeleteParamModel {
-  final int wordId;
+  final int? wordId;
+  final int? wordLanguageId;
 
   WordDeleteParamModel({
-    required this.wordId
+    this.wordId,
+    this.wordLanguageId
   });
 }

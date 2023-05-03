@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
-import 'package:my_language_app/config/index.dart';
+import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
-import 'package:my_language_app/models/components/provider/index.dart';
 import 'package:my_language_app/models/services/language.model.dart';
+import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
 import 'package:my_language_app/services/language.service.dart';
-import 'package:provider/provider.dart';
+import 'package:my_language_app/services/word.service.dart';
 
 import '../components/elements/button.dart';
 
@@ -38,11 +38,10 @@ class _PageHomeState extends State<PageHome> {
     var languages = await LanguageService.get(LanguageGetParamModel());
 
     if(languages.length > 0){
-      var findLanguage = MyLibArray.findSingle(languages, DBTableLanguages.columnIsSelected, 1);
+      var findLanguage = MyLibArray.findSingle(array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
       if(findLanguage != null){
-        final providerModel = Provider.of<ProviderModel>(context, listen: false);
-        providerModel.languageId = findLanguage[DBTableLanguages.columnId];
-        providerModel.languageName = findLanguage[DBTableLanguages.columnName];
+        Values.setLanguageId = findLanguage[DBTableLanguages.columnId];
+        Values.setLanguageName = findLanguage[DBTableLanguages.columnName];
         RouteLib(context).change(target: '/study/plan');
         return;
       }
@@ -72,9 +71,8 @@ class _PageHomeState extends State<PageHome> {
     ));
     DialogLib(context).hide();
     if(result > 0){
-      final providerModel = Provider.of<ProviderModel>(context, listen: false);
-      providerModel.languageId = row[DBTableLanguages.columnId];
-      providerModel.languageName = row[DBTableLanguages.columnName];
+      Values.setLanguageId = row[DBTableLanguages.columnId];
+      Values.setLanguageName = row[DBTableLanguages.columnName];
       RouteLib(context).change(target: '/study/plan');
     }
   }
@@ -88,6 +86,11 @@ class _PageHomeState extends State<PageHome> {
           var result = await LanguageService.delete(LanguageDeleteParamModel(
             languageId: row[DBTableLanguages.columnId]
           ));
+          if(result > 0){
+            await WordService.delete(WordDeleteParamModel(
+                wordLanguageId: row[DBTableLanguages.columnId]
+            ));
+          }
           DialogLib(context).hide();
 
           if(result > 0){
@@ -112,7 +115,6 @@ class _PageHomeState extends State<PageHome> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const Padding(padding: EdgeInsets.all(16)),
             ComponentButton(
               onPressed: () => onClickAdd(),
               text: "Add New",

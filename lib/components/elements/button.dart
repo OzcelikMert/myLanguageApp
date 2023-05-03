@@ -33,7 +33,7 @@ class ComponentButton extends StatelessWidget {
     if(buttonSize != null){
       switch(buttonSize) {
         case ComponentButtonSize.lg: value = 35; break;
-        case ComponentButtonSize.sm: value = 15; break;
+        case ComponentButtonSize.sm: value = 10; break;
       }
     }
     return value;

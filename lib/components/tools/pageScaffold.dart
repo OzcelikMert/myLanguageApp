@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/tools/preLoader.dart';
 
@@ -26,7 +24,7 @@ class ComponentPageScaffold<T> extends StatelessWidget {
 
   Widget _getBody() {
     return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
         child: isLoading == true ? null : body);
   }
 
@@ -38,7 +36,7 @@ class ComponentPageScaffold<T> extends StatelessWidget {
             : AppBar(
                 centerTitle: true,
                 title: Text(title),
-                leading: Navigator.canPop(context) ? BackButton(
+                leading: Navigator.canPop(context) && hideSidebar == true ? BackButton(
                   onPressed: () {
                     Navigator.of(context).pop(leadingArgs);
                   },

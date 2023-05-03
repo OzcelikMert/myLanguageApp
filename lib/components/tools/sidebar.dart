@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/config/index.dart';
+import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
-import 'package:my_language_app/models/components/provider/index.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/services/language.service.dart';
-import 'package:provider/provider.dart';
 
 class ComponentSideBar extends StatelessWidget {
   const ComponentSideBar({Key? key}) : super(key: key);
@@ -16,9 +14,8 @@ class ComponentSideBar extends StatelessWidget {
 
   void onClickReturnHome(BuildContext context) async {
     DialogLib(context).showLoader();
-    final providerModel = Provider.of<ProviderModel>(context);
     var result = await LanguageService.update(LanguageUpdateParamModel(
-        languageId: providerModel.languageId,
+        languageId: Values.getLanguageId,
         languageIsSelected: 0
     ));
     DialogLib(context).hide();
@@ -35,7 +32,7 @@ class ComponentSideBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            child: Center(child: Text(Provider.of<ProviderModel>(context, listen: false).languageName)),
+            child: Center(child: Text(Values.getLanguageName)),
             decoration: BoxDecoration(
               color: Colors.deepPurpleAccent,
             ),

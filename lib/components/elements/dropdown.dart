@@ -13,12 +13,12 @@ class ComponentDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownSearch<T>(
-      popupProps: const PopupProps.dialog(
+      popupProps: PopupProps.dialog(
           showSearchBox: true,
           searchDelay: Duration(milliseconds: 100),
           showSelectedItems: false,
+          disabledItemFn: (item) => item == selectedItem,
       ),
-      filterFn: (item, filter) => item != selectedItem,
       selectedItem: selectedItem,
       items: items,
       itemAsString: itemAsString,

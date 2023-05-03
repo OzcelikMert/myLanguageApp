@@ -4,7 +4,8 @@ class DBTableWords {
   static const tableName = 'words';
   static const columnId = 'wordId';
   static const columnLanguageId = 'wordLanguageId';
-  static const columnText = 'wordText';
+  static const columnTextTarget = 'wordTextTarget';
+  static const columnTextNative = 'wordTextNative';
   static const columnComment = 'wordComment';
   static const columnCreatedAt = 'wordCreatedAt';
   static const columnUpdatedAt = 'wordUpdatedAt';
@@ -19,12 +20,13 @@ class DBTableWords {
       CREATE TABLE $tableName (
         $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
         $columnLanguageId INTEGER NOT NULL,
-        $columnText TEXT NOT NULL,
+        $columnTextTarget TEXT NOT NULL,
+        $columnTextNative TEXT NOT NULL,
         $columnCreatedAt TEXT NOT NULL,
         $columnUpdatedAt TEXT NOT NULL,
         $columnComment TEXT NOT NULL,
         $columnStudyType INTEGER NOT NULL,
-        $columnIsStudy INTEGER NOT NULL,
+        $columnIsStudy INTEGER NOT NULL
       )
       ''');
   }

@@ -3,10 +3,14 @@ import 'package:my_language_app/components/elements/dropdown.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/components/elements/radio.dart';
+import 'package:my_language_app/config/db/tables/languages.dart';
+import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
-import 'package:my_language_app/models/dependencies/tts/voice.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:my_language_app/lib/voices.lib.dart';
+import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
+import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
+import 'package:my_language_app/services/language.service.dart';
 
 class PageSettings extends StatefulWidget {
   PageSettings({Key? key}) : super(key: key);
@@ -18,21 +22,10 @@ class PageSettings extends StatefulWidget {
 class _PageSettingsState extends State<PageSettings> {
   late bool _statePageIsLoading = true;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late List<TTSVoiceModel> _stateTTSVoices = [];
+  late List<Map<String, dynamic>> _stateTTSVoices = [];
   String _stateSelectedVoiceGenderRadio = "male";
-  TTSVoiceModel? _stateSelectedVoice;
-
-  FlutterTts flutterTts = FlutterTts();
-
-  Future<List<TTSVoiceModel>> getVoices() async {
-    List<TTSVoiceModel> voices = [];
-    var rows = await flutterTts.getVoices;
-    for(var row in rows) {
-      var map = MyLibArray.convertLinkedHashMapToMap(row);
-      voices.add(TTSVoiceModel(map["name"].toString(), map["locale"].toString()));
-    }
-    return voices;
-  }
+  Map<String, dynamic>? _stateSelectedVoice;
+  late Map<String, dynamic> _stateLanguage = {};
 
   @override
   void initState() {
@@ -41,11 +34,19 @@ class _PageSettingsState extends State<PageSettings> {
   }
 
   void _pageInit() async {
-    var voices = await getVoices();
+    var languages = await LanguageService.get(
+        LanguageGetParamModel(languageId: Values.getLanguageId));
+    var voices = await VoicesLib.getVoices();
+
+    var language = languages[0];
+    var findVoice = MyLibArray.findSingle(array: voices, key: TTSVoiceKeys.keyName, value: language[DBTableLanguages.columnTTSArtist]);
+
     setState(() {
-      _statePageIsLoading = false;
+      _stateLanguage = language;
       _stateTTSVoices = voices;
-      _stateSelectedVoice = voices[0];
+      _stateSelectedVoice = findVoice ?? voices[0];
+      _stateSelectedVoiceGenderRadio = language[DBTableLanguages.columnTTSGender];
+      _statePageIsLoading = false;
     });
   }
 
@@ -95,11 +96,11 @@ class _PageSettingsState extends State<PageSettings> {
                         Text("Text To Speech", style: TextStyle(fontSize: 25))),
                 const Padding(padding: EdgeInsets.all(25)),
                 const Text("Language Code"),
-                ComponentDropdown<TTSVoiceModel>(
+                ComponentDropdown<Map<String, dynamic>>(
                   selectedItem: _stateSelectedVoice,
                   items: _stateTTSVoices,
-                  itemAsString: (TTSVoiceModel u) =>  "${u.name} - ${u.locale}",
-                  onChanged: (TTSVoiceModel? data) => setState(() {
+                  itemAsString: (Map<String, dynamic> u) => u[TTSVoiceKeys.keyDisplayName],
+                  onChanged: (Map<String, dynamic>? data) => setState(() {
                     _stateSelectedVoice = data;
                   }),
                   hintText: "ex: en-UK",

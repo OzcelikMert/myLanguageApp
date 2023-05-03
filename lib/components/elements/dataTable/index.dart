@@ -25,8 +25,8 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
 
-  void _sort<P>(Comparable<P> Function(T d) getField,
-      int columnIndex, bool ascending) {
+  void _sort<P>(
+      Comparable<P> Function(T d) getField, int columnIndex, bool ascending) {
     widget.data.sort((a, b) {
       final aValue = getField(a);
       final bValue = getField(b);
@@ -48,8 +48,8 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
           numeric: column.numeric,
           onSort: column.sortable == true
               ? (columnIndex, ascending) {
-                  _sort<String>(
-                      (dynamic d) => d[column.sortKeyName], columnIndex, ascending);
+                  _sort<String>((dynamic d) => d[column.sortKeyName],
+                      columnIndex, ascending);
                 }
               : null));
     }
@@ -61,6 +61,9 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
     return Container(
       width: double.infinity,
       child: PaginatedDataTable(
+          columnSpacing: 35,
+          dataRowHeight: 70,
+          showFirstLastButtons: true,
           header: widget.title != null
               ? Center(child: Text(widget.title.toString()))
               : null,

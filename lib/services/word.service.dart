@@ -3,36 +3,61 @@ import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 
 class WordService {
-  static Future<List<Map<String, dynamic>>> get(WordGetParamModel params) async {
+  static Future<List<Map<String, dynamic>>> get(
+      WordGetParamModel params) async {
     String whereString = "";
-    List<dynamic> whereArgs= [];
+    List<dynamic> whereArgs = [];
 
-    if(params.wordId != null){
+    if (params.wordId != null) {
       whereString += "${DBTableWords.columnId} = ? AND ";
       whereArgs.add(params.wordId);
     }
 
-    if(params.wordLanguageId != null){
+    if (params.wordLanguageId != null) {
       whereString += "${DBTableWords.columnLanguageId} = ? AND ";
       whereArgs.add(params.wordLanguageId);
     }
 
-    if(params.wordStudyType != null){
+    if (params.wordStudyType != null) {
       whereString += "${DBTableWords.columnLanguageId} = ? AND ";
       whereArgs.add(params.wordStudyType);
     }
 
-    if(params.wordLanguageId != null){
+    if (params.wordLanguageId != null) {
       whereString += "${DBTableWords.columnLanguageId} = ? AND ";
       whereArgs.add(params.wordLanguageId);
     }
 
+    var db = await DBConn.instance.database;
+    return (await db.query(DBTableWords.tableName,
+        where: whereString.isNotEmpty
+            ? whereString.substring(0, whereString.length - 4)
+            : null,
+        whereArgs: whereArgs.isNotEmpty ? whereArgs : null));
+  }
+
+  static Future<List<Map<String, dynamic>>> getCountReport(
+      WordGetCountReportParamModel params) async {
+    String whereString = "";
+    List<dynamic> whereArgs = [];
+
+    if (params.wordLanguageId != null) {
+      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
+      whereArgs.add(params.wordLanguageId);
+    }
 
     var db = await DBConn.instance.database;
     return (await db.query(DBTableWords.tableName,
-        where: whereString.isNotEmpty ? whereString.substring(0, whereString.length - 4) : null,
-        whereArgs: whereArgs.isNotEmpty ? whereArgs : null
-    ));
+        columns: [
+          DBTableWords.columnStudyType,
+          DBTableWords.columnIsStudy,
+          "COUNT(*) AS wordCount"
+        ],
+        where: whereString.isNotEmpty
+            ? whereString.substring(0, whereString.length - 4)
+            : null,
+        whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+        groupBy: "WordStudyType, WordIsStudy"));
   }
 
   static Future<int> add(WordAddParamModel params) async {
@@ -41,7 +66,8 @@ class WordService {
     var db = await DBConn.instance.database;
     return await db.insert(DBTableWords.tableName, {
       DBTableWords.columnLanguageId: params.wordLanguageId,
-      DBTableWords.columnText: params.wordText,
+      DBTableWords.columnTextTarget: params.wordTextTarget,
+      DBTableWords.columnTextNative: params.wordTextNative,
       DBTableWords.columnComment: params.wordComment,
       DBTableWords.columnCreatedAt: date,
       DBTableWords.columnUpdatedAt: date,
@@ -55,47 +81,56 @@ class WordService {
     String setString = "${DBTableWords.columnUpdatedAt} = ?,";
     List<dynamic> setArgs = [date];
 
-    if(params.languageName != null){
-      setString += "${DBTableLanguages.columnName} = ?,";
-      setArgs.add(params.languageName);
+    if (params.wordTextTarget != null) {
+      setString += "${DBTableWords.columnTextTarget} = ?,";
+      setArgs.add(params.wordTextTarget);
     }
 
-    if(params.languageTTSArtist != null){
-      setString += "${DBTableLanguages.columnTTSArtist} = ?,";
-      setArgs.add(params.languageTTSArtist);
+    if (params.wordTextNative != null) {
+      setString += "${DBTableWords.columnTextNative} = ?,";
+      setArgs.add(params.wordTextNative);
     }
 
-    if(params.languageTTSGender != null){
-      setString += "${DBTableLanguages.columnTTSGender} = ?,";
-      setArgs.add(params.languageTTSGender);
+    if (params.wordComment != null) {
+      setString += "${DBTableWords.columnComment} = ?,";
+      setArgs.add(params.wordComment);
     }
 
-    if(params.languageDailyUpdatedAt != null){
-      setString += "${DBTableLanguages.columnDailyUpdatedAt} = ?,";
-      setArgs.add(params.languageDailyUpdatedAt);
+    if (params.wordStudyType != null) {
+      setString += "${DBTableWords.columnStudyType} = ?,";
+      setArgs.add(params.wordStudyType);
     }
 
-    if(params.languageWeeklyUpdatedAt != null){
-      setString += "${DBTableLanguages.columnWeeklyUpdatedAt} = ?,";
-      setArgs.add(params.languageWeeklyUpdatedAt);
-    }
-
-    if(params.languageMonthlyUpdatedAt != null){
-      setString += "${DBTableLanguages.columnMonthlyUpdatedAt} = ?,";
-      setArgs.add(params.languageMonthlyUpdatedAt);
-    }
-
-    if(params.languageIsSelected != null){
-      setString += "${DBTableLanguages.columnIsSelected} = ?,";
-      setArgs.add(params.languageIsSelected);
+    if (params.wordIsStudy != null) {
+      setString += "${DBTableWords.columnIsStudy} = ?,";
+      setArgs.add(params.wordIsStudy);
     }
 
     var db = await DBConn.instance.database;
-    return await db.rawUpdate("UPDATE ${DBTableLanguages.tableName} SET ${setString.substring(0, setString.length - 1)} WHERE ${DBTableLanguages.columnId} = ?",  [...setArgs, params.languageId]);
+    return await db.rawUpdate(
+        "UPDATE ${DBTableWords.tableName} SET ${setString.substring(0, setString.length - 1)} WHERE ${DBTableWords.columnId} = ?",
+        [...setArgs, params.wordId]);
   }
 
-  static Future<int> delete(LanguageDeleteParamModel params) async {
+  static Future<int> delete(WordDeleteParamModel params) async {
+    String whereString = "";
+    List<dynamic> whereArgs = [];
+
+    if (params.wordId != null) {
+      whereString += "${DBTableWords.columnId} = ? AND ";
+      whereArgs.add(params.wordId);
+    }
+
+    if (params.wordLanguageId != null) {
+      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
+      whereArgs.add(params.wordLanguageId);
+    }
+
     var db = await DBConn.instance.database;
-    return await db.delete(DBTableLanguages.tableName, where: "${DBTableLanguages.columnId} = ?", whereArgs: [params.languageId]);
+    return await db.delete(DBTableWords.tableName,
+        where: whereString.isNotEmpty
+            ? whereString.substring(0, whereString.length - 4)
+            : null,
+        whereArgs: whereArgs.isNotEmpty ? whereArgs : null);
   }
 }
