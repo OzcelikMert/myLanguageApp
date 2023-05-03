@@ -1,131 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/components/elements/alert/index.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.dart';
 
-class DialogLib {
-  final BuildContext context;
+abstract class DialogLib {
+  static Color success = Color(0xffAEDEF4);
+  static Color danger = Color(0xffDD6B55);
+  static Color cancel = Color(0xffD0D0D0);
 
-  DialogLib(this.context);
+  static String successText = "OK";
+  static String confirmText = "Confirm";
+  static String cancelText = "Cancel";
 
-  Future<void> hide() async {
-    Navigator.of(context).pop();
-  }
+  static Curve showCurve = Curves.bounceOut;
 
-  Future<void> showMessage({
-    required String title,
-    required String content,
-    void Function()? onPressedNo,
-    void Function()? onPressedOkay
-  }) async {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          icon: Icon(Icons.question_mark, size: 35),
-          iconColor: Colors.blue,
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(content),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('No!'),
-              onPressed: () { Navigator.of(context).pop(); if(onPressedNo != null) onPressedNo(); },
-            ),
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () { Navigator.of(context).pop(); if(onPressedOkay != null) onPressedOkay(); },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  static ComponentDialogState? state;
 
-  Future<void> showLoader({
-    String text = "Loading...",
-  }) async {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Container(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                Padding(padding: EdgeInsets.all(20)),
-                Text(text),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> showSuccess({
-    String title = "Success",
-    required String content,
-  }) async {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          icon: Icon(Icons.check, size: 35),
-          iconColor: Colors.green,
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(content),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Okay'),
-              onPressed: () { Navigator.of(context).pop(); },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> showError({
-    String title = "Error",
-    required String content,
-  }) async {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          icon: Icon(Icons.error_outline, size: 35),
-          iconColor: Colors.red,
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(content),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Okay'),
-              onPressed: () { Navigator.of(context).pop(); },
-            ),
-          ],
-        );
-      },
-    );
+  static void show(BuildContext context,
+      {Curve? curve,
+      String? title,
+      String? subtitle,
+      bool showCancelButton: false,
+      ComponentDialogOnPressedOkay? onPress,
+      Color? cancelButtonColor,
+      Color? confirmButtonColor,
+      String? cancelButtonText,
+      String? confirmButtonText,
+      EdgeInsets? titlePadding,
+      EdgeInsets? subtitlePadding,
+      TextAlign? titleTextAlign,
+      TextStyle? titleStyle,
+      TextAlign? subtitleTextAlign,
+      TextStyle? subtitleStyle,
+      ComponentDialogStyle? style}) {
+    ComponentDialogOptions options = ComponentDialogOptions(
+        showCancelButton: showCancelButton,
+        title: title,
+        subtitle: subtitle,
+        style: style,
+        onPress: onPress,
+        confirmButtonColor: confirmButtonColor,
+        confirmButtonText: confirmButtonText,
+        cancelButtonText: cancelButtonText,
+        cancelButtonColor: cancelButtonColor,
+        titlePadding: titlePadding,
+        subtitlePadding: subtitlePadding,
+        titleTextAlign: titleTextAlign,
+        titleStyle: titleStyle,
+        subtitleTextAlign: subtitleTextAlign,
+        subtitleStyle: subtitleStyle);
+    if (state != null) {
+      state?.update(options);
+    } else {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              color: Colors.transparent,
+              child: Padding(
+                padding: EdgeInsets.all(40.0),
+                child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ComponentDialog(curve: curve, options: options),
+                ),
+              ),
+            );
+          });
+    }
   }
 }

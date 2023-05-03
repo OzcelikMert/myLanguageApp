@@ -40,27 +40,27 @@ class _PageWordAddState extends State<PageWordAdd> {
         title: "Are you sure?",
         content: "Do you want to add '${_controllerTextNative.text}' as a new word for your '${StudyTypes.getTypeName(_stateSelectedStudyType)}' study?",
         onPressedOkay: () async {
-          DialogLib(context).showLoader();
-          var result = await WordService.add(WordAddParamModel(
-            wordLanguageId: Values.getLanguageId,
-            wordTextNative: _controllerTextNative.text,
-            wordTextTarget: _controllerTextTarget.text,
-            wordComment: _controllerComment.text,
-            wordStudyType: _stateSelectedStudyType
-          ));
-          DialogLib(context).hide();
+          DialogLib(context).showLoader(func: () async {
+            var result = await WordService.add(WordAddParamModel(
+                wordLanguageId: Values.getLanguageId,
+                wordTextNative: _controllerTextNative.text,
+                wordTextTarget: _controllerTextTarget.text,
+                wordComment: _controllerComment.text,
+                wordStudyType: _stateSelectedStudyType
+            ));
 
-          if(result > 0){
-            DialogLib(context).showSuccess(content: "'${_controllerTextNative.text}' successfully added!");
-            _controllerTextNative.text = "";
-            _controllerTextTarget.text = "";
-            _controllerComment.text = "";
-            setState(() {
-              _stateSelectedStudyType = StudyTypes.Daily;
-            });
-          }else {
-            DialogLib(context).showError(content: "It couldn't add!");
-          }
+            if(result > 0){
+              DialogLib(context).showSuccess(content: "'${_controllerTextNative.text}' successfully added!");
+              _controllerTextNative.text = "";
+              _controllerTextTarget.text = "";
+              _controllerComment.text = "";
+              setState(() {
+                _stateSelectedStudyType = StudyTypes.Daily;
+              });
+            }else {
+              DialogLib(context).showError(content: "It couldn't add!");
+            }
+          });
         });
   }
 

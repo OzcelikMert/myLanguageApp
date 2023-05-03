@@ -25,7 +25,6 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late bool _isAdded = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -53,25 +52,26 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   void onClickAdd() async {
     DialogLib(context).showMessage(
         title: "Are you sure?",
-        content: "Are you sure want to add '${_controllerName.text}' as a language ?",
+        content:
+            "Are you sure want to add '${_controllerName.text}' as a language ?",
         onPressedOkay: () async {
-          DialogLib(context).showLoader();
+          var loaderDialog = DialogLib(context);
+          loaderDialog.showLoader();
           var result = await LanguageService.add(LanguageAddParamModel(
-            languageName: _controllerName.text,
-            languageTTSArtist: _stateSelectedVoice![TTSVoiceKeys.keyName],
-            languageTTSGender:  _stateSelectedVoiceGenderRadio
-          ));
-          DialogLib(context).hide();
-
-          if(result > 0){
+              languageName: _controllerName.text,
+              languageTTSArtist: _stateSelectedVoice![TTSVoiceKeys.keyName],
+              languageTTSGender: _stateSelectedVoiceGenderRadio));
+          if (result > 0) {
             setState(() {
               _isAdded = true;
             });
-            DialogLib(context).showSuccess(content: "'${_controllerName.text}' successfully added!");
+            // DialogLib(context).showSuccess(
+            //    content: "'${_controllerName.text}' successfully added!");
             _controllerName.text = "";
-          }else {
-            DialogLib(context).showError(content: "It couldn't add!");
+          } else {
+            // DialogLib(context).showError(content: "It couldn't add!");
           }
+          loaderDialog.hide();
         });
   }
 
@@ -104,14 +104,16 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
               validator: onValidator,
               controller: _controllerName,
             ),
-          const Padding(padding: EdgeInsets.all(16)),
-            Center(child: Text("Text To Speech", style: TextStyle(fontSize: 20))),
+            const Padding(padding: EdgeInsets.all(16)),
+            Center(
+                child: Text("Text To Speech", style: TextStyle(fontSize: 20))),
             const Padding(padding: EdgeInsets.all(16)),
             const Text("Language Code"),
             ComponentDropdown<Map<String, dynamic>>(
               selectedItem: _stateSelectedVoice,
               items: _stateTTSVoices,
-              itemAsString: (Map<String, dynamic> u) => u[TTSVoiceKeys.keyDisplayName],
+              itemAsString: (Map<String, dynamic> u) =>
+                  u[TTSVoiceKeys.keyDisplayName],
               onChanged: (Map<String, dynamic>? data) => setState(() {
                 _stateSelectedVoice = data;
               }),

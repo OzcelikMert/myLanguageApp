@@ -13,15 +13,16 @@ class ComponentSideBar extends StatelessWidget {
   }
 
   void onClickReturnHome(BuildContext context) async {
-    DialogLib(context).showLoader();
-    var result = await LanguageService.update(LanguageUpdateParamModel(
-        languageId: Values.getLanguageId,
-        languageIsSelected: 0
-    ));
-    DialogLib(context).hide();
-    if(result > 0){
-      RouteLib(context).change(target: '/');
-    }
+    DialogLib(context).showLoader(func: () async {
+      var result = await LanguageService.update(LanguageUpdateParamModel(
+          languageId: Values.getLanguageId,
+          languageIsSelected: 0
+      ));
+
+      if(result > 0){
+        RouteLib(context).change(target: '/');
+      }
+    });
   }
 
   @override

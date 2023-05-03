@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:my_language_app/components/elements/alert/index.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
@@ -9,6 +10,7 @@ import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
@@ -64,44 +66,72 @@ class _PageHomeState extends State<PageHome> {
   }
 
   void onClickSelect(Map<String, dynamic> row) async {
-    DialogLib(context).showLoader();
-    var result = await LanguageService.update(LanguageUpdateParamModel(
-        languageId: row[DBTableLanguages.columnId],
-        languageIsSelected: 1
-    ));
-    DialogLib(context).hide();
-    if(result > 0){
-      Values.setLanguageId = row[DBTableLanguages.columnId];
-      Values.setLanguageName = row[DBTableLanguages.columnName];
-      RouteLib(context).change(target: '/study/plan');
-    }
+    DialogLib(context).showLoader(func: () async {
+      var result = await LanguageService.update(LanguageUpdateParamModel(
+          languageId: row[DBTableLanguages.columnId],
+          languageIsSelected: 1
+      ));
+      if(result > 0){
+        Values.setLanguageId = row[DBTableLanguages.columnId];
+        Values.setLanguageName = row[DBTableLanguages.columnName];
+        RouteLib(context).change(target: '/study/plan');
+      }
+    });
   }
 
   void onClickDelete(Map<String, dynamic> row) async {
-    DialogLib(context).showMessage(
+    DialogLib.show(context,
+        title: "Are you sure?",
+        subtitle: "Are you sure want to delete '${row[DBTableLanguages.columnName]}'?",
+        style: ComponentDialogStyle.confirm,
+        showCancelButton: true,
+        onPress: (bool isConfirm) {
+          if(isConfirm){
+            Future(() async {
+              DialogLib.show(context,subtitle: "Deleting...", style: ComponentDialogStyle.loading);
+              await Future.delayed(Duration(seconds: 2));
+              var result = await LanguageService.delete(LanguageDeleteParamModel(
+                  languageId: row[DBTableLanguages.columnId]
+              ));
+              if(result > 0){
+                await WordService.delete(WordDeleteParamModel(
+                    wordLanguageId: row[DBTableLanguages.columnId]
+                ));
+                setState(() {
+                  _stateLanguages = _stateLanguages.where((element) => element[DBTableLanguages.columnId] != row[DBTableLanguages.columnId]).toList();
+                });
+                DialogLib.show(context,subtitle: "Success!", style: ComponentDialogStyle.success);
+              }else {
+                DialogLib.show(context,subtitle: "It couldn't delete!", style: ComponentDialogStyle.error);
+              }
+            });
+          }
+          return false;
+        });
+    /*DialogLib(context).showMessage(
         title: "Are you sure?",
         content: "Are you sure want to delete '${row[DBTableLanguages.columnName]}'?",
         onPressedOkay: () async {
-          DialogLib(context).showLoader();
+          var dialog = DialogLib(context);
+          dialog.showLoader();
+          await Future.delayed(Duration(seconds: 2));
           var result = await LanguageService.delete(LanguageDeleteParamModel(
-            languageId: row[DBTableLanguages.columnId]
+              languageId: row[DBTableLanguages.columnId]
           ));
           if(result > 0){
             await WordService.delete(WordDeleteParamModel(
                 wordLanguageId: row[DBTableLanguages.columnId]
             ));
-          }
-          DialogLib(context).hide();
-
-          if(result > 0){
             setState(() {
               _stateLanguages = _stateLanguages.where((element) => element[DBTableLanguages.columnId] != row[DBTableLanguages.columnId]).toList();
             });
-            DialogLib(context).showSuccess(content: "'${row[DBTableLanguages.columnName]}' successfully deleted!");
+            dialog.hide();
+            dialog.showSuccess(content: "'${row[DBTableLanguages.columnName]}' successfully deleted!");
           }else {
-            DialogLib(context).showError(content: "It couldn't delete!");
+            dialog.hide();
+            dialog.showError(content: "It couldn't delete!");
           }
-        });
+        });*/
   }
 
   @override

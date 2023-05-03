@@ -31,7 +31,8 @@ class _PageWordListState extends State<PageWordList> {
   }
 
   _pageInit() async {
-    var words = await WordService.get(WordGetParamModel(wordLanguageId: Values.getLanguageId));
+    var words = await WordService.get(
+        WordGetParamModel(wordLanguageId: Values.getLanguageId));
 
     setState(() {
       _stateWords = words;
@@ -51,22 +52,27 @@ class _PageWordListState extends State<PageWordList> {
   void onClickDelete(Map<String, dynamic> row) {
     DialogLib(context).showMessage(
         title: "Are you sure?",
-        content: "Are you sure want to delete '${row[DBTableWords.columnTextNative]}'?",
+        content:
+            "Are you sure want to delete '${row[DBTableWords.columnTextNative]}'?",
         onPressedOkay: () async {
-          DialogLib(context).showLoader();
-          var result = await WordService.delete(WordDeleteParamModel(
-              wordId: row[DBTableWords.columnId]
-          ));
-          DialogLib(context).hide();
-
-          if(result > 0){
-            setState(() {
-              _stateWords = _stateWords.where((element) => element[DBTableWords.columnId] != row[DBTableWords.columnId]).toList();
-            });
-            DialogLib(context).showSuccess(content: "'${row[DBTableWords.columnTextNative]}' successfully deleted!");
-          }else {
-            DialogLib(context).showError(content: "It couldn't delete!");
-          }
+          DialogLib(context).showLoader(func: () async {
+            var result = await WordService.delete(
+                WordDeleteParamModel(wordId: row[DBTableWords.columnId]));
+            if (result > 0) {
+              setState(() {
+                _stateWords = _stateWords
+                    .where((element) =>
+                        element[DBTableWords.columnId] !=
+                        row[DBTableWords.columnId])
+                    .toList();
+              });
+              DialogLib(context).showSuccess(
+                  content:
+                      "'${row[DBTableWords.columnTextNative]}' successfully deleted!");
+            } else {
+              DialogLib(context).showError(content: "It couldn't delete!");
+            }
+          });
         });
   }
 
@@ -113,19 +119,25 @@ class _PageWordListState extends State<PageWordList> {
           ],
           cells: [
             ComponentDataCellModule(
-              child: (row) => Text(row[DBTableWords.columnTextNative].toString()),
+              child: (row) =>
+                  Text(row[DBTableWords.columnTextNative].toString()),
             ),
             ComponentDataCellModule(
-              child: (row) => Text(row[DBTableWords.columnTextTarget].toString()),
+              child: (row) =>
+                  Text(row[DBTableWords.columnTextTarget].toString()),
             ),
             ComponentDataCellModule(
-              child: (row) => Text(DateFormat.yMd().add_Hm().format(DateTime.parse(row[DBTableWords.columnCreatedAt].toString()).toLocal())),
+              child: (row) => Text(DateFormat.yMd().add_Hm().format(
+                  DateTime.parse(row[DBTableWords.columnCreatedAt].toString())
+                      .toLocal())),
             ),
             ComponentDataCellModule(
-              child: (row) => Text(StudyTypes.getTypeName(row[DBTableWords.columnStudyType])),
+              child: (row) => Text(
+                  StudyTypes.getTypeName(row[DBTableWords.columnStudyType])),
             ),
             ComponentDataCellModule(
-              child: (row) => Text(row[DBTableWords.columnIsStudy] == 1 ? "Yes" : "No"),
+              child: (row) =>
+                  Text(row[DBTableWords.columnIsStudy] == 1 ? "Yes" : "No"),
             ),
             ComponentDataCellModule(
               child: (row) => ComponentButton(
