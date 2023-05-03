@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/alert/index.dart';
+import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:vector_math/vector_math_64.dart' as math;
 import 'package:flutter_sequence_animation/flutter_sequence_animation.dart';
 
@@ -18,30 +19,30 @@ class CancelViewState extends State<CancelView>
 
   @override
   void initState() {
-    animationController = new AnimationController(vsync: this);
+    animationController = AnimationController(vsync: this);
 
-    sequenceAnimation = new SequenceAnimationBuilder()
+    sequenceAnimation = SequenceAnimationBuilder()
         .addAnimatable(
-        animatable: new Tween(begin: 90.0, end: 0.0),
-        from: new Duration(milliseconds: 0),
-        to: new Duration(milliseconds: 300),
-        tag: "rotation")
+            animatable: Tween(begin: 90.0, end: 0.0),
+            from: Duration(milliseconds: 0),
+            to: Duration(milliseconds: 300),
+            tag: "rotation")
         .addAnimatable(
-        animatable: new Tween(begin: 0.3, end: 1.0),
-        from: new Duration(milliseconds: 600),
-        to: new Duration(milliseconds: 900),
-        tag: "fade",
-        curve: Curves.bounceOut)
+            animatable: Tween(begin: 0.3, end: 1.0),
+            from: Duration(milliseconds: 600),
+            to: Duration(milliseconds: 900),
+            tag: "fade",
+            curve: Curves.bounceOut)
         .addAnimatable(
-        animatable: new Tween(begin: 32.0 / 5.0, end: 32.0 / 2.0),
-        from: new Duration(milliseconds: 600),
-        to: new Duration(milliseconds: 900),
-        tag: "fact",
-        curve: Curves.bounceOut)
+            animatable: Tween(begin: 32.0 / 5.0, end: 32.0 / 2.0),
+            from: Duration(milliseconds: 600),
+            to: Duration(milliseconds: 900),
+            tag: "fact",
+            curve: Curves.bounceOut)
         .animate(animationController);
 
     // delay
-    new Future.delayed(new Duration(milliseconds: 200)).then((_) {
+    Future.delayed(Duration(milliseconds: 200)).then((_) {
       forward();
     });
 
@@ -51,7 +52,7 @@ class CancelViewState extends State<CancelView>
   void forward() {
     animationController
         .animateTo(1.0,
-        duration: new Duration(milliseconds: 600), curve: Curves.ease)
+            duration: Duration(milliseconds: 600), curve: Curves.ease)
         .then((_) {});
   }
 
@@ -63,16 +64,16 @@ class CancelViewState extends State<CancelView>
 
   @override
   Widget build(BuildContext context) {
-    return new AnimatedBuilder(
+    return AnimatedBuilder(
         animation: animationController,
         builder: (c, w) {
-          return new Transform(
+          return Transform(
             transform: Matrix4.rotationX(
                 math.radians(sequenceAnimation['rotation'].value)),
-            origin: new Offset(0.0, 32.0),
-            child: new CustomPaint(
-              painter: new _CustomPainter(
-                  color: SweetAlertV2.danger,
+            origin: Offset(0.0, 32.0),
+            child: CustomPaint(
+              painter: _CustomPainter(
+                  color: DialogLib.danger,
                   fade: sequenceAnimation['fade'].value,
                   factor: sequenceAnimation['fact'].value),
             ),
@@ -82,7 +83,7 @@ class CancelViewState extends State<CancelView>
 }
 
 class _CustomPainter extends CustomPainter {
-  Paint _paint = new Paint();
+  Paint _paint = Paint();
 
   Color color;
 
@@ -90,7 +91,8 @@ class _CustomPainter extends CustomPainter {
   final double fade;
   final double factor;
 
-  _CustomPainter({required this.color, required this.fade, required this.factor}) {
+  _CustomPainter(
+      {required this.color, required this.fade, required this.factor}) {
     _paint.strokeCap = StrokeCap.round;
     _paint.style = PaintingStyle.stroke;
     _paint.strokeWidth = 4.0;
@@ -99,17 +101,17 @@ class _CustomPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Path path = new Path();
+    Path path = Path();
     _paint.color = color;
 
-    path.addArc(new Rect.fromCircle(center: new Offset(_r, _r), radius: _r),
-        0.0, math.radians(360.0));
+    path.addArc(Rect.fromCircle(center: Offset(_r, _r), radius: _r), 0.0,
+        math.radians(360.0));
     canvas.drawPath(path, _paint);
 
-    path = new Path();
+    path = Path();
 
     _paint.color =
-    new Color(color.value & 0x00FFFFFF + ((0xff * fade).toInt() << 24));
+        Color(color.value & 0x00FFFFFF + ((0xff * fade).toInt() << 24));
 
     path.moveTo(_r - factor, _r - factor);
     path.lineTo(_r + factor, _r + factor);

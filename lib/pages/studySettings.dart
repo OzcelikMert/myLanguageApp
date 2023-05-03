@@ -30,14 +30,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
   }
 
   void onClickSave() {
-    if (_formKey.currentState!.validate()) {
-      (DialogLib(context)).showMessage(
-          title: "Are you sure?",
-          content: "You have selected 'daily'. Are you sure about this?",
-          onPressedOkay: () {
-            Navigator.pushNamed(context, '/study/daily');
-          });
-    }
+
   }
 
   void onChangeStudyType(int? value) {

@@ -5,6 +5,7 @@ import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/studyTypes.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/services/word.service.dart';
 
@@ -36,32 +37,37 @@ class _PageWordAddState extends State<PageWordAdd> {
   }
 
   void onClickAdd() async {
-    (DialogLib(context)).showMessage(
+    DialogLib.show(context,
         title: "Are you sure?",
-        content: "Do you want to add '${_controllerTextNative.text}' as a new word for your '${StudyTypes.getTypeName(_stateSelectedStudyType)}' study?",
-        onPressedOkay: () async {
-          DialogLib(context).showLoader(func: () async {
-            var result = await WordService.add(WordAddParamModel(
-                wordLanguageId: Values.getLanguageId,
-                wordTextNative: _controllerTextNative.text,
-                wordTextTarget: _controllerTextTarget.text,
-                wordComment: _controllerComment.text,
-                wordStudyType: _stateSelectedStudyType
-            ));
+        subtitle:
+            "Do you want to add '${_controllerTextNative.text}' as a new word for your '${StudyTypes.getTypeName(_stateSelectedStudyType)}' study?",
+        onPress: (bool isConfirm) {
+      Future(() async {
+        DialogLib.show(context, style: ComponentDialogStyle.loading);
+        var result = await WordService.add(WordAddParamModel(
+            wordLanguageId: Values.getLanguageId,
+            wordTextNative: _controllerTextNative.text,
+            wordTextTarget: _controllerTextTarget.text,
+            wordComment: _controllerComment.text,
+            wordStudyType: _stateSelectedStudyType));
 
-            if(result > 0){
-              DialogLib(context).showSuccess(content: "'${_controllerTextNative.text}' successfully added!");
-              _controllerTextNative.text = "";
-              _controllerTextTarget.text = "";
-              _controllerComment.text = "";
-              setState(() {
-                _stateSelectedStudyType = StudyTypes.Daily;
-              });
-            }else {
-              DialogLib(context).showError(content: "It couldn't add!");
-            }
+        if (result > 0) {
+          DialogLib.show(context,
+              subtitle: "'${_controllerTextNative.text}' successfully added!",
+              style: ComponentDialogStyle.success);
+          _controllerTextNative.text = "";
+          _controllerTextTarget.text = "";
+          _controllerComment.text = "";
+          setState(() {
+            _stateSelectedStudyType = StudyTypes.Daily;
           });
-        });
+        } else {
+          DialogLib.show(context,
+              subtitle: "It couldn't add!", style: ComponentDialogStyle.error);
+        }
+      });
+      return false;
+    });
   }
 
   void onChangeStudyType(int? value) {

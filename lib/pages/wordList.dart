@@ -8,6 +8,7 @@ import 'package:my_language_app/constants/studyTypes.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/services/word.service.dart';
 
@@ -41,21 +42,16 @@ class _PageWordListState extends State<PageWordList> {
   }
 
   void onClickEdit() {
-    (DialogLib(context)).showMessage(
-        title: "Are you sure?",
-        content: "You have selected 'daily'. Are you sure about this?",
-        onPressedOkay: () {
-          Navigator.pushNamed(context, '/study/daily');
-        });
+
   }
 
   void onClickDelete(Map<String, dynamic> row) {
-    DialogLib(context).showMessage(
+    DialogLib.show(context,
         title: "Are you sure?",
-        content:
+        subtitle:
             "Are you sure want to delete '${row[DBTableWords.columnTextNative]}'?",
-        onPressedOkay: () async {
-          DialogLib(context).showLoader(func: () async {
+        onPress: (bool isConfirm) {
+          Future(() async {
             var result = await WordService.delete(
                 WordDeleteParamModel(wordId: row[DBTableWords.columnId]));
             if (result > 0) {
@@ -66,13 +62,12 @@ class _PageWordListState extends State<PageWordList> {
                         row[DBTableWords.columnId])
                     .toList();
               });
-              DialogLib(context).showSuccess(
-                  content:
-                      "'${row[DBTableWords.columnTextNative]}' successfully deleted!");
+              DialogLib.show(context,subtitle: "'${row[DBTableWords.columnTextNative]}' successfully deleted!", style: ComponentDialogStyle.success);
             } else {
-              DialogLib(context).showError(content: "It couldn't delete!");
+              DialogLib.show(context,subtitle: "It couldn't delete!", style: ComponentDialogStyle.error);
             }
           });
+          return false;
         });
   }
 

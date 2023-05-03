@@ -66,17 +66,16 @@ class _PageHomeState extends State<PageHome> {
   }
 
   void onClickSelect(Map<String, dynamic> row) async {
-    DialogLib(context).showLoader(func: () async {
-      var result = await LanguageService.update(LanguageUpdateParamModel(
-          languageId: row[DBTableLanguages.columnId],
-          languageIsSelected: 1
-      ));
-      if(result > 0){
-        Values.setLanguageId = row[DBTableLanguages.columnId];
-        Values.setLanguageName = row[DBTableLanguages.columnName];
-        RouteLib(context).change(target: '/study/plan');
-      }
-    });
+    DialogLib.show(context, style: ComponentDialogStyle.loading);
+    var result = await LanguageService.update(LanguageUpdateParamModel(
+        languageId: row[DBTableLanguages.columnId],
+        languageIsSelected: 1
+    ));
+    if(result > 0){
+      Values.setLanguageId = row[DBTableLanguages.columnId];
+      Values.setLanguageName = row[DBTableLanguages.columnName];
+      RouteLib(context).change(target: '/study/plan');
+    }
   }
 
   void onClickDelete(Map<String, dynamic> row) async {
@@ -88,8 +87,7 @@ class _PageHomeState extends State<PageHome> {
         onPress: (bool isConfirm) {
           if(isConfirm){
             Future(() async {
-              DialogLib.show(context,subtitle: "Deleting...", style: ComponentDialogStyle.loading);
-              await Future.delayed(Duration(seconds: 2));
+              DialogLib.show(context, subtitle: "Deleting...", style: ComponentDialogStyle.loading);
               var result = await LanguageService.delete(LanguageDeleteParamModel(
                   languageId: row[DBTableLanguages.columnId]
               ));
@@ -108,30 +106,6 @@ class _PageHomeState extends State<PageHome> {
           }
           return false;
         });
-    /*DialogLib(context).showMessage(
-        title: "Are you sure?",
-        content: "Are you sure want to delete '${row[DBTableLanguages.columnName]}'?",
-        onPressedOkay: () async {
-          var dialog = DialogLib(context);
-          dialog.showLoader();
-          await Future.delayed(Duration(seconds: 2));
-          var result = await LanguageService.delete(LanguageDeleteParamModel(
-              languageId: row[DBTableLanguages.columnId]
-          ));
-          if(result > 0){
-            await WordService.delete(WordDeleteParamModel(
-                wordLanguageId: row[DBTableLanguages.columnId]
-            ));
-            setState(() {
-              _stateLanguages = _stateLanguages.where((element) => element[DBTableLanguages.columnId] != row[DBTableLanguages.columnId]).toList();
-            });
-            dialog.hide();
-            dialog.showSuccess(content: "'${row[DBTableLanguages.columnName]}' successfully deleted!");
-          }else {
-            dialog.hide();
-            dialog.showError(content: "It couldn't delete!");
-          }
-        });*/
   }
 
   @override

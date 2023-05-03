@@ -5,6 +5,7 @@ import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/voices.lib.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/services/language.service.dart';
@@ -50,28 +51,31 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   }
 
   void onClickAdd() async {
-    DialogLib(context).showMessage(
+    DialogLib.show(context,
         title: "Are you sure?",
-        content:
-            "Are you sure want to add '${_controllerName.text}' as a language ?",
-        onPressedOkay: () async {
-          var loaderDialog = DialogLib(context);
-          loaderDialog.showLoader();
-          var result = await LanguageService.add(LanguageAddParamModel(
-              languageName: _controllerName.text,
-              languageTTSArtist: _stateSelectedVoice![TTSVoiceKeys.keyName],
-              languageTTSGender: _stateSelectedVoiceGenderRadio));
-          if (result > 0) {
-            setState(() {
-              _isAdded = true;
+        subtitle: "Are you sure want to add '${_controllerName.text}' as a language ?",
+        style: ComponentDialogStyle.confirm,
+        showCancelButton: true,
+        onPress: (bool isConfirm) {
+          if(isConfirm){
+            Future(() async {
+              DialogLib.show(context, subtitle: "Deleting...", style: ComponentDialogStyle.loading);
+              var result = await LanguageService.add(LanguageAddParamModel(
+                  languageName: _controllerName.text,
+                  languageTTSArtist: _stateSelectedVoice![TTSVoiceKeys.keyName],
+                  languageTTSGender: _stateSelectedVoiceGenderRadio));
+              if(result > 0){
+                setState(() {
+                  _isAdded = true;
+                });
+                _controllerName.text = "";
+                DialogLib.show(context,subtitle: "${_controllerName.text}' successfully added!", style: ComponentDialogStyle.success);
+              }else {
+                DialogLib.show(context,subtitle: "It couldn't add!", style: ComponentDialogStyle.error);
+              }
             });
-            // DialogLib(context).showSuccess(
-            //    content: "'${_controllerName.text}' successfully added!");
-            _controllerName.text = "";
-          } else {
-            // DialogLib(context).showError(content: "It couldn't add!");
           }
-          loaderDialog.hide();
+          return false;
         });
   }
 

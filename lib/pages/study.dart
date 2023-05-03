@@ -33,36 +33,20 @@ class _PageStudyState extends State<PageStudy> {
     });
   }
 
-  void onClickNext() {
-    if (_formKey.currentState!.validate()) {
-      (DialogLib(context)).showMessage(
-          title: "Are you sure?",
-          content: "You have selected 'daily'. Are you sure about this?",
-          onPressedOkay: () {
-            Navigator.pushNamed(context, '/study/daily');
-          });
-    }
-  }
+  void onClickNext() {}
 
-  void onClickApprove() {
-    if (_formKey.currentState!.validate()) {
-      (DialogLib(context)).showMessage(
-          title: "Are you sure?",
-          content: "You have selected 'daily'. Are you sure about this?",
-          onPressedOkay: () {
-            Navigator.pushNamed(context, '/study/daily');
-          });
-    }
-  }
+  void onClickApprove() {}
 
   void onClickBack() {
-    (DialogLib(context)).showMessage(
-          title: "Are you sure?",
-          content: "You have selected 'daily'. Are you sure about this?",
-          onPressedOkay: () {
-            RouteLib(context).change(target: "/study/plan");
-          });
-
+    DialogLib.show(context,
+        title: "Are you sure?",
+        subtitle: "You have selected 'daily'. Are you sure about this?",
+        onPress: (bool isConfirm) {
+      if (isConfirm) {
+        RouteLib(context).change(target: "/study/plan");
+      }
+      return false;
+    });
   }
 
   void onClickSettings() {
@@ -93,15 +77,13 @@ class _PageStudyState extends State<PageStudy> {
               children: [
                 Container(
                   child: ComponentIconButton(
-                      onPressed: onClickBack,
-                      icon: Icons.arrow_back,
+                    onPressed: onClickBack,
+                    icon: Icons.arrow_back,
                   ),
                 ),
                 Container(
                   child: ComponentIconButton(
-                      onPressed: onClickSettings,
-                      icon: Icons.settings
-                  ),
+                      onPressed: onClickSettings, icon: Icons.settings),
                 )
               ],
             ),

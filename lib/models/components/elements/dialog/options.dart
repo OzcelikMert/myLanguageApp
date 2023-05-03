@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 typedef ComponentDialogOnPressedOkay = bool Function(bool isConfirm);
 
-enum ComponentDialogStyle { success, error, confirm, loading }
+enum ComponentDialogIcon { success, error, confirm, loading }
 
 class ComponentDialogOptions {
   final String? title;
@@ -19,8 +19,7 @@ class ComponentDialogOptions {
   final TextStyle? titleStyle;
   final TextAlign? subtitleTextAlign;
   final TextStyle? subtitleStyle;
-
-  final ComponentDialogStyle? style;
+  final ComponentDialogIcon? icon;
 
   ComponentDialogOptions(
       {this.showCancelButton: false,
@@ -37,5 +36,5 @@ class ComponentDialogOptions {
         this.titleStyle,
         this.subtitleTextAlign,
         this.subtitleStyle,
-        this.style});
+        this.icon});
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/services/language.service.dart';
 
@@ -13,16 +14,15 @@ class ComponentSideBar extends StatelessWidget {
   }
 
   void onClickReturnHome(BuildContext context) async {
-    DialogLib(context).showLoader(func: () async {
-      var result = await LanguageService.update(LanguageUpdateParamModel(
-          languageId: Values.getLanguageId,
-          languageIsSelected: 0
-      ));
+    DialogLib.show(context, style: ComponentDialogStyle.loading);
+    var result = await LanguageService.update(LanguageUpdateParamModel(
+        languageId: Values.getLanguageId,
+        languageIsSelected: 0
+    ));
 
-      if(result > 0){
-        RouteLib(context).change(target: '/');
-      }
-    });
+    if(result > 0){
+      RouteLib(context).change(target: '/');
+    }
   }
 
   @override

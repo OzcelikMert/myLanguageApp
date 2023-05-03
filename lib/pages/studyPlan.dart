@@ -25,14 +25,16 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   late List<Map<String, dynamic>> _stateWordCountReports = [];
 
   void onClickStudy(int type) {
-    (DialogLib(context)).showMessage(
+    DialogLib.show(context,
         title: "Are you sure?",
-        content: "You have selected '" +
+        subtitle: "You have selected '" +
             StudyTypes.getTypeName(type) +
-            "'. Are you sure about this?",
-        onPressedOkay: () {
-          RouteLib(context).change(target: StudyTypes.getRouteName(type));
-        });
+            "'. Are you sure about this?", onPress: (bool isConfirm) {
+      if (isConfirm) {
+        RouteLib(context).change(target: StudyTypes.getRouteName(type));
+      }
+      return false;
+    });
   }
 
   @override

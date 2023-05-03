@@ -31,12 +31,12 @@ abstract class DialogLib {
       TextStyle? titleStyle,
       TextAlign? subtitleTextAlign,
       TextStyle? subtitleStyle,
-      ComponentDialogStyle? style}) {
+        ComponentDialogIcon? icon}) {
     ComponentDialogOptions options = ComponentDialogOptions(
         showCancelButton: showCancelButton,
         title: title,
         subtitle: subtitle,
-        style: style,
+        icon: icon,
         onPress: onPress,
         confirmButtonColor: confirmButtonColor,
         confirmButtonText: confirmButtonText,
