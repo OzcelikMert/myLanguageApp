@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/elements/alert/icons/cancel.dart';
+import 'package:my_language_app/components/elements/alert/icons/error.dart';
 import 'package:my_language_app/components/elements/alert/icons/confirm.dart';
 import 'package:my_language_app/components/elements/alert/icons/success.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 
 class ComponentDialog extends StatefulWidget {
-  final Curve? curve;
-
   final ComponentDialogOptions options;
 
   ComponentDialog({
     required this.options,
-    this.curve,
   }) : assert(options != null);
 
   @override
@@ -34,7 +32,7 @@ class ComponentDialogState extends State<ComponentDialog>
     tween = Tween(begin: 0.0, end: 1.0).animate(controller);
     controller.animateTo(1.0,
         duration: Duration(milliseconds: 300),
-        curve: widget.curve ?? DialogLib.showCurve);
+        curve: widget.options.curve);
 
     DialogLib.state = this;
     super.initState();
@@ -42,7 +40,7 @@ class ComponentDialogState extends State<ComponentDialog>
 
   @override
   void dispose() {
-    controller?.dispose();
+    controller.dispose();
     DialogLib.state = null;
     super.dispose();
   }
@@ -53,12 +51,12 @@ class ComponentDialogState extends State<ComponentDialog>
   }
 
   void confirm() {
-    if (_options.onPress != null && _options.onPress!(true) == false) return;
+    if (_options.onPressed != null && _options.onPressed!(true) == false) return;
     Navigator.pop(context);
   }
 
   void cancel() {
-    if (_options.onPress != null && _options.onPress!(false) == false) return;
+    if (_options.onPressed != null && _options.onPressed!(false) == false) return;
     Navigator.pop(context);
   }
 
@@ -83,7 +81,7 @@ class ComponentDialogState extends State<ComponentDialog>
         icon = SizedBox(
           width: 64.0,
           height: 64.0,
-          child: CancelView(),
+          child: ErrorView(),
         );
         break;
       case ComponentDialogIcon.loading:
@@ -105,40 +103,38 @@ class ComponentDialogState extends State<ComponentDialog>
   Widget getButtonsWidget() {
     return _options.showCancelButton == true
         ? Padding(
-            padding: EdgeInsets.only(top: 10.0),
+            padding: EdgeInsets.only(top: ThemeConst.paddings.sm),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 MaterialButton(
                   onPressed: cancel,
-                  color: _options.cancelButtonColor ?? DialogLib.cancel,
+                  color: _options.cancelButtonColor ?? ThemeConst.colors.dark,
                   child: Text(
-                    _options.cancelButtonText ?? DialogLib.cancelText,
-                    style: TextStyle(color: Colors.white, fontSize: 16.0),
+                    _options.cancelButtonText ?? "Cancel",
+                    style: TextStyle(fontSize: ThemeConst.fontSizes.md),
                   ),
                 ),
-                SizedBox(
-                  width: 10.0,
-                ),
+                Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.sm)),
                 MaterialButton(
                   onPressed: confirm,
-                  color: _options.confirmButtonColor ?? DialogLib.danger,
+                  color: _options.confirmButtonColor ?? ThemeConst.colors.primary,
                   child: Text(
-                    _options.confirmButtonText ?? DialogLib.confirmText,
-                    style: TextStyle(color: Colors.white, fontSize: 16.0),
+                    _options.confirmButtonText ?? "Confirm",
+                    style: TextStyle(fontSize: ThemeConst.fontSizes.md),
                   ),
                 ),
               ],
             ),
           )
         : Padding(
-            padding: EdgeInsets.only(top: 10.0),
+            padding: EdgeInsets.only(top: ThemeConst.paddings.sm),
             child: MaterialButton(
               onPressed: confirm,
-              color: _options.confirmButtonColor ?? DialogLib.success,
+              color: _options.confirmButtonColor ?? ThemeConst.colors.primary,
               child: Text(
-                _options.confirmButtonText ?? DialogLib.successText,
-                style: TextStyle(color: Colors.white, fontSize: 16.0),
+                _options.confirmButtonText ?? "Confirm",
+                style: TextStyle(fontSize: ThemeConst.fontSizes.md),
               ),
             ),
           );
@@ -155,32 +151,31 @@ class ComponentDialogState extends State<ComponentDialog>
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Container(
-                      color: Colors.white,
                       width: double.infinity,
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 20.0),
+                        padding: EdgeInsets.fromLTRB(0.0, ThemeConst.paddings.md, 0.0, ThemeConst.paddings.md),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             getIconWidget(),
                             Padding(
-                              padding: EdgeInsets.only(left: 10.0, top: 10.0),
+                              padding: EdgeInsets.only(left: ThemeConst.paddings.sm, top: ThemeConst.paddings.sm),
                               child: Text(
                                 _options.title ?? "",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 25.0,
+                                  fontSize: ThemeConst.fontSizes.lg,
                                   color: Color(0xff575757),
                                 ),
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsets.only(top: 10.0),
+                              padding: EdgeInsets.only(top: ThemeConst.paddings.sm),
                               child: Text(
-                                _options.subtitle ?? "",
+                                _options.content ?? "",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
-                                  fontSize: 16.0,
+                                  fontSize: ThemeConst.fontSizes.md,
                                   color: Color(0xff797979),
                                 ),
                               ),

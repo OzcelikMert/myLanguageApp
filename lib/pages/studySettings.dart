@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/components/elements/radio.dart';
-import 'package:my_language_app/constants/studyTypes.const.dart';
+import 'package:my_language_app/constants/studyType.const.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 
 class PageStudySettings extends StatefulWidget {
@@ -14,7 +15,7 @@ class PageStudySettings extends StatefulWidget {
 
 class _PageStudySettingsState extends State<PageStudySettings> {
   late bool _statePageIsLoading = true;
-  int _stateSelectedStudyType = StudyTypes.Daily;
+  int _stateSelectedStudyType = StudyTypeConst.Daily;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -57,32 +58,31 @@ class _PageStudySettingsState extends State<PageStudySettings> {
         withScroll: true,
         body: Column(
           children: <Widget>[
-            const Padding(padding: EdgeInsets.all(50)),
             ComponentForm(
               formKey: _formKey,
               onSubmit: onClickSave,
               submitButtonText: "Save",
               submitButtonIcon: Icons.save,
               children: <Widget>[
-                const Center(
-                    child: Text("Type", style: TextStyle(fontSize: 25))
+                Center(
+                    child: Text("Type", style: TextStyle(fontSize: ThemeConst.fontSizes.lg))
                 ),
-                const Padding(padding: EdgeInsets.all(16)),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
                 ComponentRadio<int>(
-                  title: StudyTypes.getTypeName(StudyTypes.Daily),
-                  value: StudyTypes.Daily,
+                  title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
+                  value: StudyTypeConst.Daily,
                   groupValue: _stateSelectedStudyType,
                   onChanged: onChangeStudyType,
                 ),
                 ComponentRadio<int>(
-                  title: StudyTypes.getTypeName(StudyTypes.Weekly),
-                  value: StudyTypes.Weekly,
+                  title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
+                  value: StudyTypeConst.Weekly,
                   groupValue: _stateSelectedStudyType,
                   onChanged: onChangeStudyType,
                 ),
                 ComponentRadio<int>(
-                  title: StudyTypes.getTypeName(StudyTypes.Monthly),
-                  value: StudyTypes.Monthly,
+                  title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
+                  value: StudyTypeConst.Monthly,
                   groupValue: _stateSelectedStudyType,
                   onChanged: onChangeStudyType,
                 ),

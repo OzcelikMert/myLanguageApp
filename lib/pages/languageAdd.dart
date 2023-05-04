@@ -3,6 +3,7 @@ import 'package:my_language_app/components/elements/dropdown.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
@@ -51,32 +52,49 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   }
 
   void onClickAdd() async {
-    DialogLib.show(context,
-        title: "Are you sure?",
-        subtitle: "Are you sure want to add '${_controllerName.text}' as a language ?",
-        style: ComponentDialogStyle.confirm,
-        showCancelButton: true,
-        onPress: (bool isConfirm) {
-          if(isConfirm){
-            Future(() async {
-              DialogLib.show(context, subtitle: "Deleting...", style: ComponentDialogStyle.loading);
-              var result = await LanguageService.add(LanguageAddParamModel(
-                  languageName: _controllerName.text,
-                  languageTTSArtist: _stateSelectedVoice![TTSVoiceKeys.keyName],
-                  languageTTSGender: _stateSelectedVoiceGenderRadio));
-              if(result > 0){
-                setState(() {
-                  _isAdded = true;
+    DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            title: "Are you sure?",
+            content:
+                "Are you sure want to add '${_controllerName.text}' as a language ?",
+            icon: ComponentDialogIcon.confirm,
+            showCancelButton: true,
+            onPressed: (bool isConfirm) {
+              if (isConfirm) {
+                Future(() async {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content: "Deleting...",
+                          icon: ComponentDialogIcon.loading));
+                  var result = await LanguageService.add(LanguageAddParamModel(
+                      languageName: _controllerName.text,
+                      languageTTSArtist:
+                          _stateSelectedVoice![TTSVoiceKeys.keyName],
+                      languageTTSGender: _stateSelectedVoiceGenderRadio));
+                  if (result > 0) {
+                    setState(() {
+                      _isAdded = true;
+                    });
+                    _controllerName.text = "";
+                    DialogLib.show(
+                        context,
+                        ComponentDialogOptions(
+                            content:
+                                "${_controllerName.text}' successfully added!",
+                            icon: ComponentDialogIcon.success));
+                  } else {
+                    DialogLib.show(
+                        context,
+                        ComponentDialogOptions(
+                            content: "It couldn't add!",
+                            icon: ComponentDialogIcon.error));
+                  }
                 });
-                _controllerName.text = "";
-                DialogLib.show(context,subtitle: "${_controllerName.text}' successfully added!", style: ComponentDialogStyle.success);
-              }else {
-                DialogLib.show(context,subtitle: "It couldn't add!", style: ComponentDialogStyle.error);
               }
-            });
-          }
-          return false;
-        });
+              return true;
+            }));
   }
 
   String? onValidator(String? value) {
@@ -108,10 +126,10 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
               validator: onValidator,
               controller: _controllerName,
             ),
-            const Padding(padding: EdgeInsets.all(16)),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             Center(
-                child: Text("Text To Speech", style: TextStyle(fontSize: 20))),
-            const Padding(padding: EdgeInsets.all(16)),
+                child: Text("Text To Speech", style: TextStyle(fontSize: ThemeConst.fontSizes.lg))),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             const Text("Language Code"),
             ComponentDropdown<Map<String, dynamic>>(
               selectedItem: _stateSelectedVoice,
@@ -123,7 +141,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
               }),
               hintText: "ex: en-UK",
             ),
-            const Padding(padding: EdgeInsets.all(16)),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             ComponentRadio<String>(
               title: 'Male',
               value: 'male',

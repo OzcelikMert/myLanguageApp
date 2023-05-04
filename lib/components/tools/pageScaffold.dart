@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/tools/preLoader.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 
 import 'sidebar.dart';
 
@@ -24,7 +25,7 @@ class ComponentPageScaffold<T> extends StatelessWidget {
 
   Widget _getBody() {
     return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+        padding: EdgeInsets.all(ThemeConst.paddings.md),
         child: isLoading == true ? null : body);
   }
 

@@ -6,6 +6,7 @@ import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
@@ -39,9 +40,10 @@ class _PageHomeState extends State<PageHome> {
   _pageInit() async {
     var languages = await LanguageService.get(LanguageGetParamModel());
 
-    if(languages.length > 0){
-      var findLanguage = MyLibArray.findSingle(array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
-      if(findLanguage != null){
+    if (languages.length > 0) {
+      var findLanguage = MyLibArray.findSingle(
+          array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
+      if (findLanguage != null) {
         Values.setLanguageId = findLanguage[DBTableLanguages.columnId];
         Values.setLanguageName = findLanguage[DBTableLanguages.columnName];
         RouteLib(context).change(target: '/study/plan');
@@ -56,8 +58,9 @@ class _PageHomeState extends State<PageHome> {
   }
 
   void onClickAdd() async {
-    var isAdded = await RouteLib(context).change(target: '/language/add', safeHistory: true);
-    if(isAdded){
+    var isAdded = await RouteLib(context)
+        .change(target: '/language/add', safeHistory: true);
+    if (isAdded) {
       setState(() {
         _statePageIsLoading = true;
       });
@@ -66,12 +69,11 @@ class _PageHomeState extends State<PageHome> {
   }
 
   void onClickSelect(Map<String, dynamic> row) async {
-    DialogLib.show(context, style: ComponentDialogStyle.loading);
+    DialogLib.show(
+        context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
     var result = await LanguageService.update(LanguageUpdateParamModel(
-        languageId: row[DBTableLanguages.columnId],
-        languageIsSelected: 1
-    ));
-    if(result > 0){
+        languageId: row[DBTableLanguages.columnId], languageIsSelected: 1));
+    if (result > 0) {
       Values.setLanguageId = row[DBTableLanguages.columnId];
       Values.setLanguageName = row[DBTableLanguages.columnName];
       RouteLib(context).change(target: '/study/plan');
@@ -79,33 +81,51 @@ class _PageHomeState extends State<PageHome> {
   }
 
   void onClickDelete(Map<String, dynamic> row) async {
-    DialogLib.show(context,
-        title: "Are you sure?",
-        subtitle: "Are you sure want to delete '${row[DBTableLanguages.columnName]}'?",
-        style: ComponentDialogStyle.confirm,
-        showCancelButton: true,
-        onPress: (bool isConfirm) {
-          if(isConfirm){
-            Future(() async {
-              DialogLib.show(context, subtitle: "Deleting...", style: ComponentDialogStyle.loading);
-              var result = await LanguageService.delete(LanguageDeleteParamModel(
-                  languageId: row[DBTableLanguages.columnId]
-              ));
-              if(result > 0){
-                await WordService.delete(WordDeleteParamModel(
-                    wordLanguageId: row[DBTableLanguages.columnId]
-                ));
-                setState(() {
-                  _stateLanguages = _stateLanguages.where((element) => element[DBTableLanguages.columnId] != row[DBTableLanguages.columnId]).toList();
+    DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            title: "Are you sure?",
+            content:
+                "Are you sure want to delete '${row[DBTableLanguages.columnName]}'?",
+            icon: ComponentDialogIcon.confirm,
+            showCancelButton: true,
+            onPressed: (bool isConfirm) {
+              if (isConfirm) {
+                Future(() async {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content: "Deleting...",
+                          icon: ComponentDialogIcon.loading));
+                  var result = await LanguageService.delete(
+                      LanguageDeleteParamModel(
+                          languageId: row[DBTableLanguages.columnId]));
+                  if (result > 0) {
+                    await WordService.delete(WordDeleteParamModel(
+                        wordLanguageId: row[DBTableLanguages.columnId]));
+                    setState(() {
+                      _stateLanguages = _stateLanguages
+                          .where((element) =>
+                              element[DBTableLanguages.columnId] !=
+                              row[DBTableLanguages.columnId])
+                          .toList();
+                    });
+                    DialogLib.show(
+                        context,
+                        ComponentDialogOptions(
+                            content: "Success!",
+                            icon: ComponentDialogIcon.success));
+                  } else {
+                    DialogLib.show(
+                        context,
+                        ComponentDialogOptions(
+                            content: "It couldn't delete!",
+                            icon: ComponentDialogIcon.error));
+                  }
                 });
-                DialogLib.show(context,subtitle: "Success!", style: ComponentDialogStyle.success);
-              }else {
-                DialogLib.show(context,subtitle: "It couldn't delete!", style: ComponentDialogStyle.error);
               }
-            });
-          }
-          return false;
-        });
+              return true;
+            }));
   }
 
   @override
@@ -123,7 +143,7 @@ class _PageHomeState extends State<PageHome> {
               onPressed: () => onClickAdd(),
               text: "Add New",
             ),
-            const Padding(padding: EdgeInsets.all(16)),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             ComponentDataTable<Map<String, dynamic>>(
               data: _stateLanguages,
               columns: const [
@@ -141,7 +161,8 @@ class _PageHomeState extends State<PageHome> {
               ],
               cells: [
                 ComponentDataCellModule(
-                  child: (row) => Text(row[DBTableLanguages.columnName].toString()),
+                  child: (row) =>
+                      Text(row[DBTableLanguages.columnName].toString()),
                 ),
                 ComponentDataCellModule(
                   child: (row) => ComponentButton(
@@ -154,7 +175,7 @@ class _PageHomeState extends State<PageHome> {
                 ComponentDataCellModule(
                   child: (row) => ComponentButton(
                     text: "Delete",
-                    bgColor: Colors.pink,
+                    bgColor: ThemeConst.colors.danger,
                     onPressed: () => onClickDelete(row),
                     icon: Icons.delete_forever,
                     buttonSize: ComponentButtonSize.sm,

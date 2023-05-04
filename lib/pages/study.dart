@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import '../components/elements/button.dart';
 
 class PageStudy extends StatefulWidget {
@@ -38,15 +40,17 @@ class _PageStudyState extends State<PageStudy> {
   void onClickApprove() {}
 
   void onClickBack() {
-    DialogLib.show(context,
-        title: "Are you sure?",
-        subtitle: "You have selected 'daily'. Are you sure about this?",
-        onPress: (bool isConfirm) {
-      if (isConfirm) {
-        RouteLib(context).change(target: "/study/plan");
-      }
-      return false;
-    });
+    DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            title: "Are you sure?",
+            content: "You have selected 'daily'. Are you sure about this?",
+            onPressed: (bool isConfirm) {
+              if (isConfirm) {
+                RouteLib(context).change(target: "/study/plan");
+              }
+              return false;
+            }));
   }
 
   void onClickSettings() {
@@ -70,7 +74,6 @@ class _PageStudyState extends State<PageStudy> {
         withScroll: true,
         body: Column(
           children: <Widget>[
-            const Padding(padding: EdgeInsets.all(25)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
@@ -87,17 +90,17 @@ class _PageStudyState extends State<PageStudy> {
                 )
               ],
             ),
-            const Padding(padding: EdgeInsets.all(100)),
-            const Text(
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
+            Text(
               "[word]",
-              style: TextStyle(fontSize: 35),
+              style: TextStyle(fontSize: ThemeConst.fontSizes.lg),
             ),
-            const Padding(padding: EdgeInsets.all(50)),
-            const Text(
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
+            Text(
               "[comment]",
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(fontSize: ThemeConst.fontSizes.md),
             ),
-            const Padding(padding: EdgeInsets.all(75)),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
             ComponentForm(
               formKey: _formKey,
               onSubmit: onClickApprove,
@@ -113,12 +116,12 @@ class _PageStudyState extends State<PageStudy> {
                 ),
               ],
             ),
-            const Padding(padding: EdgeInsets.all(50)),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
             ComponentButton(
               onPressed: onClickNext,
               text: "Skip Next",
               icon: Icons.arrow_forward,
-              bgColor: Colors.blueGrey,
+              bgColor: ThemeConst.colors.secondary,
               reverseIconAlign: true,
             ),
           ],

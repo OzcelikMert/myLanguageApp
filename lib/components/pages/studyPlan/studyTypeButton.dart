@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/button.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 
 class ComponentStudyTypeButton extends StatelessWidget {
   final String title;
@@ -25,13 +26,13 @@ class ComponentStudyTypeButton extends StatelessWidget {
         progressValue.isNaN || progressValue.isInfinite ? 0 : progressValue;
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+      padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md, horizontal: ThemeConst.paddings.sm),
       decoration: BoxDecoration(
-        color: bgColor ?? Colors.black26,
+        color: bgColor ?? ThemeConst.colors.dark,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black26.withOpacity(0.5),
+            color: ThemeConst.colors.dark.withOpacity(0.5),
             spreadRadius: 2,
             blurRadius: 5,
             offset: Offset(5, 5),
@@ -45,53 +46,53 @@ class ComponentStudyTypeButton extends StatelessWidget {
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: ThemeConst.fontSizes.lg,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          SizedBox(height: 10),
+          Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
           Text(
             'Total Word Count: $totalWords',
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
           ),
-          SizedBox(height: 5),
+          Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
           Text(
             'Studied Word Count: $studiedWords',
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
           ),
-          SizedBox(height: 5),
+          Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
           Text(
             'Unstudied Word Count: $unstudiedWords',
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
           ),
-          SizedBox(height: 20),
+          Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Progress',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: ThemeConst.fontSizes.sm,
                   fontWeight: FontWeight.w400,
                 ),
               ),
               Text(
                 '${(progressValue * 100).toStringAsFixed(0)}%',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: ThemeConst.fontSizes.sm,
                   fontWeight: FontWeight.bold,
                 ),
               )
             ],
           ),
-          SizedBox(height: 5),
+          Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
           LinearProgressIndicator(
             value: progressValue,
-            backgroundColor: Colors.grey.withOpacity(0.3),
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+            backgroundColor: ThemeConst.colors.dark.withOpacity(0.3),
+            valueColor: AlwaysStoppedAnimation<Color>(ThemeConst.colors.primary),
           ),
-          SizedBox(height: 10),
+          Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
           ComponentButton(
             text: 'Start Studying',
             buttonSize: ComponentButtonSize.sm,

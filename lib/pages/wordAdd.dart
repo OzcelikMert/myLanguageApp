@@ -3,7 +3,8 @@ import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/values.dart';
-import 'package:my_language_app/constants/studyTypes.const.dart';
+import 'package:my_language_app/constants/studyType.const.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/services/word.model.dart';
@@ -18,7 +19,7 @@ class PageWordAdd extends StatefulWidget {
 
 class _PageWordAddState extends State<PageWordAdd> {
   late bool _statePageIsLoading = true;
-  int _stateSelectedStudyType = StudyTypes.Daily;
+  int _stateSelectedStudyType = StudyTypeConst.Daily;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _controllerTextNative = TextEditingController();
   final _controllerTextTarget = TextEditingController();
@@ -37,37 +38,45 @@ class _PageWordAddState extends State<PageWordAdd> {
   }
 
   void onClickAdd() async {
-    DialogLib.show(context,
-        title: "Are you sure?",
-        subtitle:
-            "Do you want to add '${_controllerTextNative.text}' as a new word for your '${StudyTypes.getTypeName(_stateSelectedStudyType)}' study?",
-        onPress: (bool isConfirm) {
-      Future(() async {
-        DialogLib.show(context, style: ComponentDialogStyle.loading);
-        var result = await WordService.add(WordAddParamModel(
-            wordLanguageId: Values.getLanguageId,
-            wordTextNative: _controllerTextNative.text,
-            wordTextTarget: _controllerTextTarget.text,
-            wordComment: _controllerComment.text,
-            wordStudyType: _stateSelectedStudyType));
+    DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            title: "Are you sure?",
+            content:
+                "Do you want to add '${_controllerTextNative.text}' as a new word for your '${StudyTypeConst.getTypeName(_stateSelectedStudyType)}' study?",
+            onPressed: (bool isConfirm) {
+              Future(() async {
+                DialogLib.show(context,
+                    ComponentDialogOptions(icon: ComponentDialogIcon.loading));
+                var result = await WordService.add(WordAddParamModel(
+                    wordLanguageId: Values.getLanguageId,
+                    wordTextNative: _controllerTextNative.text,
+                    wordTextTarget: _controllerTextTarget.text,
+                    wordComment: _controllerComment.text,
+                    wordStudyType: _stateSelectedStudyType));
 
-        if (result > 0) {
-          DialogLib.show(context,
-              subtitle: "'${_controllerTextNative.text}' successfully added!",
-              style: ComponentDialogStyle.success);
-          _controllerTextNative.text = "";
-          _controllerTextTarget.text = "";
-          _controllerComment.text = "";
-          setState(() {
-            _stateSelectedStudyType = StudyTypes.Daily;
-          });
-        } else {
-          DialogLib.show(context,
-              subtitle: "It couldn't add!", style: ComponentDialogStyle.error);
-        }
-      });
-      return false;
-    });
+                if (result > 0) {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content:
+                              "'${_controllerTextNative.text}' successfully added!",
+                          icon: ComponentDialogIcon.success));
+                  _controllerTextNative.text = "";
+                  _controllerTextTarget.text = "";
+                  _controllerComment.text = "";
+                  setState(() {
+                    _stateSelectedStudyType = StudyTypeConst.Daily;
+                  });
+                } else {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content: "It couldn't add!",
+                          icon: ComponentDialogIcon.error));
+                }
+              });
+            }));
   }
 
   void onChangeStudyType(int? value) {
@@ -105,7 +114,7 @@ class _PageWordAddState extends State<PageWordAdd> {
               validator: onValidator,
               controller: _controllerTextTarget,
             ),
-            const Padding(padding: EdgeInsets.all(16)),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             const Text("Native Language"),
             TextFormField(
               decoration: const InputDecoration(
@@ -114,7 +123,7 @@ class _PageWordAddState extends State<PageWordAdd> {
               validator: onValidator,
               controller: _controllerTextNative,
             ),
-            const Padding(padding: EdgeInsets.all(16)),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             const Text("Comment"),
             TextFormField(
               decoration: const InputDecoration(
@@ -122,23 +131,23 @@ class _PageWordAddState extends State<PageWordAdd> {
               ),
               controller: _controllerComment,
             ),
-            const Padding(padding: EdgeInsets.all(16)),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             const Text("Study Type"),
             ComponentRadio<int>(
-              title: StudyTypes.getTypeName(StudyTypes.Daily),
-              value: StudyTypes.Daily,
+              title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
+              value: StudyTypeConst.Daily,
               groupValue: _stateSelectedStudyType,
               onChanged: onChangeStudyType,
             ),
             ComponentRadio<int>(
-              title: StudyTypes.getTypeName(StudyTypes.Weekly),
-              value: StudyTypes.Weekly,
+              title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
+              value: StudyTypeConst.Weekly,
               groupValue: _stateSelectedStudyType,
               onChanged: onChangeStudyType,
             ),
             ComponentRadio<int>(
-              title: StudyTypes.getTypeName(StudyTypes.Monthly),
-              value: StudyTypes.Monthly,
+              title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
+              value: StudyTypeConst.Monthly,
               groupValue: _stateSelectedStudyType,
               onChanged: onChangeStudyType,
             )

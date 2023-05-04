@@ -4,7 +4,8 @@ import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/config/values.dart';
-import 'package:my_language_app/constants/studyTypes.const.dart';
+import 'package:my_language_app/constants/studyType.const.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
@@ -46,12 +47,14 @@ class _PageWordListState extends State<PageWordList> {
   }
 
   void onClickDelete(Map<String, dynamic> row) {
-    DialogLib.show(context,
+    DialogLib.show(context, ComponentDialogOptions(
         title: "Are you sure?",
-        subtitle:
+        content:
             "Are you sure want to delete '${row[DBTableWords.columnTextNative]}'?",
-        onPress: (bool isConfirm) {
+        onPressed: (bool isConfirm) {
           Future(() async {
+            DialogLib.show(context,
+                ComponentDialogOptions(icon: ComponentDialogIcon.loading));
             var result = await WordService.delete(
                 WordDeleteParamModel(wordId: row[DBTableWords.columnId]));
             if (result > 0) {
@@ -62,13 +65,12 @@ class _PageWordListState extends State<PageWordList> {
                         row[DBTableWords.columnId])
                     .toList();
               });
-              DialogLib.show(context,subtitle: "'${row[DBTableWords.columnTextNative]}' successfully deleted!", style: ComponentDialogStyle.success);
+              DialogLib.show(context, ComponentDialogOptions(content: "'${row[DBTableWords.columnTextNative]}' successfully deleted!", icon: ComponentDialogIcon.success));
             } else {
-              DialogLib.show(context,subtitle: "It couldn't delete!", style: ComponentDialogStyle.error);
+              DialogLib.show(context, ComponentDialogOptions(content: "It couldn't delete!", icon: ComponentDialogIcon.error));
             }
           });
-          return false;
-        });
+        }));
   }
 
   @override
@@ -128,7 +130,7 @@ class _PageWordListState extends State<PageWordList> {
             ),
             ComponentDataCellModule(
               child: (row) => Text(
-                  StudyTypes.getTypeName(row[DBTableWords.columnStudyType])),
+                  StudyTypeConst.getTypeName(row[DBTableWords.columnStudyType])),
             ),
             ComponentDataCellModule(
               child: (row) =>
@@ -145,7 +147,7 @@ class _PageWordListState extends State<PageWordList> {
             ComponentDataCellModule(
               child: (row) => ComponentButton(
                 text: "Delete",
-                bgColor: Colors.pink,
+                bgColor: ThemeConst.colors.danger,
                 onPressed: () => onClickDelete(row),
                 icon: Icons.delete_forever,
                 buttonSize: ComponentButtonSize.sm,

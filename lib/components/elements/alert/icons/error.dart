@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/elements/alert/index.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:vector_math/vector_math_64.dart' as math;
 import 'package:flutter_sequence_animation/flutter_sequence_animation.dart';
 
-class CancelView extends StatefulWidget {
-  const CancelView({Key? key}) : super(key: key);
+class ErrorView extends StatefulWidget {
+  const ErrorView({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => CancelViewState();
+  State<StatefulWidget> createState() => ErrorViewState();
 }
 
-class CancelViewState extends State<CancelView>
+class ErrorViewState extends State<ErrorView>
     with SingleTickerProviderStateMixin {
   late AnimationController animationController;
 
@@ -58,7 +58,7 @@ class CancelViewState extends State<CancelView>
 
   @override
   void dispose() {
-    animationController?.dispose();
+    animationController.dispose();
     super.dispose();
   }
 
@@ -73,7 +73,7 @@ class CancelViewState extends State<CancelView>
             origin: Offset(0.0, 32.0),
             child: CustomPaint(
               painter: _CustomPainter(
-                  color: DialogLib.danger,
+                  color: ThemeConst.colors.danger,
                   fade: sequenceAnimation['fade'].value,
                   factor: sequenceAnimation['fact'].value),
             ),

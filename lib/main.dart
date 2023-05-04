@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/constants/studyTypes.const.dart';
+import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/pages/settings.dart';
 import 'package:my_language_app/pages/study.dart';
 import 'package:my_language_app/pages/studySettings.dart';
@@ -31,9 +31,9 @@ class MyLanguageApp extends StatelessWidget {
           "/word/add": (context) => const PageWordAdd(),
           "/word/list": (context) => const PageWordList(),
           "/study/plan": (context) => const PageStudyPlan(),
-          "/study/daily": (context) => PageStudy(type: StudyTypes.Daily),
-          "/study/weekly": (context) => PageStudy(type: StudyTypes.Weekly),
-          "/study/monthly": (context) => PageStudy(type: StudyTypes.Monthly),
+          "/study/daily": (context) => PageStudy(type: StudyTypeConst.Daily),
+          "/study/weekly": (context) => PageStudy(type: StudyTypeConst.Weekly),
+          "/study/monthly": (context) => PageStudy(type: StudyTypeConst.Monthly),
           "/study/settings": (context) => PageStudySettings(),
         }
     );

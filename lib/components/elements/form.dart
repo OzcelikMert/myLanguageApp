@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 
 import 'button.dart';
 
@@ -33,7 +34,7 @@ class ComponentForm extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ...children,
-          const Padding(padding: EdgeInsets.all(16)),
+          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
           ComponentButton(
             onPressed: () => _onPressed(),
             text: submitButtonText ?? "Submit",

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
@@ -10,11 +11,11 @@ class ComponentSideBar extends StatelessWidget {
   const ComponentSideBar({Key? key}) : super(key: key);
 
   Color? getActiveBG(String? routeName, String itemRouteName) {
-    return routeName == itemRouteName ? Colors.black26 : null;
+    return routeName == itemRouteName ? ThemeConst.colors.dark : null;
   }
 
   void onClickReturnHome(BuildContext context) async {
-    DialogLib.show(context, style: ComponentDialogStyle.loading);
+    DialogLib.show(context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
     var result = await LanguageService.update(LanguageUpdateParamModel(
         languageId: Values.getLanguageId,
         languageIsSelected: 0
@@ -35,7 +36,7 @@ class ComponentSideBar extends StatelessWidget {
           DrawerHeader(
             child: Center(child: Text(Values.getLanguageName)),
             decoration: BoxDecoration(
-              color: Colors.deepPurpleAccent,
+              color: ThemeConst.colors.primary,
             ),
           ),
           Container(

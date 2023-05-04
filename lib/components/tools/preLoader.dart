@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 
 class ComponentPreLoader extends StatefulWidget {
   final bool isLoading;
@@ -16,7 +17,7 @@ class _ComponentPreLoaderState extends State<ComponentPreLoader> {
     return widget.isLoading ? AbsorbPointer(
       absorbing: true,
       child: Container(
-        color: Colors.black12,
+        color: ThemeConst.colors.dark,
         child: Center(
           child: CircularProgressIndicator(),
         ),

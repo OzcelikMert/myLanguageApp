@@ -5,6 +5,7 @@ import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
@@ -77,17 +78,16 @@ class _PageSettingsState extends State<PageSettings> {
         withScroll: true,
         body: Column(
           children: <Widget>[
-            const Padding(padding: EdgeInsets.all(50)),
             ComponentForm(
               formKey: _formKey,
               onSubmit: onClickSave,
               submitButtonText: "Save",
               submitButtonIcon: Icons.save,
               children: <Widget>[
-                const Center(
+                Center(
                     child:
-                        Text("Text To Speech", style: TextStyle(fontSize: 25))),
-                const Padding(padding: EdgeInsets.all(25)),
+                        Text("Text To Speech", style: TextStyle(fontSize: ThemeConst.fontSizes.lg))),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
                 const Text("Language Code"),
                 ComponentDropdown<Map<String, dynamic>>(
                   selectedItem: _stateSelectedVoice,
@@ -98,7 +98,7 @@ class _PageSettingsState extends State<PageSettings> {
                   }),
                   hintText: "ex: en-UK",
                 ),
-                const Padding(padding: EdgeInsets.all(16)),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
                 ComponentRadio<String>(
                   title: 'Male',
                   value: 'male',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 
 enum ComponentButtonSize {
   sm,
@@ -18,22 +19,22 @@ class ComponentButton extends StatelessWidget {
   const ComponentButton({Key? key, required this.text, required this.onPressed, this.icon, this.bgColor, this.style, this.reverseIconAlign, this.buttonSize}) : super(key: key);
 
   double _getIconTextPadding() {
-    double value = 10;
+    double value = ThemeConst.paddings.md;
     if(buttonSize != null){
       switch(buttonSize) {
-        case ComponentButtonSize.lg: value = 15; break;
-        case ComponentButtonSize.sm: value = 5; break;
+        case ComponentButtonSize.lg: value = ThemeConst.paddings.lg; break;
+        case ComponentButtonSize.sm: value = ThemeConst.paddings.sm; break;
       }
     }
     return value;
   }
 
   double _getStyleVerticalPadding() {
-    double value = 25;
+    double value = ThemeConst.paddings.md;
     if(buttonSize != null){
       switch(buttonSize) {
-        case ComponentButtonSize.lg: value = 35; break;
-        case ComponentButtonSize.sm: value = 10; break;
+        case ComponentButtonSize.lg: value = ThemeConst.paddings.lg; break;
+        case ComponentButtonSize.sm: value = ThemeConst.paddings.sm; break;
       }
     }
     return value;
@@ -54,10 +55,10 @@ class ComponentButton extends StatelessWidget {
         ],
       ) : Text(text),
       style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: _getStyleVerticalPadding(), horizontal: 25),
+        padding: EdgeInsets.symmetric(vertical: _getStyleVerticalPadding(), horizontal: ThemeConst.paddings.md),
         minimumSize: Size(double.infinity, 0),
-        primary: bgColor ?? Colors.deepPurpleAccent, // change button color here
-        onPrimary: Colors.white, // change text color here
+        primary: bgColor ?? ThemeConst.colors.primary, // change button color here
+        onPrimary: ThemeConst.colors.light, // change text color here
       ).merge(style),
     );
   }
