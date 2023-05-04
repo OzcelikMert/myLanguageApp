@@ -7,13 +7,14 @@ class ThemeConst {
 }
 
 class _ThemeColorConst {
-  Color dark = Colors.black38;
-  Color light = Colors.white38;
+  Color dark = Colors.black.withBlue(28).withGreen(28).withRed(28);
+  Color gray = Colors.black.withBlue(74).withGreen(74).withRed(74);
+  Color light = Colors.white.withRed(220).withGreen(220).withBlue(220);
   Color primary = Colors.deepPurpleAccent;
   Color secondary = Colors.blue.shade800;
   Color success = Colors.green.shade800;
   Color danger = Colors.pink.shade800;
-  Color warning = Colors.orange.shade800;
+  Color warning = Colors.orange.withRed(224).withGreen(112).withBlue(14);
   Color info = Colors.teal.shade800;
 }
 

@@ -40,7 +40,7 @@ class ComponentDialogState extends State<ComponentDialog>
 
   @override
   void dispose() {
-    controller.dispose();
+    controller?.dispose();
     DialogLib.state = null;
     super.dispose();
   }
@@ -50,13 +50,13 @@ class ComponentDialogState extends State<ComponentDialog>
     super.didUpdateWidget(oldWidget);
   }
 
-  void confirm() {
-    if (_options.onPressed != null && _options.onPressed!(true) == false) return;
+  void confirm() async {
+    if (_options.onPressed != null && (await _options.onPressed!(true)) == false) return;
     Navigator.pop(context);
   }
 
-  void cancel() {
-    if (_options.onPressed != null && _options.onPressed!(false) == false) return;
+  void cancel() async {
+    if (_options.onPressed != null && (await _options.onPressed!(false)) == false) return;
     Navigator.pop(context);
   }
 
@@ -89,7 +89,10 @@ class ComponentDialogState extends State<ComponentDialog>
           width: 64.0,
           height: 64.0,
           child: Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(
+              color: ThemeConst.colors.primary,
+              backgroundColor: ThemeConst.colors.light,
+            ),
           ),
         );
         break;
@@ -109,7 +112,7 @@ class ComponentDialogState extends State<ComponentDialog>
               children: <Widget>[
                 MaterialButton(
                   onPressed: cancel,
-                  color: _options.cancelButtonColor ?? ThemeConst.colors.dark,
+                  color: _options.cancelButtonColor ?? ThemeConst.colors.gray,
                   child: Text(
                     _options.cancelButtonText ?? "Cancel",
                     style: TextStyle(fontSize: ThemeConst.fontSizes.md),
@@ -133,7 +136,7 @@ class ComponentDialogState extends State<ComponentDialog>
               onPressed: confirm,
               color: _options.confirmButtonColor ?? ThemeConst.colors.primary,
               child: Text(
-                _options.confirmButtonText ?? "Confirm",
+                _options.confirmButtonText ?? "Okay",
                 style: TextStyle(fontSize: ThemeConst.fontSizes.md),
               ),
             ),
@@ -152,8 +155,9 @@ class ComponentDialogState extends State<ComponentDialog>
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Container(
                       width: double.infinity,
+                      color: ThemeConst.colors.dark,
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(0.0, ThemeConst.paddings.md, 0.0, ThemeConst.paddings.md),
+                        padding: EdgeInsets.all(ThemeConst.paddings.md),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -165,7 +169,7 @@ class ComponentDialogState extends State<ComponentDialog>
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: ThemeConst.fontSizes.lg,
-                                  color: Color(0xff575757),
+                                  color: ThemeConst.colors.light,
                                 ),
                               ),
                             ),
@@ -173,10 +177,10 @@ class ComponentDialogState extends State<ComponentDialog>
                               padding: EdgeInsets.only(top: ThemeConst.paddings.sm),
                               child: Text(
                                 _options.content ?? "",
-                                textAlign: TextAlign.left,
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: ThemeConst.fontSizes.md,
-                                  color: Color(0xff797979),
+                                  color: ThemeConst.colors.light,
                                 ),
                               ),
                             ),

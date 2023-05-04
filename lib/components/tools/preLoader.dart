@@ -19,7 +19,10 @@ class _ComponentPreLoaderState extends State<ComponentPreLoader> {
       child: Container(
         color: ThemeConst.colors.dark,
         child: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: ThemeConst.colors.primary,
+            backgroundColor: ThemeConst.colors.light,
+          ),
         ),
       ),
     ) : Visibility(visible: false, child: Text(""));

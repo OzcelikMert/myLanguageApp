@@ -1,5 +1,6 @@
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:my_language_app/myLib/variable/array.dart';
 
 class VoicesLib {
   static Future<List<Map<String, dynamic>>> getVoices() async {
@@ -10,12 +11,7 @@ class VoicesLib {
       for (var voice in availableVoices) {
         String displayName = voice["name"];
         if (voice["locale"] != null) {
-          //Locale locale = Locale(voice["locale"]);
-          //if(locale is Locale) {
-          //  displayName += " (${locale.languageCode}-${locale.countryCode})";
-          //}else {
           displayName += " (${voice["locale"]})";
-          //}
         }
         voices.add({
           TTSVoiceKeys.keyName: voice["name"],
@@ -28,6 +24,6 @@ class VoicesLib {
         });
       }
     }
-    return voices;
+    return MyLibArray.sort(array: voices, key: TTSVoiceKeys.keyDisplayName, sortType: SortType.asc);
   }
 }

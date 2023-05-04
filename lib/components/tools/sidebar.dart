@@ -62,7 +62,7 @@ class ComponentSideBar extends StatelessWidget {
           Container(
             color: getActiveBG(routeName, "/word/list"),
             child: ListTile(
-              leading: const Icon(Icons.edit),
+              leading: const Icon(Icons.list),
               title: const Text('List Words'),
               onTap: () {
                 RouteLib(context).change(target: '/word/list');

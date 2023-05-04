@@ -34,7 +34,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
             content: "You have selected '" +
                 StudyTypeConst.getTypeName(type) +
                 "'. Are you sure about this?",
-            onPressed: (bool isConfirm) {
+            onPressed: (bool isConfirm) async {
               if (isConfirm) {
                 RouteLib(context)
                     .change(target: StudyTypeConst.getRouteName(type));

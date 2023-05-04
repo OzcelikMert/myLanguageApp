@@ -9,6 +9,7 @@ class ComponentPageScaffold<T> extends StatelessWidget {
   final Widget body;
   final bool? hideAppBar;
   final bool? hideSidebar;
+  final bool? hideBackButton;
   final bool? withScroll;
   final bool isLoading;
   final T? leadingArgs;
@@ -17,10 +18,12 @@ class ComponentPageScaffold<T> extends StatelessWidget {
       {Key? key,
       required this.title,
       required this.body,
+      this.hideBackButton,
       this.hideAppBar,
       this.hideSidebar,
       this.withScroll,
-      required this.isLoading, this.leadingArgs})
+      required this.isLoading,
+      this.leadingArgs})
       : super(key: key);
 
   Widget _getBody() {
@@ -37,11 +40,13 @@ class ComponentPageScaffold<T> extends StatelessWidget {
             : AppBar(
                 centerTitle: true,
                 title: Text(title),
-                leading: Navigator.canPop(context) && hideSidebar == true ? BackButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(leadingArgs);
-                  },
-                ) : null,
+                leading: Navigator.canPop(context) && hideSidebar == true && hideBackButton == null
+                    ? BackButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(leadingArgs);
+                        },
+                      )
+                    : null,
               ),
         body: Stack(
           children: [

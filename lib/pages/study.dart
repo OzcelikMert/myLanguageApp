@@ -45,11 +45,10 @@ class _PageStudyState extends State<PageStudy> {
         ComponentDialogOptions(
             title: "Are you sure?",
             content: "You have selected 'daily'. Are you sure about this?",
-            onPressed: (bool isConfirm) {
+            onPressed: (bool isConfirm) async {
               if (isConfirm) {
                 RouteLib(context).change(target: "/study/plan");
               }
-              return false;
             }));
   }
 

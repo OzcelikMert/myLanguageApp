@@ -58,7 +58,7 @@ class ErrorViewState extends State<ErrorView>
 
   @override
   void dispose() {
-    animationController.dispose();
+    animationController?.dispose();
     super.dispose();
   }
 

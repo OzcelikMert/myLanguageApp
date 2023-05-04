@@ -6,6 +6,10 @@ import 'package:my_language_app/models/components/elements/dialog/options.dart';
 abstract class DialogLib {
   static ComponentDialogState? state;
 
+  static void hide(BuildContext context) {
+    Navigator.pop(context);
+  }
+
   static void show(BuildContext context, ComponentDialogOptions options) {
     if (state != null) {
       state?.update(options);

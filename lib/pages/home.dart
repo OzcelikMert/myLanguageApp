@@ -1,7 +1,4 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/elements/alert/index.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
@@ -61,16 +58,18 @@ class _PageHomeState extends State<PageHome> {
     var isAdded = await RouteLib(context)
         .change(target: '/language/add', safeHistory: true);
     if (isAdded) {
-      setState(() {
-        _statePageIsLoading = true;
-      });
+      DialogLib.show(
+          context,
+          ComponentDialogOptions(
+              content: "Loading...",
+              icon: ComponentDialogIcon.loading));
       await _pageInit();
+      DialogLib.hide(context);
     }
   }
 
   void onClickSelect(Map<String, dynamic> row) async {
-    DialogLib.show(
-        context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
+    DialogLib.show(context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
     var result = await LanguageService.update(LanguageUpdateParamModel(
         languageId: row[DBTableLanguages.columnId], languageIsSelected: 1));
     if (result > 0) {
@@ -89,42 +88,41 @@ class _PageHomeState extends State<PageHome> {
                 "Are you sure want to delete '${row[DBTableLanguages.columnName]}'?",
             icon: ComponentDialogIcon.confirm,
             showCancelButton: true,
-            onPressed: (bool isConfirm) {
+            onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                Future(() async {
+                DialogLib.show(
+                    context,
+                    ComponentDialogOptions(
+                        content: "Deleting...",
+                        icon: ComponentDialogIcon.loading));
+                var result = await LanguageService.delete(
+                    LanguageDeleteParamModel(
+                        languageId: row[DBTableLanguages.columnId]));
+                if (result > 0) {
+                  await WordService.delete(WordDeleteParamModel(
+                      wordLanguageId: row[DBTableLanguages.columnId]));
+                  setState(() {
+                    _stateLanguages = _stateLanguages
+                        .where((element) =>
+                            element[DBTableLanguages.columnId] !=
+                            row[DBTableLanguages.columnId])
+                        .toList();
+                  });
                   DialogLib.show(
                       context,
                       ComponentDialogOptions(
-                          content: "Deleting...",
-                          icon: ComponentDialogIcon.loading));
-                  var result = await LanguageService.delete(
-                      LanguageDeleteParamModel(
-                          languageId: row[DBTableLanguages.columnId]));
-                  if (result > 0) {
-                    await WordService.delete(WordDeleteParamModel(
-                        wordLanguageId: row[DBTableLanguages.columnId]));
-                    setState(() {
-                      _stateLanguages = _stateLanguages
-                          .where((element) =>
-                              element[DBTableLanguages.columnId] !=
-                              row[DBTableLanguages.columnId])
-                          .toList();
-                    });
-                    DialogLib.show(
-                        context,
-                        ComponentDialogOptions(
-                            content: "Success!",
-                            icon: ComponentDialogIcon.success));
-                  } else {
-                    DialogLib.show(
-                        context,
-                        ComponentDialogOptions(
-                            content: "It couldn't delete!",
-                            icon: ComponentDialogIcon.error));
-                  }
-                });
+                          content:
+                              "Success! You've deleted '${row[DBTableLanguages.columnName]}'",
+                          icon: ComponentDialogIcon.success));
+                } else {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content: "It couldn't delete!",
+                          icon: ComponentDialogIcon.error));
+                }
+                return false;
               }
-              return true;
             }));
   }
 
@@ -135,6 +133,7 @@ class _PageHomeState extends State<PageHome> {
       title: "Select Language",
       hideSidebar: true,
       withScroll: true,
+      hideBackButton: true,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,

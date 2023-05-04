@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/components/elements/search.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
 
@@ -7,13 +9,18 @@ class ComponentDataTable<T> extends StatefulWidget {
   final List<T> data;
   final List<ComponentDataColumnModule> columns;
   final List<ComponentDataCellModule<T>> cells;
+  final bool? isSearchable;
+  final List<String>? searchableKeys;
 
   const ComponentDataTable(
       {Key? key,
       this.title,
       required this.data,
       required this.columns,
-      required this.cells})
+      required this.cells, 
+        this.isSearchable, 
+        this.searchableKeys
+      })
       : super(key: key);
 
   @override
@@ -21,9 +28,30 @@ class ComponentDataTable<T> extends StatefulWidget {
 }
 
 class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
-  int _rowsPerPage = 15;
-  int _sortColumnIndex = 0;
-  bool _sortAscending = true;
+  late int _stateRowsPerPage = 15;
+  late int _stateSortColumnIndex = 0;
+  late bool _stateSortAscending = true;
+  late List<T> _stateFilteredRows = [];
+  late String _stateSearchText = "";
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _stateFilteredRows = widget.data;
+    });
+  }
+
+  @override
+  void didUpdateWidget(ComponentDataTable<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.data != oldWidget.data) {
+      setState(() {
+        _stateFilteredRows = widget.data;
+      });
+      search(_stateSearchText);
+    }
+  }
 
   void _sort<P>(
       Comparable<P> Function(T d) getField, int columnIndex, bool ascending) {
@@ -35,8 +63,8 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
           : Comparable.compare(bValue, aValue);
     });
     setState(() {
-      _sortColumnIndex = columnIndex;
-      _sortAscending = ascending;
+      _stateSortColumnIndex = columnIndex;
+      _stateSortAscending = ascending;
     });
   }
 
@@ -56,23 +84,52 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
     return dataColumns;
   }
 
+  void search(String query) {
+    setState(() {
+      _stateSearchText = query;
+      if (query.isNotEmpty) {
+        _stateFilteredRows = widget.data.where((dynamic row) {
+          bool isContain = false;
+          if(widget.searchableKeys != null){
+            for(var key in widget.searchableKeys!) {
+              isContain = row[key].toString().toLowerCase().contains(query.toLowerCase());
+              if(isContain == true) break;
+            }
+          }
+          return isContain;
+        }).toList();
+      } else {
+        _stateFilteredRows = widget.data;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      child: PaginatedDataTable(
-          columnSpacing: 35,
-          dataRowHeight: 70,
-          showFirstLastButtons: true,
-          header: widget.title != null
-              ? Center(child: Text(widget.title.toString()))
-              : null,
-          rowsPerPage: _rowsPerPage,
-          source: _DataSource<T>(
-              context: context, data: widget.data, cells: widget.cells),
-          sortColumnIndex: _sortColumnIndex,
-          sortAscending: _sortAscending,
-          columns: _getColumns()),
+      child: Column(
+        children: [
+          widget.isSearchable == true ? ComponentSearchTextField(
+            onTextChanged: (query) {
+              search(query);
+            },
+          ) : Container(),
+          PaginatedDataTable(
+              columnSpacing: 35,
+              dataRowHeight: 70,
+              showFirstLastButtons: true,
+              header: widget.title != null
+                  ? Center(child: Text(widget.title.toString()))
+                  : null,
+              rowsPerPage: _stateRowsPerPage,
+              source: _DataSource<T>(
+                  context: context, data: _stateFilteredRows, cells: widget.cells),
+              sortColumnIndex: _stateSortColumnIndex,
+              sortAscending: _stateSortAscending,
+              columns: _getColumns())
+        ],
+      ),
     );
   }
 }

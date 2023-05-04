@@ -25,7 +25,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   Map<String, dynamic>? _stateSelectedVoice;
   final _controllerName = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late bool _isAdded = false;
+  late bool _stateIsAdded = false;
 
   @override
   void initState() {
@@ -60,40 +60,40 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                 "Are you sure want to add '${_controllerName.text}' as a language ?",
             icon: ComponentDialogIcon.confirm,
             showCancelButton: true,
-            onPressed: (bool isConfirm) {
+            onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                Future(() async {
+                DialogLib.show(
+                    context,
+                    ComponentDialogOptions(
+                        content: "Adding...",
+                        icon: ComponentDialogIcon.loading));
+                var result = await LanguageService.add(LanguageAddParamModel(
+                    languageName: _controllerName.text,
+                    languageTTSArtist:
+                        _stateSelectedVoice![TTSVoiceKeys.keyName],
+                    languageTTSGender: _stateSelectedVoiceGenderRadio));
+                if (result > 0) {
+                  setState(() {
+                    _stateIsAdded = true;
+                  });
                   DialogLib.show(
                       context,
                       ComponentDialogOptions(
-                          content: "Deleting...",
-                          icon: ComponentDialogIcon.loading));
-                  var result = await LanguageService.add(LanguageAddParamModel(
-                      languageName: _controllerName.text,
-                      languageTTSArtist:
-                          _stateSelectedVoice![TTSVoiceKeys.keyName],
-                      languageTTSGender: _stateSelectedVoiceGenderRadio));
-                  if (result > 0) {
-                    setState(() {
-                      _isAdded = true;
-                    });
-                    _controllerName.text = "";
-                    DialogLib.show(
-                        context,
-                        ComponentDialogOptions(
-                            content:
-                                "${_controllerName.text}' successfully added!",
-                            icon: ComponentDialogIcon.success));
-                  } else {
-                    DialogLib.show(
-                        context,
-                        ComponentDialogOptions(
-                            content: "It couldn't add!",
-                            icon: ComponentDialogIcon.error));
-                  }
-                });
+                          content:
+                              "'${_controllerName.text}' has successfully added!",
+                          icon: ComponentDialogIcon.success));
+                  _controllerName.text = "";
+                  _stateSelectedVoice = _stateTTSVoices[0];
+                  _stateSelectedVoiceGenderRadio = "male";
+                } else {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content: "It couldn't add!",
+                          icon: ComponentDialogIcon.error));
+                }
+                return false;
               }
-              return true;
             }));
   }
 
@@ -107,7 +107,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
-      leadingArgs: _isAdded,
+      leadingArgs: _stateIsAdded,
       isLoading: _statePageIsLoading,
       title: "Add New",
       withScroll: true,
@@ -128,7 +128,8 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
             ),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             Center(
-                child: Text("Text To Speech", style: TextStyle(fontSize: ThemeConst.fontSizes.lg))),
+                child: Text("Text To Speech",
+                    style: TextStyle(fontSize: ThemeConst.fontSizes.lg))),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             const Text("Language Code"),
             ComponentDropdown<Map<String, dynamic>>(
@@ -142,6 +143,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
               hintText: "ex: en-UK",
             ),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+            const Text("Gender"),
             ComponentRadio<String>(
               title: 'Male',
               value: 'male',

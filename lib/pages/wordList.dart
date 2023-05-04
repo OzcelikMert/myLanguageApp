@@ -7,6 +7,7 @@ import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
+import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
@@ -42,35 +43,61 @@ class _PageWordListState extends State<PageWordList> {
     });
   }
 
-  void onClickEdit() {
-
+  void onClickEdit(Map<String, dynamic> row) async {
+    bool isUpdated = await RouteLib(context).change(target: '/word/edit', arguments: {DBTableWords.columnId: row[DBTableWords.columnId]}, safeHistory: true);
+    if(isUpdated){
+      DialogLib.show(
+          context,
+          ComponentDialogOptions(
+              content: "Loading...",
+              icon: ComponentDialogIcon.loading));
+      await _pageInit();
+      DialogLib.hide(context);
+    }
   }
 
   void onClickDelete(Map<String, dynamic> row) {
-    DialogLib.show(context, ComponentDialogOptions(
-        title: "Are you sure?",
-        content:
-            "Are you sure want to delete '${row[DBTableWords.columnTextNative]}'?",
-        onPressed: (bool isConfirm) {
-          Future(() async {
-            DialogLib.show(context,
-                ComponentDialogOptions(icon: ComponentDialogIcon.loading));
-            var result = await WordService.delete(
-                WordDeleteParamModel(wordId: row[DBTableWords.columnId]));
-            if (result > 0) {
-              setState(() {
-                _stateWords = _stateWords
-                    .where((element) =>
-                        element[DBTableWords.columnId] !=
-                        row[DBTableWords.columnId])
-                    .toList();
-              });
-              DialogLib.show(context, ComponentDialogOptions(content: "'${row[DBTableWords.columnTextNative]}' successfully deleted!", icon: ComponentDialogIcon.success));
-            } else {
-              DialogLib.show(context, ComponentDialogOptions(content: "It couldn't delete!", icon: ComponentDialogIcon.error));
-            }
-          });
-        }));
+    DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            title: "Are you sure?",
+            content:
+                "Are you sure want to delete '${row[DBTableWords.columnTextNative]}'?",
+            icon: ComponentDialogIcon.confirm,
+            showCancelButton: true,
+            onPressed: (bool isConfirm) async {
+              if (isConfirm) {
+                DialogLib.show(
+                    context,
+                    ComponentDialogOptions(
+                        content: "Deleting...",
+                        icon: ComponentDialogIcon.loading));
+                var result = await WordService.delete(
+                    WordDeleteParamModel(wordId: row[DBTableWords.columnId]));
+                if (result > 0) {
+                  setState(() {
+                    _stateWords = _stateWords
+                        .where((element) =>
+                            element[DBTableWords.columnId] !=
+                            row[DBTableWords.columnId])
+                        .toList();
+                  });
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content:
+                              "'${row[DBTableWords.columnTextNative]}' has successfully deleted!",
+                          icon: ComponentDialogIcon.success));
+                } else {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content: "It couldn't delete!",
+                          icon: ComponentDialogIcon.error));
+                }
+                return false;
+              }
+            }));
   }
 
   @override
@@ -81,6 +108,8 @@ class _PageWordListState extends State<PageWordList> {
         withScroll: true,
         body: ComponentDataTable<Map<String, dynamic>>(
           data: _stateWords,
+          isSearchable: true,
+          searchableKeys: [DBTableWords.columnTextTarget, DBTableWords.columnTextNative],
           columns: [
             ComponentDataColumnModule(
               title: "Native",
@@ -129,8 +158,8 @@ class _PageWordListState extends State<PageWordList> {
                       .toLocal())),
             ),
             ComponentDataCellModule(
-              child: (row) => Text(
-                  StudyTypeConst.getTypeName(row[DBTableWords.columnStudyType])),
+              child: (row) => Text(StudyTypeConst.getTypeName(
+                  row[DBTableWords.columnStudyType])),
             ),
             ComponentDataCellModule(
               child: (row) =>
@@ -139,9 +168,10 @@ class _PageWordListState extends State<PageWordList> {
             ComponentDataCellModule(
               child: (row) => ComponentButton(
                 text: "Edit",
-                onPressed: onClickEdit,
-                icon: Icons.check,
+                onPressed: () => onClickEdit(row),
+                icon: Icons.edit,
                 buttonSize: ComponentButtonSize.sm,
+                bgColor: ThemeConst.colors.warning,
               ),
             ),
             ComponentDataCellModule(

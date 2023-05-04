@@ -8,8 +8,7 @@ class MyLibArray {
     return jsonEncode({"d": data is int ? data.toString() : data});
   }
 
-  static T? findSingle<T>(
-      {required List<T> array, required String key, required dynamic value}) {
+  static T? findSingle<T>({required List<T> array, required String key, required dynamic value}) {
     var finds = array.where((data) {
       bool query = false;
       if (value != null) {
@@ -62,8 +61,8 @@ class MyLibArray {
     }).toList();
   }
 
-  sort(
-      {required List<Map<String, dynamic>> array,
+  static List<Map<String, dynamic>> sort(
+      {required List array,
       required String key,
       required SortType? sortType}) {
     sortType = sortType ?? SortType.asc;

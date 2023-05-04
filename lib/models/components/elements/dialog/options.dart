@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-typedef ComponentDialogOnPressedOkay = bool? Function(bool isConfirm);
+typedef ComponentDialogOnPressedOkay = Future<bool?> Function(bool isConfirm);
 
 enum ComponentDialogIcon { success, error, confirm, loading, none }
 
