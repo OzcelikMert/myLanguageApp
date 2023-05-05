@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/pages/settings.dart';
 import 'package:my_language_app/pages/study.dart';
@@ -11,6 +12,8 @@ import 'package:my_language_app/pages/wordList.dart';
 import 'package:my_language_app/pages/studyPlan.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   runApp(MyLanguageApp());
 }
 
@@ -31,11 +34,9 @@ class MyLanguageApp extends StatelessWidget {
           "/word/add": (context) => PageWordAdd(context: context),
           "/word/edit": (context) => PageWordAdd(context: context),
           "/word/list": (context) => const PageWordList(),
+          "/study": (context) => PageStudy(context: context),
           "/study/plan": (context) => const PageStudyPlan(),
-          "/study/daily": (context) => PageStudy(type: StudyTypeConst.Daily),
-          "/study/weekly": (context) => PageStudy(type: StudyTypeConst.Weekly),
-          "/study/monthly": (context) => PageStudy(type: StudyTypeConst.Monthly),
-          "/study/settings": (context) => PageStudySettings(),
+          "/study/settings": (context) => PageStudySettings(context: context),
         }
     );
   }

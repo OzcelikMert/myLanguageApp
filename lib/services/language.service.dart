@@ -37,7 +37,8 @@ class LanguageService {
       DBTableLanguages.columnDailyUpdatedAt: date,
       DBTableLanguages.columnWeeklyUpdatedAt: date,
       DBTableLanguages.columnMonthlyUpdatedAt: date,
-      DBTableLanguages.columnIsSelected: 0
+      DBTableLanguages.columnIsSelected: 0,
+      DBTableLanguages.columnDisplayedLanguage: 0
     });
   }
 
@@ -80,6 +81,10 @@ class LanguageService {
 
     if(params.languageIsSelected != null){
       setMap[DBTableLanguages.columnIsSelected] = params.languageIsSelected;
+    }
+
+    if(params.languageDisplayedLanguage != null){
+      setMap[DBTableLanguages.columnDisplayedLanguage] = params.languageDisplayedLanguage;
     }
 
     var db = await DBConn.instance.database;

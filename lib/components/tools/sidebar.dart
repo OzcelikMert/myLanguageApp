@@ -22,7 +22,7 @@ class ComponentSideBar extends StatelessWidget {
     ));
 
     if(result > 0){
-      RouteLib(context).change(target: '/');
+      await RouteLib(context).change(target: '/');
     }
   }
 
@@ -44,8 +44,8 @@ class ComponentSideBar extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.workspace_premium),
               title: const Text('Study Plan'),
-              onTap: () {
-                RouteLib(context).change(target: '/study/plan');
+              onTap: () async {
+                await RouteLib(context).change(target: '/study/plan');
               },
             ),
           ),
@@ -54,8 +54,8 @@ class ComponentSideBar extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.add),
               title: const Text('Add New Word'),
-              onTap: () {
-                RouteLib(context).change(target: '/word/add');
+              onTap: () async {
+                await RouteLib(context).change(target: '/word/add');
               },
             ),
           ),
@@ -64,8 +64,8 @@ class ComponentSideBar extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.list),
               title: const Text('List Words'),
-              onTap: () {
-                RouteLib(context).change(target: '/word/list');
+              onTap: () async {
+                await RouteLib(context).change(target: '/word/list');
               },
             ),
           ),
@@ -74,8 +74,8 @@ class ComponentSideBar extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
-              onTap: () {
-                RouteLib(context).change(target: '/settings');
+              onTap: () async {
+                await RouteLib(context).change(target: '/settings');
               },
             ),
           ),

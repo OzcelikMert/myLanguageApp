@@ -43,7 +43,7 @@ class _PageHomeState extends State<PageHome> {
       if (findLanguage != null) {
         Values.setLanguageId = findLanguage[DBTableLanguages.columnId];
         Values.setLanguageName = findLanguage[DBTableLanguages.columnName];
-        RouteLib(context).change(target: '/study/plan');
+        await RouteLib(context).change(target: '/study/plan');
         return;
       }
     }
@@ -75,7 +75,8 @@ class _PageHomeState extends State<PageHome> {
     if (result > 0) {
       Values.setLanguageId = row[DBTableLanguages.columnId];
       Values.setLanguageName = row[DBTableLanguages.columnName];
-      RouteLib(context).change(target: '/study/plan');
+      Values.setLanguageDisplayedLanguage = row[DBTableLanguages.columnDisplayedLanguage];
+      await RouteLib(context).change(target: '/study/plan');
     }
   }
 

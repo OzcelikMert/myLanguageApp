@@ -45,12 +45,10 @@ class ComponentButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       child: icon != null ? Row(
-        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           reverseIconAlign == true ? Text(text) : Icon(icon),
-          Padding(padding: EdgeInsets.all(_getIconTextPadding())),
+          Padding(padding: EdgeInsets.symmetric(horizontal: _getIconTextPadding())),
           reverseIconAlign == true ? Icon(icon) : Text(text),
         ],
       ) : Text(text),

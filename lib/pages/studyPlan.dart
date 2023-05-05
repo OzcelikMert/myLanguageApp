@@ -117,8 +117,8 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                   }
 
                   if (changeRoute) {
-                    RouteLib(context)
-                        .change(target: StudyTypeConst.getRouteName(type));
+                    await RouteLib(context)
+                        .change(target: "/study", arguments: {DBTableWords.columnStudyType: type});
                   } else {
                     DialogLib.show(
                         context,

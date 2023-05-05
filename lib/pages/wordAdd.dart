@@ -14,10 +14,18 @@ import 'package:my_language_app/services/word.service.dart';
 
 class PageWordAdd extends StatefulWidget {
   final BuildContext context;
-  late Map<String, dynamic>? args;
+  late int wordId = 0;
 
   PageWordAdd({Key? key, required this.context}) : super(key: key) {
-    args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    var args =
+    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args[DBTableWords.columnId] != null) {
+      wordId = int.tryParse(args[DBTableWords.columnId].toString()) ?? 0;
+    }
+
+    if (wordId == 0) {
+      RouteLib(context).change(target: "/word/list");
+    }
   }
 
   @override
@@ -41,21 +49,16 @@ class _PageWordAddState extends State<PageWordAdd> {
   }
 
   _pageInit() async {
-    if(widget.args != null){
-      var words = await WordService.get(WordGetParamModel(wordLanguageId: Values.getLanguageId, wordId: widget.args![DBTableWords.columnId]));
-      if(words.isNotEmpty){
-        var word = words[0];
-        setState(() {
-          _stateWord = word;
-          _stateSelectedStudyType = word[DBTableWords.columnStudyType];
-          _controllerTextNative.text = word[DBTableWords.columnTextNative];
-          _controllerTextTarget.text = word[DBTableWords.columnTextTarget];
-          _controllerComment.text = word[DBTableWords.columnComment];
-        });
-      }else {
-        await RouteLib(context).change(target: '/word/list');
-        return false;
-      }
+    var words = await WordService.get(WordGetParamModel(wordLanguageId: Values.getLanguageId, wordId: widget.wordId));
+    if(words.isNotEmpty){
+      var word = words[0];
+      setState(() {
+        _stateWord = word;
+        _stateSelectedStudyType = word[DBTableWords.columnStudyType];
+        _controllerTextNative.text = word[DBTableWords.columnTextNative];
+        _controllerTextTarget.text = word[DBTableWords.columnTextTarget];
+        _controllerComment.text = word[DBTableWords.columnComment];
+      });
     }
 
     setState(() {

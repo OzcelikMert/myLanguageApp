@@ -12,14 +12,4 @@ class StudyTypeConst {
     }
     return name;
   }
-
-  static getRouteName(int type) {
-    String name = "";
-    switch(type) {
-      case StudyTypeConst.Daily: name = "daily"; break;
-      case StudyTypeConst.Weekly: name = "weekly"; break;
-      case StudyTypeConst.Monthly: name = "monthly"; break;
-    }
-    return "/study/$name";
-  }
 }
