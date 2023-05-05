@@ -21,7 +21,7 @@ class LanguageAddParamModel {
 }
 
 class LanguageUpdateParamModel {
-  final int languageId;
+  final int whereLanguageId;
   final String? languageName;
   final String? languageTTSArtist;
   final String? languageTTSGender;
@@ -31,7 +31,7 @@ class LanguageUpdateParamModel {
   final int? languageIsSelected;
 
   LanguageUpdateParamModel({
-    required this.languageId,
+    required this.whereLanguageId,
     this.languageName,
     this.languageTTSArtist,
     this.languageTTSGender,

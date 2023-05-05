@@ -71,7 +71,7 @@ class _PageSettingsState extends State<PageSettings> {
                         content: "Saving...",
                         icon: ComponentDialogIcon.loading));
                 var result = await LanguageService.update(LanguageUpdateParamModel(
-                    languageId: Values.getLanguageId,
+                    whereLanguageId: Values.getLanguageId,
                     languageTTSArtist: _stateSelectedVoice![TTSVoiceKeys.keyName],
                     languageTTSGender: _stateSelectedVoiceGenderRadio));
                 if (result > 0) {

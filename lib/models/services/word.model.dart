@@ -12,6 +12,18 @@ class WordGetParamModel {
   });
 }
 
+class WordGetCountParamModel {
+  final int wordLanguageId;
+  final int? wordStudyType;
+  final int? wordIsStudy;
+
+  WordGetCountParamModel({
+    required this.wordLanguageId,
+    this.wordStudyType,
+    this.wordIsStudy
+  });
+}
+
 class WordGetCountReportParamModel {
   final int wordLanguageId;
 
@@ -38,7 +50,9 @@ class WordAddParamModel {
 }
 
 class WordUpdateParamModel {
-  final int wordId;
+  final int whereWordLanguageId;
+  final int? whereWordId;
+  final int? whereWordStudyType;
   final String? wordTextTarget;
   final String? wordTextNative;
   final String? wordComment;
@@ -46,7 +60,9 @@ class WordUpdateParamModel {
   final int? wordIsStudy;
 
   WordUpdateParamModel({
-    required this.wordId,
+    required this.whereWordLanguageId,
+    this.whereWordId,
+    this.whereWordStudyType,
     this.wordTextTarget,
     this.wordTextNative,
     this.wordComment,

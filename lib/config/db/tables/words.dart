@@ -12,6 +12,8 @@ class DBTableWords {
   static const columnStudyType = 'wordStudyType';
   static const columnIsStudy = 'wordIsStudy';
 
+  static const asColumnCount = 'wordCount';
+
   final Database db;
   DBTableWords(this.db);
 

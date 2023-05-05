@@ -43,46 +43,54 @@ class LanguageService {
 
   static Future<int> update(LanguageUpdateParamModel params) async {
     var date = DateTime.now().toUtc().toString();
-    String setString = "${DBTableLanguages.columnUpdatedAt} = ?,";
-    List<dynamic> setArgs = [date];
+    Map<String, dynamic> setMap = {
+      DBTableLanguages.columnUpdatedAt: date
+    };
+    String whereString = "";
+    List<dynamic> whereArgs = [];
+
+    if (params.whereLanguageId != null) {
+      whereString += "${DBTableLanguages.columnId} = ? AND ";
+      whereArgs.add(params.whereLanguageId);
+    }
 
     if(params.languageName != null){
-      setString += "${DBTableLanguages.columnName} = ?,";
-      setArgs.add(params.languageName);
+      setMap[DBTableLanguages.columnName] = params.languageName;
     }
 
     if(params.languageTTSArtist != null){
-      setString += "${DBTableLanguages.columnTTSArtist} = ?,";
-      setArgs.add(params.languageTTSArtist);
+      setMap[DBTableLanguages.columnTTSArtist] = params.languageTTSArtist;
     }
 
     if(params.languageTTSGender != null){
-      setString += "${DBTableLanguages.columnTTSGender} = ?,";
-      setArgs.add(params.languageTTSGender);
+      setMap[DBTableLanguages.columnTTSGender] = params.languageTTSGender;
     }
 
     if(params.languageDailyUpdatedAt != null){
-      setString += "${DBTableLanguages.columnDailyUpdatedAt} = ?,";
-      setArgs.add(params.languageDailyUpdatedAt);
+      setMap[DBTableLanguages.columnDailyUpdatedAt] = params.languageDailyUpdatedAt;
     }
 
     if(params.languageWeeklyUpdatedAt != null){
-      setString += "${DBTableLanguages.columnWeeklyUpdatedAt} = ?,";
-      setArgs.add(params.languageWeeklyUpdatedAt);
+      setMap[DBTableLanguages.columnWeeklyUpdatedAt] = params.languageWeeklyUpdatedAt;
     }
 
     if(params.languageMonthlyUpdatedAt != null){
-      setString += "${DBTableLanguages.columnMonthlyUpdatedAt} = ?,";
-      setArgs.add(params.languageMonthlyUpdatedAt);
+      setMap[DBTableLanguages.columnMonthlyUpdatedAt] = params.languageMonthlyUpdatedAt;
     }
 
     if(params.languageIsSelected != null){
-      setString += "${DBTableLanguages.columnIsSelected} = ?,";
-      setArgs.add(params.languageIsSelected);
+      setMap[DBTableLanguages.columnIsSelected] = params.languageIsSelected;
     }
 
     var db = await DBConn.instance.database;
-    return await db.rawUpdate("UPDATE ${DBTableLanguages.tableName} SET ${setString.substring(0, setString.length - 1)} WHERE ${DBTableLanguages.columnId} = ?",  [...setArgs, params.languageId]);
+    return await db.update(
+      DBTableLanguages.tableName,
+      setMap,
+      where: whereString.isNotEmpty
+          ? whereString.substring(0, whereString.length - 4)
+          : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+    );
   }
 
   static Future<int> delete(LanguageDeleteParamModel params) async {

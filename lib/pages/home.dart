@@ -71,7 +71,7 @@ class _PageHomeState extends State<PageHome> {
   void onClickSelect(Map<String, dynamic> row) async {
     DialogLib.show(context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
     var result = await LanguageService.update(LanguageUpdateParamModel(
-        languageId: row[DBTableLanguages.columnId], languageIsSelected: 1));
+        whereLanguageId: row[DBTableLanguages.columnId], languageIsSelected: 1));
     if (result > 0) {
       Values.setLanguageId = row[DBTableLanguages.columnId];
       Values.setLanguageName = row[DBTableLanguages.columnName];

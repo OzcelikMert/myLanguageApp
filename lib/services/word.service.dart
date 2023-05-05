@@ -36,6 +36,42 @@ class WordService {
         whereArgs: whereArgs.isNotEmpty ? whereArgs : null));
   }
 
+  static Future<int> getCount(
+      WordGetCountParamModel params) async {
+    String whereString = "";
+    List<dynamic> whereArgs = [];
+
+    if (params.wordLanguageId != null) {
+      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
+      whereArgs.add(params.wordLanguageId);
+    }
+
+    if (params.wordIsStudy != null) {
+      whereString += "${DBTableWords.columnIsStudy} = ? AND ";
+      whereArgs.add(params.wordIsStudy);
+    }
+
+    if (params.wordStudyType != null) {
+      whereString += "${DBTableWords.columnStudyType} = ? AND ";
+      whereArgs.add(params.wordStudyType);
+    }
+
+    var db = await DBConn.instance.database;
+
+    var words = (await db.query(
+      DBTableWords.tableName,
+      columns: ["COUNT(*) AS ${DBTableWords.asColumnCount}"],
+      where: whereString.isNotEmpty
+          ? whereString.substring(0, whereString.length - 4)
+          : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+    ));
+
+    int? count = int.tryParse(words[0][DBTableWords.asColumnCount].toString());
+
+    return count ?? 0;
+  }
+
   static Future<List<Map<String, dynamic>>> getCountReport(
       WordGetCountReportParamModel params) async {
     String whereString = "";
@@ -51,7 +87,7 @@ class WordService {
         columns: [
           DBTableWords.columnStudyType,
           DBTableWords.columnIsStudy,
-          "COUNT(*) AS wordCount"
+          "COUNT(*) AS ${DBTableWords.asColumnCount}"
         ],
         where: whereString.isNotEmpty
             ? whereString.substring(0, whereString.length - 4)
@@ -78,38 +114,56 @@ class WordService {
 
   static Future<int> update(WordUpdateParamModel params) async {
     var date = DateTime.now().toUtc().toString();
-    String setString = "${DBTableWords.columnUpdatedAt} = ?,";
-    List<dynamic> setArgs = [date];
+    Map<String, dynamic> setMap = {
+      DBTableWords.columnUpdatedAt: date
+    };
+    String whereString = "";
+    List<dynamic> whereArgs = [];
+
+    if (params.whereWordLanguageId != null) {
+      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
+      whereArgs.add(params.whereWordLanguageId);
+    }
+
+    if (params.whereWordId != null) {
+      whereString += "${DBTableWords.columnId} = ? AND ";
+      whereArgs.add(params.whereWordId);
+    }
+
+    if (params.whereWordStudyType != null) {
+      whereString += "${DBTableWords.columnStudyType} = ? AND ";
+      whereArgs.add(params.whereWordStudyType);
+    }
 
     if (params.wordTextTarget != null) {
-      setString += "${DBTableWords.columnTextTarget} = ?,";
-      setArgs.add(params.wordTextTarget);
+      setMap[DBTableWords.columnTextTarget] = params.wordTextTarget;
     }
 
     if (params.wordTextNative != null) {
-      setString += "${DBTableWords.columnTextNative} = ?,";
-      setArgs.add(params.wordTextNative);
+      setMap[DBTableWords.columnTextNative] = params.wordTextNative;
     }
 
     if (params.wordComment != null) {
-      setString += "${DBTableWords.columnComment} = ?,";
-      setArgs.add(params.wordComment);
+      setMap[DBTableWords.columnComment] = params.wordComment;
     }
 
     if (params.wordStudyType != null) {
-      setString += "${DBTableWords.columnStudyType} = ?,";
-      setArgs.add(params.wordStudyType);
+      setMap[DBTableWords.columnStudyType] = params.wordStudyType;
     }
 
     if (params.wordIsStudy != null) {
-      setString += "${DBTableWords.columnIsStudy} = ?,";
-      setArgs.add(params.wordIsStudy);
+      setMap[DBTableWords.columnIsStudy] = params.wordIsStudy;
     }
 
     var db = await DBConn.instance.database;
-    return await db.rawUpdate(
-        "UPDATE ${DBTableWords.tableName} SET ${setString.substring(0, setString.length - 1)} WHERE ${DBTableWords.columnId} = ?",
-        [...setArgs, params.wordId]);
+    return await db.update(
+      DBTableWords.tableName,
+      setMap,
+      where: whereString.isNotEmpty
+          ? whereString.substring(0, whereString.length - 4)
+          : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+    );
   }
 
   static Future<int> delete(WordDeleteParamModel params) async {

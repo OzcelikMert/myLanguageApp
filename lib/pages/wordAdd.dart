@@ -82,7 +82,8 @@ class _PageWordAddState extends State<PageWordAdd> {
                 int result = 0;
                 if(_stateWord != null){
                   result = await WordService.update(WordUpdateParamModel(
-                      wordId: _stateWord![DBTableWords.columnId],
+                      whereWordLanguageId: Values.getLanguageId,
+                      whereWordId: _stateWord![DBTableWords.columnId],
                       wordTextNative: _controllerTextNative.text,
                       wordTextTarget: _controllerTextTarget.text,
                       wordComment: _controllerComment.text,

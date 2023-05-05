@@ -26,7 +26,7 @@ class MyLanguageApp extends StatelessWidget {
         initialRoute: "/",
         routes: {
           "/": (context) => const PageHome(),
-          "/settings": (context) => PageSettings(),
+          "/settings": (context) => const PageSettings(),
           "/language/add": (context) => const PageLanguageAdd(),
           "/word/add": (context) => PageWordAdd(context: context),
           "/word/edit": (context) => PageWordAdd(context: context),
