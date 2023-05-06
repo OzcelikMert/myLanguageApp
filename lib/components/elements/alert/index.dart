@@ -8,9 +8,11 @@ import 'package:my_language_app/models/components/elements/dialog/options.dart';
 
 class ComponentDialog extends StatefulWidget {
   final ComponentDialogOptions options;
+  final Function? onBuild;
 
   ComponentDialog({
     required this.options,
+    this.onBuild
   }) : assert(options != null);
 
   @override
@@ -34,21 +36,26 @@ class ComponentDialogState extends State<ComponentDialog>
         duration: Duration(milliseconds: 300),
         curve: widget.options.curve);
 
-    DialogLib.setState = this;
+    DialogLib.dialogState = this;
     super.initState();
+    if(widget.onBuild != null){
+      widget.onBuild!();
+    }
   }
 
   @override
   void dispose() {
     controller?.dispose();
-    print("STATE DISPOSE");
-    DialogLib.setState = null;
+    DialogLib.dialogState = null;
     super.dispose();
   }
 
   @override
   void didUpdateWidget(ComponentDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if(widget.onBuild != null){
+      widget.onBuild!();
+    }
   }
 
   void confirm() async {

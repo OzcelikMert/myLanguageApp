@@ -80,7 +80,7 @@ class _PageSettingsState extends State<PageSettings> {
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                DialogLib.show(
+                await DialogLib.show(
                     context,
                     ComponentDialogOptions(
                         content: "Saving...",

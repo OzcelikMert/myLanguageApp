@@ -58,7 +58,7 @@ class _PageHomeState extends State<PageHome> {
     var isAdded = await RouteLib(context)
         .change(target: '/language/add', safeHistory: true);
     if (isAdded) {
-      DialogLib.show(
+      await DialogLib.show(
           context,
           ComponentDialogOptions(
               content: "Loading...",
@@ -69,13 +69,12 @@ class _PageHomeState extends State<PageHome> {
   }
 
   void onClickSelect(Map<String, dynamic> row) async {
-    DialogLib.show(context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
+    await DialogLib.show(context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
     var result = await LanguageService.update(LanguageUpdateParamModel(
         whereLanguageId: row[DBTableLanguages.columnId], languageIsSelected: 1));
     if (result > 0) {
       Values.setLanguageId = row[DBTableLanguages.columnId];
       Values.setLanguageName = row[DBTableLanguages.columnName];
-      Values.setLanguageDisplayedLanguage = row[DBTableLanguages.columnDisplayedLanguage];
       await RouteLib(context).change(target: '/study/plan');
     }
   }
@@ -91,7 +90,7 @@ class _PageHomeState extends State<PageHome> {
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                DialogLib.show(
+                await DialogLib.show(
                     context,
                     ComponentDialogOptions(
                         content: "Deleting...",

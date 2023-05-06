@@ -62,7 +62,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                DialogLib.show(
+                await DialogLib.show(
                     context,
                     ComponentDialogOptions(
                         content: "Adding...",

@@ -73,7 +73,7 @@ class _PageWordAddState extends State<PageWordAdd> {
                 "Do you want to ${_stateWord != null ? "update" : "add"} '${_controllerTextNative.text}' as a word for your '${StudyTypeConst.getTypeName(_stateSelectedStudyType)}' study?",
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                DialogLib.show(
+                await DialogLib.show(
                     context,
                     ComponentDialogOptions(
                         content: _stateWord != null ? "Updating..." : "Adding...",

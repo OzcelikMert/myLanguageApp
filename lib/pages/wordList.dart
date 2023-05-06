@@ -46,7 +46,7 @@ class _PageWordListState extends State<PageWordList> {
   void onClickEdit(Map<String, dynamic> row) async {
     bool isUpdated = await RouteLib(context).change(target: '/word/edit', arguments: {DBTableWords.columnId: row[DBTableWords.columnId]}, safeHistory: true);
     if(isUpdated){
-      DialogLib.show(
+      await DialogLib.show(
           context,
           ComponentDialogOptions(
               content: "Loading...",
@@ -67,7 +67,7 @@ class _PageWordListState extends State<PageWordList> {
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                DialogLib.show(
+                await DialogLib.show(
                     context,
                     ComponentDialogOptions(
                         content: "Deleting...",

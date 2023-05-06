@@ -79,9 +79,10 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
               title: "Are you sure?",
               content: "You have selected '${StudyTypeConst.getTypeName(type)}'. ${unstudiedWordCount == 0 ? "If you continue your all words in '${StudyTypeConst.getTypeName(type)}' will set is 'unstudied'." : ""} Are you sure you want to continue?",
               showCancelButton: true,
+              icon: ComponentDialogIcon.confirm,
               onPressed: (bool isConfirm) async {
                 if (isConfirm) {
-                  DialogLib.show(
+                  await DialogLib.show(
                       context,
                       ComponentDialogOptions(
                           content: "Loading...",

@@ -112,6 +112,23 @@ class WordService {
     });
   }
 
+  static Future<int> addMulti(List<WordAddParamModel> params) async {
+    /*var date = DateTime.now().toUtc().toString();
+
+    var db = await DBConn.instance.database;
+    return await db.insert(DBTableWords.tableName, {
+      DBTableWords.columnLanguageId: params.wordLanguageId,
+      DBTableWords.columnTextTarget: params.wordTextTarget,
+      DBTableWords.columnTextNative: params.wordTextNative,
+      DBTableWords.columnComment: params.wordComment,
+      DBTableWords.columnCreatedAt: date,
+      DBTableWords.columnUpdatedAt: date,
+      DBTableWords.columnStudyType: params.wordStudyType,
+      DBTableWords.columnIsStudy: 0,
+    });*/
+    return 0;
+  }
+
   static Future<int> update(WordUpdateParamModel params) async {
     var date = DateTime.now().toUtc().toString();
     Map<String, dynamic> setMap = {

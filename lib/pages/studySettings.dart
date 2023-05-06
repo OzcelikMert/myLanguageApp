@@ -21,7 +21,7 @@ class PageStudySettings extends StatefulWidget {
 class _PageStudySettingsState extends State<PageStudySettings> {
   late bool _stateIsUpdated = false;
   late bool _statePageIsLoading = true;
-  int _stateSelectedDisplayedLanguage = 0;
+  int _stateSelectedDisplayedLanguage = 1;
   late Map<String, dynamic> _stateLanguage;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -53,7 +53,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                DialogLib.show(
+                await DialogLib.show(
                     context,
                     ComponentDialogOptions(
                         content: "Saving...",
@@ -62,7 +62,6 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                     whereLanguageId: Values.getLanguageId,
                     languageDisplayedLanguage: _stateSelectedDisplayedLanguage));
                 if (updateLanguage > 0) {
-                  Values.setLanguageDisplayedLanguage = _stateSelectedDisplayedLanguage;
                   setState(() {
                     _stateIsUpdated = true;
                   });
@@ -117,13 +116,13 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                 const Text("Displayed Language"),
                 ComponentRadio<int>(
                   title: Values.getLanguageName,
-                  value: 0,
+                  value: 1,
                   groupValue: _stateSelectedDisplayedLanguage,
                   onChanged: onChangeVoiceGenderRadio,
                 ),
                 ComponentRadio<int>(
                   title: 'Native',
-                  value: 1,
+                  value: 0,
                   groupValue: _stateSelectedDisplayedLanguage,
                   onChanged: onChangeVoiceGenderRadio,
                 )
