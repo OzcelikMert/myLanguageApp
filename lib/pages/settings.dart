@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/dropdown.dart';
 import 'package:my_language_app/components/elements/form.dart';
+import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
@@ -13,6 +14,7 @@ import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
 import 'package:my_language_app/services/language.service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PageSettings extends StatefulWidget {
   const PageSettings({Key? key}) : super(key: key);
@@ -45,6 +47,19 @@ class _PageSettingsState extends State<PageSettings> {
       _stateSelectedVoiceGenderRadio = language[DBTableLanguages.columnTTSGender];
       _statePageIsLoading = false;
     });
+  }
+
+  void onClickTTS() async {
+    if (await Permission.speech.request() != PermissionStatus.granted) {
+      return;
+    }
+    var voice = MyLibArray.findSingle(array: _stateTTSVoices, key: TTSVoiceKeys.keyName, value: _stateSelectedVoice![TTSVoiceKeys.keyName]);
+    if(voice != null){
+      await (await VoicesLib.flutterTts).setVoice({"name": voice[TTSVoiceKeys.keyName], "locale": voice[TTSVoiceKeys.keyLocale], "gender": _stateSelectedVoiceGenderRadio});
+      await (await VoicesLib.flutterTts).setSpeechRate(0.7);
+      await (await VoicesLib.flutterTts).setVolume(1.0);
+      await (await VoicesLib.flutterTts).speak("Text to speech");
+    }
   }
 
   void onChangeVoiceGenderRadio(String? value) {
@@ -106,7 +121,7 @@ class _PageSettingsState extends State<PageSettings> {
       isLoading: _statePageIsLoading,
       title: "Settings",
       withScroll: true,
-      body: Center(
+      body: _statePageIsLoading ? Container() : Center(
         child: ComponentForm(
           formKey: _formKey,
           onSubmit: () => onClickSave(),
@@ -115,6 +130,13 @@ class _PageSettingsState extends State<PageSettings> {
             Center(
                 child: Text("Text To Speech",
                     style: TextStyle(fontSize: ThemeConst.fontSizes.lg))),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
+            Center(
+                child: ComponentIconButton(
+                  onPressed: onClickTTS,
+                  icon: Icons.volume_up,
+                  color: ThemeConst.colors.info,
+                )),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             const Text("Language Code"),
             ComponentDropdown<Map<String, dynamic>>(
@@ -129,6 +151,12 @@ class _PageSettingsState extends State<PageSettings> {
             ),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             const Text("Gender"),
+            Text(
+                "Sometimes the selected language code may not support the selected gender. In these cases, you can try other language codes.",
+              style: TextStyle(
+                fontSize: ThemeConst.fontSizes.sm
+              ),
+            ),
             ComponentRadio<String>(
               title: 'Male',
               value: 'male',

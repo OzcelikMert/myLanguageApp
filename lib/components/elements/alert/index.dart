@@ -34,14 +34,15 @@ class ComponentDialogState extends State<ComponentDialog>
         duration: Duration(milliseconds: 300),
         curve: widget.options.curve);
 
-    DialogLib.state = this;
+    DialogLib.setState = this;
     super.initState();
   }
 
   @override
   void dispose() {
     controller?.dispose();
-    DialogLib.state = null;
+    print("STATE DISPOSE");
+    DialogLib.setState = null;
     super.dispose();
   }
 

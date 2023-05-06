@@ -22,10 +22,6 @@ class PageWordAdd extends StatefulWidget {
     if (args != null && args[DBTableWords.columnId] != null) {
       wordId = int.tryParse(args[DBTableWords.columnId].toString()) ?? 0;
     }
-
-    if (wordId == 0) {
-      RouteLib(context).change(target: "/word/list");
-    }
   }
 
   @override
@@ -154,7 +150,7 @@ class _PageWordAddState extends State<PageWordAdd> {
       withScroll: true,
       leadingArgs: _stateIsUpdated,
       hideSidebar: _stateWord != null,
-      body: Center(
+      body: _statePageIsLoading ? Container() : Center(
         child: ComponentForm(
           formKey: _formKey,
           onSubmit: onClickAdd,

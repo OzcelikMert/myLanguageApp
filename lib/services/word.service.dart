@@ -19,13 +19,13 @@ class WordService {
     }
 
     if (params.wordStudyType != null) {
-      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
+      whereString += "${DBTableWords.columnStudyType} = ? AND ";
       whereArgs.add(params.wordStudyType);
     }
 
-    if (params.wordLanguageId != null) {
-      whereString += "${DBTableWords.columnLanguageId} = ? AND ";
-      whereArgs.add(params.wordLanguageId);
+    if (params.wordIsStudy != null) {
+      whereString += "${DBTableWords.columnIsStudy} = ? AND ";
+      whereArgs.add(params.wordIsStudy);
     }
 
     var db = await DBConn.instance.database;

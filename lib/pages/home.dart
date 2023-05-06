@@ -135,7 +135,7 @@ class _PageHomeState extends State<PageHome> {
       hideSidebar: true,
       withScroll: true,
       hideBackButton: true,
-      body: Center(
+      body: _statePageIsLoading ? Container() : Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [

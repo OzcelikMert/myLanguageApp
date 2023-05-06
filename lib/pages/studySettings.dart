@@ -107,7 +107,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
         leadingArgs: _stateIsUpdated,
         hideSidebar: true,
         withScroll: true,
-        body: Column(
+        body: _statePageIsLoading ? Container() : Column(
           children: <Widget>[
             ComponentForm(
               formKey: _formKey,

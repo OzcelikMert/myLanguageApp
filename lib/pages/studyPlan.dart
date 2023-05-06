@@ -234,7 +234,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         isLoading: _statePageIsLoading,
         title: "Study Plan",
         withScroll: true,
-        body: Center(
+        body: _statePageIsLoading ? Container() : Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,

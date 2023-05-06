@@ -112,7 +112,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
       title: "Add New",
       withScroll: true,
       hideSidebar: true,
-      body: Center(
+      body: _statePageIsLoading ? Container() : Center(
         child: ComponentForm(
           formKey: _formKey,
           onSubmit: () => onClickAdd(),

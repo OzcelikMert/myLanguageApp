@@ -106,7 +106,7 @@ class _PageWordListState extends State<PageWordList> {
         isLoading: _statePageIsLoading,
         title: "List of Words",
         withScroll: true,
-        body: ComponentDataTable<Map<String, dynamic>>(
+        body: _statePageIsLoading ? Container() : ComponentDataTable<Map<String, dynamic>>(
           data: _stateWords,
           isSearchable: true,
           searchableKeys: [DBTableWords.columnTextTarget, DBTableWords.columnTextNative],
