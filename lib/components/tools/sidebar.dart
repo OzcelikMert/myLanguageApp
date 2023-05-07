@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
@@ -26,25 +27,57 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
     return routeName == itemRouteName ? ThemeConst.colors.dark : null;
   }
 
+  Future<bool> checkFilePermission() async {
+    bool returnStatus = false;
+    final permissionStatus = await FileLib.checkPermission();
+    if (permissionStatus.isGranted) {
+      returnStatus = true;
+    } else {
+      if (await Permission.storage.shouldShowRequestRationale) {
+        DialogLib.show(
+            context,
+            ComponentDialogOptions(
+                title: "Permission Denied!",
+                content: "You must give permission to perform file operations.",
+                icon: ComponentDialogIcon.error));
+      } else {
+        DialogLib.show(
+            context,
+            ComponentDialogOptions(
+              title: "Permission is permanently Denied!",
+              content: "You must give permission to perform file operations.",
+              icon: ComponentDialogIcon.error,
+              showCancelButton: true,
+              onPressed: (isConfirm) async {
+                if (isConfirm) {
+                  openAppSettings();
+                }
+              },
+            ));
+      }
+    }
+    return returnStatus;
+  }
+
   void onClickReturnHome() async {
-    await DialogLib.show(context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
+    await DialogLib.show(
+        context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
     var result = await LanguageService.update(LanguageUpdateParamModel(
-        whereLanguageId: Values.getLanguageId,
-        languageIsSelected: 0
-    ));
-    if(result > 0){
+        whereLanguageId: Values.getLanguageId, languageIsSelected: 0));
+    if (result > 0) {
       await RouteLib(context).change(target: '/');
     }
   }
 
   void onClickExport() async {
-    if (await Permission.storage.request().isGranted) {
+    if (await checkFilePermission()) {
       DialogLib.show(
           context,
           ComponentDialogOptions(
               title: "Are you sure?",
               content: "Are you sure you want to export whole words?",
               showCancelButton: true,
+              icon: ComponentDialogIcon.confirm,
               onPressed: (bool isConfirm) async {
                 if (isConfirm) {
                   await DialogLib.show(
@@ -52,35 +85,69 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
                       ComponentDialogOptions(
                           content: "Loading...",
                           icon: ComponentDialogIcon.loading));
-                  var words = await WordService.get(WordGetParamModel(wordLanguageId: Values.getLanguageId));
-                  File? file = await FileLib.convertJsonStringToFile(fileName: "${Values.getLanguageName}.json", jsonString: jsonEncode(words));
-                  if(file != null){
-                    await FileLib.saveLocation(file);
+                  var words = await WordService.get(
+                      WordGetParamModel(wordLanguageId: Values.getLanguageId));
+                  File? file = await FileLib.exportJsonFile(
+                      fileName: Values.getLanguageName,
+                      jsonString: jsonEncode(words));
+                  if (file != null) {
                     DialogLib.show(
                         context,
                         ComponentDialogOptions(
-                            title: "Successfully!",
-                            content: "The file has saved successfully.",
-                            icon: ComponentDialogIcon.success
+                          title: "Successfully!",
+                          content: "The file has saved successfully. Check your downloads folder.",
+                          icon: ComponentDialogIcon.success,
                         ));
-                  }else {
+                  } else {
                     DialogLib.show(
                         context,
                         ComponentDialogOptions(
                             title: "Error!",
                             content: "It couldn't save.",
-                            icon: ComponentDialogIcon.error
-                        ));
+                            icon: ComponentDialogIcon.error));
                   }
+                  return false;
                 }
               }));
     }
-
   }
 
   void onClickImport() async {
-    if (await Permission.storage.request().isGranted) {
+    var importedDataList = await FileLib.importJsonFile();
+    if(importedDataList != null && importedDataList is List && importedDataList.length > 0) {
+      await DialogLib.show(
+          context,
+          ComponentDialogOptions(
+              content: "Loading...",
+              icon: ComponentDialogIcon.loading));
 
+      List<WordAddParamModel> wordAddParamsList = [];
+      for(var importedData in importedDataList) {
+        wordAddParamsList.add(WordAddParamModel(
+            wordLanguageId: Values.getLanguageId,
+            wordTextTarget: importedData[DBTableWords.columnTextTarget],
+            wordTextNative: importedData[DBTableWords.columnTextNative],
+            wordComment: importedData[DBTableWords.columnComment],
+            wordStudyType: importedData[DBTableWords.columnStudyType]
+        ));
+      }
+      int addWords = await WordService.addMulti(wordAddParamsList);
+      if(addWords > 0){
+        DialogLib.show(
+            context,
+            ComponentDialogOptions(
+              title: "Successfully!",
+              content: "The file has imported successfully.",
+              icon: ComponentDialogIcon.success,
+            ));
+      }else {
+        DialogLib.show(
+            context,
+            ComponentDialogOptions(
+                title: "Error!",
+                content: "It couldn't import.",
+                icon: ComponentDialogIcon.error));
+      }
     }
   }
 

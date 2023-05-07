@@ -1,8 +1,8 @@
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
+import 'package:my_language_app/lib/file.lib.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 
 class DBConn {
   static const _databaseName = 'myLanguageApp.db';
@@ -19,8 +19,7 @@ class DBConn {
   }
 
   _initDatabase() async {
-    var documentsDirectory = await getApplicationDocumentsDirectory();
-    var path = join(documentsDirectory.path, _databaseName);
+    var path = join((await FileLib.applicationDocumentDirectory).path, _databaseName);
     return await openDatabase(path,
         version: _databaseVersion, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
