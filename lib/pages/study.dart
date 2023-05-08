@@ -43,13 +43,13 @@ class _PageStudyState extends State<PageStudy> {
   late bool _stateIsStudied = false;
   late bool _stateIsTrue = false;
   late bool _statePageIsLoading = true;
-  late List<Map<String, dynamic>> _stateVoices = [];
   int _stateSelectedStudyType = StudyTypeConst.Daily;
   late List<Map<String, dynamic>> _stateWords = [];
   late Map<String, dynamic> _stateCurrentWord = {};
   late Map<String, dynamic> _stateLanguage = {};
   late String _stateTextDisplayed = "";
   late String _stateTextAnswer = "";
+  late String _stateVoiceText = "";
   final _controllerText = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -72,11 +72,8 @@ class _PageStudyState extends State<PageStudy> {
 
     setLanguage();
 
-    var voices = await VoicesLib.getVoices();
-
     setState(() {
       _stateWords = words;
-      _stateVoices = voices;
     });
 
     setCurrentWord();
@@ -118,7 +115,8 @@ class _PageStudyState extends State<PageStudy> {
   }
 
   Future<void> setTTS() async {
-    var voice = MyLibArray.findSingle(array: _stateVoices, key: TTSVoiceKeys.keyName, value: _stateLanguage[DBTableLanguages.columnTTSArtist]);
+    var voices = await VoicesLib.getVoices();
+    var voice = MyLibArray.findSingle(array: voices, key: TTSVoiceKeys.keyName, value: _stateLanguage[DBTableLanguages.columnTTSArtist]);
     if(voice != null){
       await (await VoicesLib.flutterTts).setVoice({"name": voice[TTSVoiceKeys.keyName], "locale": voice[TTSVoiceKeys.keyLocale], "gender": _stateLanguage[DBTableLanguages.columnTTSGender]});
       await (await VoicesLib.flutterTts).setSpeechRate(0.7);
@@ -363,6 +361,32 @@ class _PageStudyState extends State<PageStudy> {
     );
   }
 
+  Widget ComponentInfo() {
+    return _stateCurrentWord[DBTableWords.columnComment].toString().isNotEmpty ?
+    Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ComponentIconButton(
+          onPressed: onClickTTS,
+          icon: Icons.volume_up,
+          color: ThemeConst.colors.info,
+        ),
+        Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.sm)),
+        Container(
+          child: ComponentIconButton(
+            onPressed: onClickComment,
+            icon: Icons.lightbulb,
+            color: ThemeConst.colors.warning,
+          ),
+        ),
+      ],
+    ) : ComponentIconButton(
+      onPressed: onClickTTS,
+      icon: Icons.volume_up,
+      color: ThemeConst.colors.info,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ComponentPageScaffold(
@@ -399,23 +423,12 @@ class _PageStudyState extends State<PageStudy> {
             Text(_stateTextDisplayed,
               style: TextStyle(fontSize: ThemeConst.fontSizes.lg),
             ),
-            Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ComponentIconButton(
-                  onPressed: onClickTTS,
-                  icon: Icons.volume_up,
-                  color: ThemeConst.colors.info,
-                ),
-                Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.sm)),
-                ComponentIconButton(
-                  onPressed: onClickComment,
-                  icon: Icons.lightbulb,
-                  color: ThemeConst.colors.warning,
-                ),
-              ],
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.xsm)),
+            Text(_stateVoiceText,
+              style: TextStyle(fontSize: ThemeConst.fontSizes.md),
             ),
+            Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
+            ComponentInfo(),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             _stateIsStudied ? ComponentResult() : ComponentAnswer(),
           ],
