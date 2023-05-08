@@ -68,7 +68,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                         content: "Adding...",
                         icon: ComponentDialogIcon.loading));
                 var result = await LanguageService.add(LanguageAddParamModel(
-                    languageName: _controllerName.text,
+                    languageName: _controllerName.text.trim(),
                     languageTTSArtist:
                         _stateSelectedVoice![TTSVoiceKeys.keyName],
                     languageTTSGender: _stateSelectedVoiceGenderRadio));

@@ -12,6 +12,7 @@ import 'package:my_language_app/models/components/elements/dataTable/dataCell.da
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/services/word.model.dart';
+import 'package:my_language_app/myLib/variable/array.dart';
 import 'package:my_language_app/services/word.service.dart';
 
 import '../components/elements/button.dart';
@@ -38,7 +39,7 @@ class _PageWordListState extends State<PageWordList> {
         WordGetParamModel(wordLanguageId: Values.getLanguageId));
 
     setState(() {
-      _stateWords = words;
+      _stateWords = MyLibArray.sort(array: words, key: DBTableWords.columnCreatedAt, sortType: SortType.desc);
       _statePageIsLoading = false;
     });
   }
@@ -112,45 +113,45 @@ class _PageWordListState extends State<PageWordList> {
           searchableKeys: [DBTableWords.columnTextTarget, DBTableWords.columnTextNative],
           columns: [
             ComponentDataColumnModule(
-              title: "Native",
-              sortKeyName: DBTableWords.columnTextNative,
-              sortable: true,
-            ),
-            ComponentDataColumnModule(
               title: "Target (${Values.getLanguageName})",
               sortKeyName: DBTableWords.columnTextTarget,
               sortable: true,
             ),
-            ComponentDataColumnModule(
+            const ComponentDataColumnModule(
+              title: "Native",
+              sortKeyName: DBTableWords.columnTextNative,
+              sortable: true,
+            ),
+            const ComponentDataColumnModule(
               title: "Create Date",
               sortKeyName: DBTableWords.columnCreatedAt,
               sortable: true,
             ),
-            ComponentDataColumnModule(
+            const ComponentDataColumnModule(
               title: "Study Type",
               sortKeyName: DBTableWords.columnStudyType,
               sortable: true,
             ),
-            ComponentDataColumnModule(
+            const ComponentDataColumnModule(
               title: "Is Study",
               sortKeyName: DBTableWords.columnIsStudy,
               sortable: true,
             ),
-            ComponentDataColumnModule(
+            const ComponentDataColumnModule(
               title: "Edit",
             ),
-            ComponentDataColumnModule(
+            const ComponentDataColumnModule(
               title: "Delete",
             )
           ],
           cells: [
             ComponentDataCellModule(
               child: (row) =>
-                  Text(row[DBTableWords.columnTextNative].toString()),
+                  Text(row[DBTableWords.columnTextTarget].toString()),
             ),
             ComponentDataCellModule(
               child: (row) =>
-                  Text(row[DBTableWords.columnTextTarget].toString()),
+                  Text(row[DBTableWords.columnTextNative].toString()),
             ),
             ComponentDataCellModule(
               child: (row) => Text(DateFormat.yMd().add_Hm().format(

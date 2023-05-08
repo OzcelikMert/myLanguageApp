@@ -7,7 +7,6 @@ import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
-import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/services/word.service.dart';
@@ -83,16 +82,16 @@ class _PageWordAddState extends State<PageWordAdd> {
                   result = await WordService.update(WordUpdateParamModel(
                       whereWordLanguageId: Values.getLanguageId,
                       whereWordId: _stateWord![DBTableWords.columnId],
-                      wordTextNative: _controllerTextNative.text,
-                      wordTextTarget: _controllerTextTarget.text,
-                      wordComment: _controllerComment.text,
+                      wordTextNative: _controllerTextNative.text.trim(),
+                      wordTextTarget: _controllerTextTarget.text.trim(),
+                      wordComment: _controllerComment.text.trim(),
                       wordStudyType: _stateSelectedStudyType));
                 }else {
                   result = await WordService.add(WordAddParamModel(
                       wordLanguageId: Values.getLanguageId,
-                      wordTextNative: _controllerTextNative.text,
-                      wordTextTarget: _controllerTextTarget.text,
-                      wordComment: _controllerComment.text,
+                      wordTextNative: _controllerTextNative.text.trim(),
+                      wordTextTarget: _controllerTextTarget.text.trim(),
+                      wordComment: _controllerComment.text.trim(),
                       wordStudyType: _stateSelectedStudyType));
                 }
 
@@ -105,9 +104,6 @@ class _PageWordAddState extends State<PageWordAdd> {
                     _controllerTextNative.text = "";
                     _controllerTextTarget.text = "";
                     _controllerComment.text = "";
-                    setState(() {
-                      _stateSelectedStudyType = StudyTypeConst.Daily;
-                    });
                   }
                   DialogLib.show(
                       context,

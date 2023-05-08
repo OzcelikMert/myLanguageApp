@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/radio.dart';
@@ -156,7 +153,7 @@ class _PageStudyState extends State<PageStudy> {
 
     setState(() {
       _stateIsStudied = true;
-      _stateIsTrue = _stateTextAnswer.toLowerCase() == _controllerText.text.toString().toLowerCase();
+      _stateIsTrue = _stateTextAnswer.toLowerCase() == _controllerText.text.toString().toLowerCase().trim();
     });
 
     if (_stateIsTrue) {

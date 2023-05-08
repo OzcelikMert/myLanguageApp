@@ -38,7 +38,7 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
   void initState() {
     super.initState();
     setState(() {
-      _stateFilteredRows = widget.data;
+      _stateFilteredRows = List<T>.from(widget.data);
     });
   }
 
@@ -47,17 +47,18 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
     super.didUpdateWidget(oldWidget);
     if (widget.data != oldWidget.data) {
       setState(() {
-        _stateFilteredRows = widget.data;
+        _stateFilteredRows = List<T>.from(widget.data);
       });
       search(_stateSearchText);
     }
   }
 
   void _sort<P>(
-      Comparable<P> Function(T d) getField, int columnIndex, bool ascending) {
-    widget.data.sort((a, b) {
-      final aValue = getField(a);
-      final bValue = getField(b);
+      Comparable<P> Function(T d) getField, int columnIndex, bool ascending, bool isDate) {
+    _stateFilteredRows.sort((a, b) {
+      dynamic aValue = getField(a);
+      dynamic bValue = getField(b);
+
       return ascending
           ? Comparable.compare(aValue, bValue)
           : Comparable.compare(bValue, aValue);
@@ -76,8 +77,8 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
           numeric: column.numeric,
           onSort: column.sortable == true
               ? (columnIndex, ascending) {
-                  _sort<String>((dynamic d) => d[column.sortKeyName],
-                      columnIndex, ascending);
+                  _sort<dynamic>((dynamic d) => d[column.sortKeyName],
+                      columnIndex, ascending, column.isDate);
                 }
               : null));
     }
