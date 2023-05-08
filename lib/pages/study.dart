@@ -181,8 +181,8 @@ class _PageStudyState extends State<PageStudy> {
                               content: "Congratulations, you have mastered all the words. 🤩",
                               icon: ComponentDialogIcon.success
                           ));
+                      return false;
                     }
-                    return false;
                   }
                 },
             )
@@ -344,7 +344,7 @@ class _PageStudyState extends State<PageStudy> {
           children: [
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
             Text(
-              "Correct Text: ${_stateTextAnswer}",
+              "Correct Word: ${_stateTextAnswer}",
               style: TextStyle(
                 fontSize: ThemeConst.fontSizes.lg,
                 color: ThemeConst.colors.info,

@@ -128,7 +128,8 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
             wordTextTarget: importedData[DBTableWords.columnTextTarget],
             wordTextNative: importedData[DBTableWords.columnTextNative],
             wordComment: importedData[DBTableWords.columnComment],
-            wordStudyType: importedData[DBTableWords.columnStudyType]
+            wordStudyType: importedData[DBTableWords.columnStudyType],
+            wordIsStudy: importedData[DBTableWords.columnIsStudy]
         ));
       }
       int addWords = await WordService.addMulti(wordAddParamsList);

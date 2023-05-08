@@ -39,13 +39,15 @@ class WordAddParamModel {
   final String wordTextNative;
   final String wordComment;
   final int wordStudyType;
+  final int wordIsStudy;
 
   WordAddParamModel({
     required this.wordTextTarget,
     required this.wordTextNative,
     required this.wordLanguageId,
     required this.wordComment,
-    required this.wordStudyType
+    required this.wordStudyType,
+    this.wordIsStudy = 0
   });
 }
 

@@ -108,7 +108,7 @@ class WordService {
       DBTableWords.columnCreatedAt: date,
       DBTableWords.columnUpdatedAt: date,
       DBTableWords.columnStudyType: params.wordStudyType,
-      DBTableWords.columnIsStudy: 0,
+      DBTableWords.columnIsStudy: params.wordIsStudy,
     });
   }
 
@@ -127,7 +127,7 @@ class WordService {
         DBTableWords.columnCreatedAt: date,
         DBTableWords.columnUpdatedAt: date,
         DBTableWords.columnStudyType: params.wordStudyType,
-        DBTableWords.columnIsStudy: 0,
+        DBTableWords.columnIsStudy: params.wordIsStudy,
       });
     }
 
