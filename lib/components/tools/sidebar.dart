@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/theme.const.dart';
@@ -88,7 +89,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
                   var words = await WordService.get(
                       WordGetParamModel(wordLanguageId: Values.getLanguageId));
                   File? file = await FileLib.exportJsonFile(
-                      fileName: Values.getLanguageName,
+                      fileName: "LangApp-${Values.getLanguageName}-${DateFormat("yyyy-MM-dd-HH-mm").format(DateTime.now().toLocal())}",
                       jsonString: jsonEncode(words));
                   if (file != null) {
                     DialogLib.show(
