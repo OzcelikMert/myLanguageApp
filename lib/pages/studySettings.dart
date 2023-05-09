@@ -4,6 +4,7 @@ import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/displayedLanguage.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
@@ -129,13 +130,19 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                 const Text("Displayed Language"),
                 ComponentRadio<int>(
                   title: Values.getLanguageName,
-                  value: 1,
+                  value: DisplayedLanguageConst.target,
                   groupValue: _stateSelectedDisplayedLanguage,
                   onChanged: onChangeDisplayedLanguage,
                 ),
                 ComponentRadio<int>(
                   title: 'Native',
-                  value: 0,
+                  value: DisplayedLanguageConst.native,
+                  groupValue: _stateSelectedDisplayedLanguage,
+                  onChanged: onChangeDisplayedLanguage,
+                ),
+                ComponentRadio<int>(
+                  title: 'Random',
+                  value: DisplayedLanguageConst.random,
                   groupValue: _stateSelectedDisplayedLanguage,
                   onChanged: onChangeDisplayedLanguage,
                 ),

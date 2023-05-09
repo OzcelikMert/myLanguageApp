@@ -8,6 +8,7 @@ import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/audio.const.dart';
+import 'package:my_language_app/constants/displayedLanguage.const.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/audio.lib.dart';
@@ -82,29 +83,41 @@ class _PageStudyState extends State<PageStudy> {
 
     setCurrentWord();
 
-    setTextDisplayed();
-
-    setTextAnswer();
+    setTextDisplayedAndAnswer();
 
     setState(() {
       _statePageIsLoading = false;
     });
   }
 
-  setTextDisplayed() {
-    setState(() {
-      _stateTextDisplayed = _stateCurrentWord[_stateLanguage[DBTableLanguages.columnDisplayedLanguage] == 0
-          ? DBTableWords.columnTextNative
-          : DBTableWords.columnTextTarget].toString();
-    });
-  }
+  setTextDisplayedAndAnswer() {
+    int displayedLanguage = _stateLanguage[DBTableLanguages.columnDisplayedLanguage];
 
-  setTextAnswer() {
+    String columnDisplayedText = DBTableWords.columnTextNative;
+    String columnAnswerText = DBTableWords.columnTextTarget;
+
+    if(displayedLanguage == DisplayedLanguageConst.target){
+      columnDisplayedText = DBTableWords.columnTextTarget;
+      columnAnswerText = DBTableWords.columnTextNative;
+    }else if(displayedLanguage == DisplayedLanguageConst.random){
+      var random = Random();
+      int randomNumber = random.nextInt(2);
+
+      if(randomNumber == 1){
+        columnDisplayedText = DBTableWords.columnTextTarget;
+        columnAnswerText = DBTableWords.columnTextNative;
+      }
+    }
+
+
+
+
     setState(() {
-      _stateTextAnswer = _stateCurrentWord[_stateLanguage[DBTableLanguages.columnDisplayedLanguage] == 0
-          ? DBTableWords.columnTextTarget
-          : DBTableWords.columnTextNative].toString();
+      _stateTextDisplayed = _stateCurrentWord[columnDisplayedText].toString();
+
+      _stateTextAnswer = _stateCurrentWord[columnAnswerText].toString();
     });
+
   }
 
   Future<void> setLanguage() async {
@@ -122,8 +135,6 @@ class _PageStudyState extends State<PageStudy> {
     var voice = MyLibArray.findSingle(array: voices, key: TTSVoiceKeys.keyName, value: _stateLanguage[DBTableLanguages.columnTTSArtist]);
     if(voice != null){
       await (await VoicesLib.flutterTts).setVoice({"name": voice[TTSVoiceKeys.keyName], "locale": voice[TTSVoiceKeys.keyLocale], "gender": _stateLanguage[DBTableLanguages.columnTTSGender]});
-      await (await VoicesLib.flutterTts).setSpeechRate(0.7);
-      await (await VoicesLib.flutterTts).setVolume(1.0);
     }
   }
 
@@ -235,8 +246,7 @@ class _PageStudyState extends State<PageStudy> {
           ComponentDialogOptions(
               content: "Loading...", icon: ComponentDialogIcon.loading));
       await setLanguage();
-      setTextDisplayed();
-      setTextAnswer();
+      setTextDisplayedAndAnswer();
       DialogLib.hide(context);
     }
   }
@@ -264,8 +274,7 @@ class _PageStudyState extends State<PageStudy> {
               icon: ComponentDialogIcon.success));
     }else {
       setCurrentWord();
-      setTextDisplayed();
-      setTextAnswer();
+      setTextDisplayedAndAnswer();
       _controllerText.text = "";
       DialogLib.hide(context);
     }
@@ -275,6 +284,8 @@ class _PageStudyState extends State<PageStudy> {
     if (await Permission.speech.request() != PermissionStatus.granted) {
       return;
     }
+    await (await VoicesLib.flutterTts).setSpeechRate(0.5);
+    await (await VoicesLib.flutterTts).setVolume(1.0);
     await (await VoicesLib.flutterTts).speak(_stateTextDisplayed);
   }
 
@@ -300,7 +311,7 @@ class _PageStudyState extends State<PageStudy> {
       onSubmit: onClickCheck,
       submitButtonText: "Check",
       children: <Widget>[
-        Text(_stateLanguage[DBTableLanguages.columnDisplayedLanguage] == 0
+        Text(_stateLanguage[DBTableLanguages.columnDisplayedLanguage] == DisplayedLanguageConst.native
             ? Values.getLanguageName
             : "Native"),
         TextFormField(
