@@ -4,6 +4,7 @@ import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/services/language.model.dart';
@@ -22,6 +23,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
   late bool _stateIsUpdated = false;
   late bool _statePageIsLoading = true;
   int _stateSelectedDisplayedLanguage = 1;
+  int _stateSelectedIsAutoVoice = 0;
   late Map<String, dynamic> _stateLanguage;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -39,6 +41,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
     setState(() {
       _stateLanguage = languages[0];
       _stateSelectedDisplayedLanguage = _stateLanguage[DBTableLanguages.columnDisplayedLanguage];
+      _stateSelectedIsAutoVoice = _stateLanguage[DBTableLanguages.columnIsAutoVoice];
       _statePageIsLoading = false;
     });
   }
@@ -60,7 +63,9 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                         icon: ComponentDialogIcon.loading));
                 var updateLanguage = await LanguageService.update(LanguageUpdateParamModel(
                     whereLanguageId: Values.getLanguageId,
-                    languageDisplayedLanguage: _stateSelectedDisplayedLanguage));
+                    languageDisplayedLanguage: _stateSelectedDisplayedLanguage,
+                    languageIsAutoVoice: _stateSelectedIsAutoVoice
+                ));
                 if (updateLanguage > 0) {
                   setState(() {
                     _stateIsUpdated = true;
@@ -83,7 +88,15 @@ class _PageStudySettingsState extends State<PageStudySettings> {
             }));
   }
 
-  void onChangeVoiceGenderRadio(int? value) {
+  void onChangeIsAutoVoice(int? value) {
+    if (value != null) {
+      setState(() {
+        _stateSelectedIsAutoVoice = value;
+      });
+    }
+  }
+
+  void onChangeDisplayedLanguage(int? value) {
     if (value != null) {
       setState(() {
         _stateSelectedDisplayedLanguage = value;
@@ -118,13 +131,27 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                   title: Values.getLanguageName,
                   value: 1,
                   groupValue: _stateSelectedDisplayedLanguage,
-                  onChanged: onChangeVoiceGenderRadio,
+                  onChanged: onChangeDisplayedLanguage,
                 ),
                 ComponentRadio<int>(
                   title: 'Native',
                   value: 0,
                   groupValue: _stateSelectedDisplayedLanguage,
-                  onChanged: onChangeVoiceGenderRadio,
+                  onChanged: onChangeDisplayedLanguage,
+                ),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+                const Text("Auto Voice"),
+                ComponentRadio<int>(
+                  title: "Yes",
+                  value: 1,
+                  groupValue: _stateSelectedIsAutoVoice,
+                  onChanged: onChangeIsAutoVoice,
+                ),
+                ComponentRadio<int>(
+                  title: 'No',
+                  value: 0,
+                  groupValue: _stateSelectedIsAutoVoice,
+                  onChanged: onChangeIsAutoVoice,
                 )
               ],
             ),

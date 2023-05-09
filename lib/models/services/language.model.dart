@@ -30,6 +30,7 @@ class LanguageUpdateParamModel {
   final String? languageMonthlyUpdatedAt;
   final int? languageIsSelected;
   final int? languageDisplayedLanguage;
+  final int? languageIsAutoVoice;
 
   LanguageUpdateParamModel({
     required this.whereLanguageId,
@@ -40,7 +41,8 @@ class LanguageUpdateParamModel {
     this.languageWeeklyUpdatedAt,
     this.languageMonthlyUpdatedAt,
     this.languageIsSelected,
-    this.languageDisplayedLanguage
+    this.languageDisplayedLanguage,
+    this.languageIsAutoVoice
   });
 }
 

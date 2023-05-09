@@ -7,8 +7,10 @@ import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/audio.const.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
+import 'package:my_language_app/lib/audio.lib.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/lib/voices.lib.dart';
@@ -70,17 +72,18 @@ class _PageStudyState extends State<PageStudy> {
         wordStudyType: widget.studyType,
         wordIsStudy: 0));
 
-    setLanguage();
-
     setState(() {
       _stateWords = words;
     });
 
-    setCurrentWord();
+    setLanguage();
 
     await setTTS();
 
+    setCurrentWord();
+
     setTextDisplayed();
+
     setTextAnswer();
 
     setState(() {
@@ -133,6 +136,9 @@ class _PageStudyState extends State<PageStudy> {
       _stateIsTrue = false;
       _stateIsStudied = false;
     });
+    if(_stateLanguage[DBTableLanguages.columnIsAutoVoice] == 1){
+      onClickTTS();
+    }
   }
 
   void onChangeStudyType(int? value) {
@@ -163,6 +169,7 @@ class _PageStudyState extends State<PageStudy> {
         setState(() {
           _stateWords = MyLibArray.findMulti(array: _stateWords, key: DBTableWords.columnId, value: _stateCurrentWord[DBTableWords.columnId], isLike: false);
         });
+        AudioLib.play(AudioConst.positive);
         DialogLib.show(
             context,
             ComponentDialogOptions(
@@ -172,6 +179,7 @@ class _PageStudyState extends State<PageStudy> {
                 onPressed: (isConfirm) async {
                   if(isConfirm){
                     if(_stateWords.isEmpty) {
+                      AudioLib.play(AudioConst.positive_2);
                       DialogLib.show(
                           context,
                           ComponentDialogOptions(
@@ -193,6 +201,7 @@ class _PageStudyState extends State<PageStudy> {
                 icon: ComponentDialogIcon.error));
       }
     } else {
+      AudioLib.play(AudioConst.negative);
       DialogLib.show(
           context,
           ComponentDialogOptions(

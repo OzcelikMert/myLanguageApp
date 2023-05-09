@@ -38,7 +38,8 @@ class LanguageService {
       DBTableLanguages.columnWeeklyUpdatedAt: date,
       DBTableLanguages.columnMonthlyUpdatedAt: date,
       DBTableLanguages.columnIsSelected: 0,
-      DBTableLanguages.columnDisplayedLanguage: 0
+      DBTableLanguages.columnDisplayedLanguage: 0,
+      DBTableLanguages.columnIsAutoVoice: 0
     });
   }
 
@@ -85,6 +86,10 @@ class LanguageService {
 
     if(params.languageDisplayedLanguage != null){
       setMap[DBTableLanguages.columnDisplayedLanguage] = params.languageDisplayedLanguage;
+    }
+
+    if(params.languageIsAutoVoice != null){
+      setMap[DBTableLanguages.columnIsAutoVoice] = params.languageIsAutoVoice;
     }
 
     var db = await DBConn.instance.database;

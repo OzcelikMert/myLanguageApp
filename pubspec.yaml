@@ -22,6 +22,7 @@ dependencies:
   permission_handler: ^10.2.0
   device_info: ^2.0.3
   file_picker: ^5.2.11
+  audioplayers: ^4.0.1
 
 dev_dependencies:
   flutter_test:
@@ -32,3 +33,5 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/audios/
+    - assets/json/
