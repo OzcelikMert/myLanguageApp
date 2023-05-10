@@ -26,9 +26,11 @@ class WordGetCountParamModel {
 
 class WordGetCountReportParamModel {
   final int wordLanguageId;
+  final int? wordStudyType;
 
   WordGetCountReportParamModel({
-    required this.wordLanguageId
+    required this.wordLanguageId,
+    this.wordStudyType
   });
 }
 

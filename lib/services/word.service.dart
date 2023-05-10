@@ -82,6 +82,11 @@ class WordService {
       whereArgs.add(params.wordLanguageId);
     }
 
+    if (params.wordStudyType != null) {
+      whereString += "${DBTableWords.columnStudyType} = ? AND ";
+      whereArgs.add(params.wordStudyType);
+    }
+
     var db = await DBConn.instance.database;
     return (await db.query(DBTableWords.tableName,
         columns: [

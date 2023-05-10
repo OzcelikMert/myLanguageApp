@@ -71,6 +71,12 @@ class _PageStudyState extends State<PageStudy> {
       return;
     }
 
+    var wordCountReports = await WordService.getCountReport(
+        WordGetCountReportParamModel(wordLanguageId: Values.getLanguageId, wordStudyType: widget.studyType));
+
+    var studiedReports = MyLibArray.findMulti(
+        array: wordCountReports, key: DBTableWords.columnIsStudy, value: 1);
+
     var words = await WordService.get(WordGetParamModel(
         wordLanguageId: Values.getLanguageId,
         wordStudyType: widget.studyType,
@@ -78,7 +84,16 @@ class _PageStudyState extends State<PageStudy> {
 
     setState(() {
       _stateWords = words;
-      _stateTotalWords = words.length;
+      _stateTotalWords = wordCountReports.isNotEmpty
+          ? wordCountReports
+          .map((e) => e[DBTableWords.asColumnCount])
+          .reduce((a, b) => a + b)
+          : 0;
+      _stateStudiedWords = studiedReports.isNotEmpty
+          ? studiedReports
+          .map((e) => e[DBTableWords.asColumnCount])
+          .reduce((a, b) => a + b)
+          : 0;
     });
 
     setLanguage();
@@ -119,6 +134,9 @@ class _PageStudyState extends State<PageStudy> {
       _stateIsActiveVoice = columnDisplayedText == DBTableWords.columnTextTarget;
     });
 
+    if(_stateLanguage[DBTableLanguages.columnIsAutoVoice] == 1 && _stateIsActiveVoice){
+      onClickTTS();
+    }
   }
 
   Future<void> setLanguage() async {
@@ -148,9 +166,7 @@ class _PageStudyState extends State<PageStudy> {
       _stateIsTrue = false;
       _stateIsStudied = false;
     });
-    if(_stateLanguage[DBTableLanguages.columnIsAutoVoice] == 1 && _stateIsActiveVoice){
-      onClickTTS();
-    }
+
   }
 
   void onChangeStudyType(int? value) {
