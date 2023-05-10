@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
+import 'package:my_language_app/components/elements/progress.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
@@ -52,7 +53,9 @@ class _PageStudyState extends State<PageStudy> {
   late Map<String, dynamic> _stateLanguage = {};
   late String _stateTextDisplayed = "";
   late String _stateTextAnswer = "";
-  late String _stateVoiceText = "";
+  late bool _stateIsActiveVoice = false;
+  late int _stateTotalWords = 0;
+  late int _stateStudiedWords = 0;
   final _controllerText = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -75,6 +78,7 @@ class _PageStudyState extends State<PageStudy> {
 
     setState(() {
       _stateWords = words;
+      _stateTotalWords = words.length;
     });
 
     setLanguage();
@@ -96,7 +100,7 @@ class _PageStudyState extends State<PageStudy> {
     String columnDisplayedText = DBTableWords.columnTextNative;
     String columnAnswerText = DBTableWords.columnTextTarget;
 
-    if(displayedLanguage == DisplayedLanguageConst.target){
+    if(displayedLanguage == DisplayedLanguageConst.target || displayedLanguage == DisplayedLanguageConst.onlyVoiceTarget){
       columnDisplayedText = DBTableWords.columnTextTarget;
       columnAnswerText = DBTableWords.columnTextNative;
     }else if(displayedLanguage == DisplayedLanguageConst.random){
@@ -109,13 +113,10 @@ class _PageStudyState extends State<PageStudy> {
       }
     }
 
-
-
-
     setState(() {
       _stateTextDisplayed = _stateCurrentWord[columnDisplayedText].toString();
-
       _stateTextAnswer = _stateCurrentWord[columnAnswerText].toString();
+      _stateIsActiveVoice = columnDisplayedText == DBTableWords.columnTextTarget;
     });
 
   }
@@ -147,7 +148,7 @@ class _PageStudyState extends State<PageStudy> {
       _stateIsTrue = false;
       _stateIsStudied = false;
     });
-    if(_stateLanguage[DBTableLanguages.columnIsAutoVoice] == 1){
+    if(_stateLanguage[DBTableLanguages.columnIsAutoVoice] == 1 && _stateIsActiveVoice){
       onClickTTS();
     }
   }
@@ -179,6 +180,7 @@ class _PageStudyState extends State<PageStudy> {
       if (updateWord > 0) {
         setState(() {
           _stateWords = MyLibArray.findMulti(array: _stateWords, key: DBTableWords.columnId, value: _stateCurrentWord[DBTableWords.columnId], isLike: false);
+          _stateStudiedWords += 1;
         });
         AudioLib.play(AudioConst.positive);
         DialogLib.show(
@@ -305,7 +307,7 @@ class _PageStudyState extends State<PageStudy> {
     return null;
   }
 
-  Widget ComponentAnswer() {
+  Widget _componentAnswer() {
     return ComponentForm(
       formKey: _formKey,
       onSubmit: onClickCheck,
@@ -324,7 +326,7 @@ class _PageStudyState extends State<PageStudy> {
     );
   }
 
-  Widget ComponentResult() {
+  Widget _componentResult() {
     return Column(
       children: [
         Text(
@@ -381,29 +383,71 @@ class _PageStudyState extends State<PageStudy> {
     );
   }
 
-  Widget ComponentInfo() {
+  Widget _componentInfo() {
+    Widget _componentVoice() {
+      return _stateIsActiveVoice ? ComponentIconButton(
+        onPressed: onClickTTS,
+        icon: Icons.volume_up,
+        color: ThemeConst.colors.info,
+      ) : Container();
+    }
+
+    Widget _componentComment() {
+      return ComponentIconButton(
+        onPressed: onClickComment,
+        icon: Icons.lightbulb,
+        color: ThemeConst.colors.warning,
+      );
+    }
+
+
     return _stateCurrentWord[DBTableWords.columnComment].toString().isNotEmpty ?
     Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ComponentIconButton(
-          onPressed: onClickTTS,
-          icon: Icons.volume_up,
-          color: ThemeConst.colors.info,
-        ),
+        _componentVoice(),
         Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.sm)),
+        _componentComment(),
+      ],
+    ) : _componentVoice();
+  }
+
+  Widget _componentProgress() {
+    return Column(
+      children: [
+        Text(
+          "$_stateTotalWords / $_stateStudiedWords",
+          style: TextStyle(fontSize: ThemeConst.fontSizes.md),
+        ),
+        Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
+        ComponentProgress(
+            maxValue: _stateTotalWords.toDouble(),
+            currentValue: _stateStudiedWords.toDouble()
+        )
+      ],
+    );
+  }
+
+  Widget _componentNavbar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.max,
+      children: [
         Container(
           child: ComponentIconButton(
-            onPressed: onClickComment,
-            icon: Icons.lightbulb,
-            color: ThemeConst.colors.warning,
+            onPressed: onClickBack,
+            icon: Icons.arrow_back,
           ),
         ),
+        Container(
+          child: Text(StudyTypeConst.getTypeName(widget.studyType),
+              style: TextStyle(fontSize: ThemeConst.fontSizes.lg)),
+        ),
+        Container(
+          child: ComponentIconButton(
+              onPressed: onClickSettings, icon: Icons.settings),
+        )
       ],
-    ) : ComponentIconButton(
-      onPressed: onClickTTS,
-      icon: Icons.volume_up,
-      color: ThemeConst.colors.info,
     );
   }
 
@@ -419,38 +463,18 @@ class _PageStudyState extends State<PageStudy> {
         body: _statePageIsLoading ? Container() : Column(
           children: <Widget>[
             Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  child: ComponentIconButton(
-                    onPressed: onClickBack,
-                    icon: Icons.arrow_back,
-                  ),
-                ),
-                Container(
-                  child: Text(StudyTypeConst.getTypeName(widget.studyType),
-                      style: TextStyle(fontSize: ThemeConst.fontSizes.lg)),
-                ),
-                Container(
-                  child: ComponentIconButton(
-                      onPressed: onClickSettings, icon: Icons.settings),
-                )
-              ],
-            ),
+            _componentNavbar(),
+            Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
+            _componentProgress(),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
-            Text(_stateTextDisplayed,
+            _stateLanguage[DBTableLanguages.columnDisplayedLanguage] != DisplayedLanguageConst.onlyVoiceTarget ? Text(_stateTextDisplayed,
               style: TextStyle(fontSize: ThemeConst.fontSizes.lg),
-            ),
+            ) : Container(),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.xsm)),
-            Text(_stateVoiceText,
-              style: TextStyle(fontSize: ThemeConst.fontSizes.md),
-            ),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
-            ComponentInfo(),
+            _componentInfo(),
             Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-            _stateIsStudied ? ComponentResult() : ComponentAnswer(),
+            _stateIsStudied ? _componentResult() : _componentAnswer(),
           ],
         ));
   }

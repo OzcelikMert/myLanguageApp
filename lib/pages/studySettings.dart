@@ -146,6 +146,12 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                   groupValue: _stateSelectedDisplayedLanguage,
                   onChanged: onChangeDisplayedLanguage,
                 ),
+                ComponentRadio<int>(
+                  title: 'Only Voice (${Values.getLanguageName})',
+                  value: DisplayedLanguageConst.onlyVoiceTarget,
+                  groupValue: _stateSelectedDisplayedLanguage,
+                  onChanged: onChangeDisplayedLanguage,
+                ),
                 Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
                 const Text("Auto Voice"),
                 ComponentRadio<int>(

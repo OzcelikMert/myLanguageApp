@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_language_app/components/elements/button.dart';
+import 'package:my_language_app/components/elements/progress.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 
 class ComponentStudyTypeButton extends StatelessWidget {
@@ -24,10 +25,6 @@ class ComponentStudyTypeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double progressValue = studiedWords.toDouble() / totalWords.toDouble();
-    progressValue =
-        progressValue.isNaN || progressValue.isInfinite ? 0 : progressValue;
-
     return Container(
       padding: EdgeInsets.symmetric(
           vertical: ThemeConst.paddings.md, horizontal: ThemeConst.paddings.sm),
@@ -81,32 +78,9 @@ class ComponentStudyTypeButton extends StatelessWidget {
           ),
           Padding(
               padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Progress',
-                style: TextStyle(
-                  fontSize: ThemeConst.fontSizes.sm,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              Text(
-                '${(progressValue * 100).toStringAsFixed(0)}%',
-                style: TextStyle(
-                  fontSize: ThemeConst.fontSizes.sm,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            ],
-          ),
-          Padding(
-              padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
-          LinearProgressIndicator(
-            value: progressValue,
-            backgroundColor: ThemeConst.colors.dark.withOpacity(0.3),
-            valueColor:
-                AlwaysStoppedAnimation<Color>(ThemeConst.colors.primary),
+          ComponentProgress(
+            maxValue: totalWords.toDouble(),
+            currentValue: studiedWords.toDouble(),
           ),
           Padding(
               padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
