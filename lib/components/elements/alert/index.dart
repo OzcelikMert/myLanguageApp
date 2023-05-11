@@ -184,7 +184,7 @@ class ComponentDialogState extends State<ComponentDialog>
                             Padding(
                               padding: EdgeInsets.only(top: ThemeConst.paddings.sm),
                               child: Text(
-                                _options.content ?? "",
+                                _options.content ?? (_options.icon == ComponentDialogIcon.loading ? "Loading..." : ""),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: ThemeConst.fontSizes.md,

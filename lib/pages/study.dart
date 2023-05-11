@@ -4,26 +4,26 @@ import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/progress.dart';
 import 'package:my_language_app/components/elements/radio.dart';
-import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
-import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/audio.const.dart';
 import 'package:my_language_app/constants/displayedLanguage.const.dart';
+import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/audio.lib.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
+import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
-import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
-import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
-import 'package:my_language_app/models/services/language.model.dart';
+import 'package:my_language_app/models/providers/language.provider.dart';
+import 'package:my_language_app/models/providers/page.provider.dart';
+import 'package:my_language_app/models/providers/tts.provider.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
-import 'package:my_language_app/services/language.service.dart';
 import 'package:my_language_app/services/word.service.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import '../components/elements/button.dart';
 
 class PageStudy extends StatefulWidget {
@@ -45,40 +45,52 @@ class PageStudy extends StatefulWidget {
 
 class _PageStudyState extends State<PageStudy> {
   late bool _stateIsStudied = false;
-  late bool _stateIsTrue = false;
-  late bool _statePageIsLoading = true;
+  late bool _stateIsCorrect = false;
   int _stateSelectedStudyType = StudyTypeConst.Daily;
   late List<Map<String, dynamic>> _stateWords = [];
   late Map<String, dynamic> _stateCurrentWord = {};
-  late Map<String, dynamic> _stateLanguage = {};
   late String _stateTextDisplayed = "";
   late String _stateTextAnswer = "";
   late bool _stateIsActiveVoice = false;
   late int _stateTotalWords = 0;
   late int _stateStudiedWords = 0;
+  late bool _stateIsDisplayedTarget = false;
   final _controllerText = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _pageInit();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _pageInit();
+    });
   }
 
   _pageInit() async {
     if (widget.studyType == 0) {
-      await RouteLib(context).change(target: "/study/plan");
+      await RouteLib.change(
+          context: context, target: PageConst.routeNames.studyPlan);
       return;
     }
 
+    final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
+    pageProviderModel.setTitle("Study");
+
+    final languageProviderModel =
+        ProviderLib.get<LanguageProviderModel>(context);
+
     var wordCountReports = await WordService.getCountReport(
-        WordGetCountReportParamModel(wordLanguageId: Values.getLanguageId, wordStudyType: widget.studyType));
+        WordGetCountReportParamModel(
+            wordLanguageId: languageProviderModel
+                .selectedLanguage[DBTableLanguages.columnId],
+            wordStudyType: widget.studyType));
 
     var studiedReports = MyLibArray.findMulti(
         array: wordCountReports, key: DBTableWords.columnIsStudy, value: 1);
 
     var words = await WordService.get(WordGetParamModel(
-        wordLanguageId: Values.getLanguageId,
+        wordLanguageId:
+            languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
         wordStudyType: widget.studyType,
         wordIsStudy: 0));
 
@@ -86,74 +98,67 @@ class _PageStudyState extends State<PageStudy> {
       _stateWords = words;
       _stateTotalWords = wordCountReports.isNotEmpty
           ? wordCountReports
-          .map((e) => e[DBTableWords.asColumnCount])
-          .reduce((a, b) => a + b)
+              .map((e) => e[DBTableWords.asColumnCount])
+              .reduce((a, b) => a + b)
           : 0;
       _stateStudiedWords = studiedReports.isNotEmpty
           ? studiedReports
-          .map((e) => e[DBTableWords.asColumnCount])
-          .reduce((a, b) => a + b)
+              .map((e) => e[DBTableWords.asColumnCount])
+              .reduce((a, b) => a + b)
           : 0;
     });
-
-    setLanguage();
-
-    await setTTS();
-
     setCurrentWord();
 
     setTextDisplayedAndAnswer();
 
-    setState(() {
-      _statePageIsLoading = false;
-    });
+    pageProviderModel.setIsLoading(false);
   }
 
   setTextDisplayedAndAnswer() {
-    int displayedLanguage = _stateLanguage[DBTableLanguages.columnDisplayedLanguage];
+    final languageProviderModel =
+        ProviderLib.get<LanguageProviderModel>(context);
+
+    int displayedLanguage = languageProviderModel
+        .selectedLanguage[DBTableLanguages.columnDisplayedLanguage];
+
+    bool isDisplayedTarget = false;
+
+    if ([
+      DisplayedLanguageConst.target,
+      DisplayedLanguageConst.random,
+      DisplayedLanguageConst.onlyVoiceTarget
+    ].contains(displayedLanguage)) {
+      isDisplayedTarget = true;
+
+      if (displayedLanguage == DisplayedLanguageConst.random) {
+        var random = Random();
+        int randomNumber = random.nextInt(2);
+        if (randomNumber == 0) {
+          isDisplayedTarget = false;
+        }
+      }
+    }
 
     String columnDisplayedText = DBTableWords.columnTextNative;
     String columnAnswerText = DBTableWords.columnTextTarget;
 
-    if(displayedLanguage == DisplayedLanguageConst.target || displayedLanguage == DisplayedLanguageConst.onlyVoiceTarget){
-      columnDisplayedText = DBTableWords.columnTextTarget;
-      columnAnswerText = DBTableWords.columnTextNative;
-    }else if(displayedLanguage == DisplayedLanguageConst.random){
-      var random = Random();
-      int randomNumber = random.nextInt(2);
-
-      if(randomNumber == 1){
+    setState(() {
+      if (isDisplayedTarget) {
         columnDisplayedText = DBTableWords.columnTextTarget;
         columnAnswerText = DBTableWords.columnTextNative;
       }
-    }
 
-    setState(() {
       _stateTextDisplayed = _stateCurrentWord[columnDisplayedText].toString();
       _stateTextAnswer = _stateCurrentWord[columnAnswerText].toString();
-      _stateIsActiveVoice = columnDisplayedText == DBTableWords.columnTextTarget;
+      _stateIsActiveVoice = isDisplayedTarget;
+      _stateIsDisplayedTarget = isDisplayedTarget;
     });
 
-    if(_stateLanguage[DBTableLanguages.columnIsAutoVoice] == 1 && _stateIsActiveVoice){
+    if (isDisplayedTarget &&
+        languageProviderModel
+                .selectedLanguage[DBTableLanguages.columnIsAutoVoice] ==
+            1) {
       onClickTTS();
-    }
-  }
-
-  Future<void> setLanguage() async {
-    var languages = await LanguageService.get(
-        LanguageGetParamModel(languageId: Values.getLanguageId));
-
-    setState(() {
-      _stateLanguage = languages[0];
-    });
-
-  }
-
-  Future<void> setTTS() async {
-    var voices = await VoicesLib.getVoices();
-    var voice = MyLibArray.findSingle(array: voices, key: TTSVoiceKeys.keyName, value: _stateLanguage[DBTableLanguages.columnTTSArtist]);
-    if(voice != null){
-      await (await VoicesLib.flutterTts).setVoice({"name": voice[TTSVoiceKeys.keyName], "locale": voice[TTSVoiceKeys.keyLocale], "gender": _stateLanguage[DBTableLanguages.columnTTSGender]});
     }
   }
 
@@ -163,10 +168,9 @@ class _PageStudyState extends State<PageStudy> {
     setState(() {
       _stateCurrentWord = _stateWords[randomNumber];
       _stateSelectedStudyType = _stateCurrentWord[DBTableWords.columnStudyType];
-      _stateIsTrue = false;
+      _stateIsCorrect = false;
       _stateIsStudied = false;
     });
-
   }
 
   void onChangeStudyType(int? value) {
@@ -185,43 +189,51 @@ class _PageStudyState extends State<PageStudy> {
 
     setState(() {
       _stateIsStudied = true;
-      _stateIsTrue = _stateTextAnswer.toLowerCase() == _controllerText.text.toString().toLowerCase().trim();
+      _stateIsCorrect = _stateTextAnswer.toLowerCase() ==
+          _controllerText.text.toString().toLowerCase().trim();
     });
 
-    if (_stateIsTrue) {
+    if (_stateIsCorrect) {
+      final languageProviderModel =
+          ProviderLib.get<LanguageProviderModel>(context);
+
       var updateWord = await WordService.update(WordUpdateParamModel(
-          whereWordLanguageId: Values.getLanguageId,
+          whereWordLanguageId:
+              languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
           whereWordId: _stateCurrentWord[DBTableWords.columnId],
           wordIsStudy: 1));
       if (updateWord > 0) {
         setState(() {
-          _stateWords = MyLibArray.findMulti(array: _stateWords, key: DBTableWords.columnId, value: _stateCurrentWord[DBTableWords.columnId], isLike: false);
+          _stateWords = MyLibArray.findMulti(
+              array: _stateWords,
+              key: DBTableWords.columnId,
+              value: _stateCurrentWord[DBTableWords.columnId],
+              isLike: false);
           _stateStudiedWords += 1;
         });
         AudioLib.play(AudioConst.positive);
         DialogLib.show(
             context,
             ComponentDialogOptions(
-                title: "🤗 Correct! 🤗",
-                content: "Congratulations your answer is correct! 🤗",
-                icon: ComponentDialogIcon.success,
-                onPressed: (isConfirm) async {
-                  if(isConfirm){
-                    if(_stateWords.isEmpty) {
-                      AudioLib.play(AudioConst.positive_2);
-                      DialogLib.show(
-                          context,
-                          ComponentDialogOptions(
-                              title: "🤩 Finally Over! 🤩",
-                              content: "Congratulations, you have mastered all the words. 🤩",
-                              icon: ComponentDialogIcon.success
-                          ));
-                      return false;
-                    }
+              title: "🤗 Correct! 🤗",
+              content: "Congratulations your answer is correct! 🤗",
+              icon: ComponentDialogIcon.success,
+              onPressed: (isConfirm) async {
+                if (isConfirm) {
+                  if (_stateWords.isEmpty) {
+                    AudioLib.play(AudioConst.positive_2);
+                    DialogLib.show(
+                        context,
+                        ComponentDialogOptions(
+                            title: "🤩 Finally Over! 🤩",
+                            content:
+                                "Congratulations, you have mastered all the words. 🤩",
+                            icon: ComponentDialogIcon.success));
+                    return false;
                   }
-                },
-            )
-        );
+                }
+              },
+            ));
       } else {
         DialogLib.show(
             context,
@@ -250,20 +262,20 @@ class _PageStudyState extends State<PageStudy> {
             icon: ComponentDialogIcon.confirm,
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
-                await RouteLib(context).change(target: "/study/plan");
+                await RouteLib.change(
+                    context: context, target: PageConst.routeNames.studyPlan);
               }
             }));
   }
 
   void onClickSettings() async {
-    bool isUpdated = await RouteLib(context)
-        .change(target: "/study/settings", safeHistory: true);
+    var isUpdated = await RouteLib.change(
+        context: context,
+        target: PageConst.routeNames.studySettings,
+        safeHistory: true);
     if (isUpdated == true) {
       await DialogLib.show(
-          context,
-          ComponentDialogOptions(
-              content: "Loading...", icon: ComponentDialogIcon.loading));
-      await setLanguage();
+          context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
       setTextDisplayedAndAnswer();
       DialogLib.hide(context);
     }
@@ -275,22 +287,25 @@ class _PageStudyState extends State<PageStudy> {
         ComponentDialogOptions(
             content: "Loading...", icon: ComponentDialogIcon.loading));
 
-    if(_stateCurrentWord[DBTableWords.columnStudyType] != _stateSelectedStudyType){
+    final languageProviderModel =
+        ProviderLib.get<LanguageProviderModel>(context);
+
+    if (_stateCurrentWord[DBTableWords.columnStudyType] !=
+        _stateSelectedStudyType) {
       await WordService.update(WordUpdateParamModel(
-        whereWordLanguageId: Values.getLanguageId,
-        whereWordId: _stateCurrentWord[DBTableWords.columnId],
-        wordStudyType: _stateSelectedStudyType
-      ));
+          whereWordLanguageId:
+              languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
+          whereWordId: _stateCurrentWord[DBTableWords.columnId],
+          wordStudyType: _stateSelectedStudyType));
     }
 
-    if(_stateWords.isEmpty) {
+    if (_stateWords.isEmpty) {
       DialogLib.show(
           context,
           ComponentDialogOptions(
-              content:
-              "Word's study type has successfully saved!",
+              content: "Word's study type has successfully saved!",
               icon: ComponentDialogIcon.success));
-    }else {
+    } else {
       setCurrentWord();
       setTextDisplayedAndAnswer();
       _controllerText.text = "";
@@ -302,9 +317,8 @@ class _PageStudyState extends State<PageStudy> {
     if (await Permission.speech.request() != PermissionStatus.granted) {
       return;
     }
-    await (await VoicesLib.flutterTts).setSpeechRate(0.5);
-    await (await VoicesLib.flutterTts).setVolume(1.0);
-    await (await VoicesLib.flutterTts).speak(_stateTextDisplayed);
+    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
+    await ttsProviderModel.flutterTts.speak(_stateTextDisplayed);
   }
 
   void onClickComment() async {
@@ -312,8 +326,7 @@ class _PageStudyState extends State<PageStudy> {
         context,
         ComponentDialogOptions(
             title: "🧐 Comment 🧐",
-            content: _stateCurrentWord[DBTableWords.columnComment]
-        ));
+            content: _stateCurrentWord[DBTableWords.columnComment]));
   }
 
   String? onValidator(String? value) {
@@ -329,9 +342,13 @@ class _PageStudyState extends State<PageStudy> {
       onSubmit: onClickCheck,
       submitButtonText: "Check",
       children: <Widget>[
-        Text(_stateLanguage[DBTableLanguages.columnDisplayedLanguage] == DisplayedLanguageConst.native
-            ? Values.getLanguageName
-            : "Native"),
+        Consumer<LanguageProviderModel>(
+          builder: (context, model, child) {
+            return Text(!_stateIsDisplayedTarget
+                ? model.selectedLanguage[DBTableLanguages.columnName]
+                : "Native");
+          },
+        ),
         TextFormField(
             controller: _controllerText,
             validator: onValidator,
@@ -344,51 +361,56 @@ class _PageStudyState extends State<PageStudy> {
 
   Widget _componentResult() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Answer: ${_controllerText.text}",
+          "[Answer]: ${_controllerText.text}",
           style: TextStyle(
-            fontSize: ThemeConst.fontSizes.lg,
-            color: _stateIsTrue ? ThemeConst.colors.success : ThemeConst.colors.danger,
+            fontSize: ThemeConst.fontSizes.md,
+            color: _stateIsCorrect
+                ? ThemeConst.colors.success
+                : ThemeConst.colors.danger,
             fontWeight: FontWeight.bold,
           ),
         ),
-        _stateIsTrue ? Column(
-          children: [
-            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-            const Text("Word Study Type"),
-            ComponentRadio<int>(
-              title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
-              value: StudyTypeConst.Daily,
-              groupValue: _stateSelectedStudyType,
-              onChanged: onChangeStudyType,
-            ),
-            ComponentRadio<int>(
-              title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
-              value: StudyTypeConst.Weekly,
-              groupValue: _stateSelectedStudyType,
-              onChanged: onChangeStudyType,
-            ),
-            ComponentRadio<int>(
-              title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
-              value: StudyTypeConst.Monthly,
-              groupValue: _stateSelectedStudyType,
-              onChanged: onChangeStudyType,
-            )
-          ],
-        ) : Column(
-          children: [
-            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-            Text(
-              "Correct Word: ${_stateTextAnswer}",
-              style: TextStyle(
-                fontSize: ThemeConst.fontSizes.lg,
-                color: ThemeConst.colors.info,
-                fontWeight: FontWeight.bold,
+        _stateIsCorrect
+            ? Column(
+                children: [
+                  Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+                  const Text("Word Study Type"),
+                  ComponentRadio<int>(
+                    title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
+                    value: StudyTypeConst.Daily,
+                    groupValue: _stateSelectedStudyType,
+                    onChanged: onChangeStudyType,
+                  ),
+                  ComponentRadio<int>(
+                    title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
+                    value: StudyTypeConst.Weekly,
+                    groupValue: _stateSelectedStudyType,
+                    onChanged: onChangeStudyType,
+                  ),
+                  ComponentRadio<int>(
+                    title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
+                    value: StudyTypeConst.Monthly,
+                    groupValue: _stateSelectedStudyType,
+                    onChanged: onChangeStudyType,
+                  )
+                ],
+              )
+            : Column(
+                children: [
+                  Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
+                  Text(
+                    "[Correct]: ${_stateTextAnswer}",
+                    style: TextStyle(
+                      fontSize: ThemeConst.fontSizes.md,
+                      color: ThemeConst.colors.info,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
         Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
         ComponentButton(
           text: _stateWords.isNotEmpty ? "Next" : "Save",
@@ -401,11 +423,13 @@ class _PageStudyState extends State<PageStudy> {
 
   Widget _componentInfo() {
     Widget _componentVoice() {
-      return _stateIsActiveVoice ? ComponentIconButton(
-        onPressed: onClickTTS,
-        icon: Icons.volume_up,
-        color: ThemeConst.colors.info,
-      ) : Container();
+      return _stateIsActiveVoice
+          ? ComponentIconButton(
+              onPressed: onClickTTS,
+              icon: Icons.volume_up,
+              color: ThemeConst.colors.info,
+            )
+          : Container();
     }
 
     Widget _componentComment() {
@@ -416,16 +440,20 @@ class _PageStudyState extends State<PageStudy> {
       );
     }
 
-
-    return _stateCurrentWord[DBTableWords.columnComment].toString().isNotEmpty ?
-    Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _componentVoice(),
-        Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.sm)),
-        _componentComment(),
-      ],
-    ) : _componentVoice();
+    return _stateCurrentWord[DBTableWords.columnComment].toString().isNotEmpty
+        ? _stateIsDisplayedTarget
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _componentVoice(),
+                  Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: ThemeConst.paddings.sm)),
+                  _componentComment(),
+                ],
+              )
+            : _componentComment()
+        : _componentVoice();
   }
 
   Widget _componentProgress() {
@@ -435,11 +463,28 @@ class _PageStudyState extends State<PageStudy> {
           "$_stateTotalWords / $_stateStudiedWords",
           style: TextStyle(fontSize: ThemeConst.fontSizes.md),
         ),
-        Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
+        Padding(
+            padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
         ComponentProgress(
             maxValue: _stateTotalWords.toDouble(),
-            currentValue: _stateStudiedWords.toDouble()
-        )
+            currentValue: _stateStudiedWords.toDouble()),
+      ],
+    );
+  }
+
+  Widget _componentStatusInfo() {
+    return Column(
+      children: [
+        Padding(
+            padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
+        Text(
+          _stateIsCorrect ? "🤗 Correct! 🤗" : "😥 Wrong! 😥",
+          style: TextStyle(
+              fontSize: ThemeConst.fontSizes.md,
+              color: _stateIsCorrect
+                  ? ThemeConst.colors.success
+                  : ThemeConst.colors.danger),
+        ),
       ],
     );
   }
@@ -469,29 +514,40 @@ class _PageStudyState extends State<PageStudy> {
 
   @override
   Widget build(BuildContext context) {
-    return ComponentPageScaffold(
-        isLoading: _statePageIsLoading,
-        title: "Study",
-        hideBackButton: true,
-        hideAppBar: true,
-        hideSidebar: true,
-        withScroll: true,
-        body: _statePageIsLoading ? Container() : Column(
-          children: <Widget>[
-            Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
-            _componentNavbar(),
-            Padding(padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
-            _componentProgress(),
-            Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
-            _stateLanguage[DBTableLanguages.columnDisplayedLanguage] != DisplayedLanguageConst.onlyVoiceTarget ? Text(_stateTextDisplayed,
-              style: TextStyle(fontSize: ThemeConst.fontSizes.lg),
-            ) : Container(),
-            Padding(padding: EdgeInsets.all(ThemeConst.paddings.xsm)),
-            Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
-            _componentInfo(),
-            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-            _stateIsStudied ? _componentResult() : _componentAnswer(),
-          ],
-        ));
+    final languageProviderModel =
+        ProviderLib.get<LanguageProviderModel>(context, listen: true);
+    final pageProviderModel =
+        ProviderLib.get<PageProviderModel>(context, listen: true);
+
+    return pageProviderModel.isLoading
+        ? Container()
+        : Column(
+            children: <Widget>[
+              Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
+              _componentNavbar(),
+              Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
+              _componentProgress(),
+              Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
+              languageProviderModel.selectedLanguage[
+                              DBTableLanguages.columnDisplayedLanguage] ==
+                          DisplayedLanguageConst.onlyVoiceTarget &&
+                      !_stateIsStudied
+                  ? Container()
+                  : Text(
+                      _stateTextDisplayed,
+                      style: TextStyle(fontSize: ThemeConst.fontSizes.lg),
+                    ),
+              Padding(padding: EdgeInsets.all(ThemeConst.paddings.xsm)),
+              Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
+              _componentInfo(),
+              _stateIsStudied ? _componentStatusInfo() : Container(),
+              Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+              _stateIsStudied ? _componentResult() : _componentAnswer(),
+            ],
+          );
   }
 }

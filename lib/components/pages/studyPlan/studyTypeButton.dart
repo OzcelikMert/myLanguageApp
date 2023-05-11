@@ -6,7 +6,7 @@ import 'package:my_language_app/constants/theme.const.dart';
 
 class ComponentStudyTypeButton extends StatelessWidget {
   final String title;
-  final String lastStudyDate;
+  final DateTime lastStudyDate;
   final int totalWords;
   final int studiedWords;
   final int unstudiedWords;
@@ -25,6 +25,7 @@ class ComponentStudyTypeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var dateDiff = DateTime.now().difference(lastStudyDate);
     return Container(
       padding: EdgeInsets.symmetric(
           vertical: ThemeConst.paddings.md, horizontal: ThemeConst.paddings.sm),
@@ -73,7 +74,7 @@ class ComponentStudyTypeButton extends StatelessWidget {
           Padding(
               padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
           Text(
-            'Last Study Date: ${DateFormat.yMd().add_Hm().format(DateTime.parse(lastStudyDate).toLocal())}',
+            'Last Study Date: ${DateFormat.yMd().add_Hm().format(lastStudyDate.toLocal())} (${dateDiff.inDays > 0 ? "${dateDiff.inDays} Days ago" : dateDiff.inDays == 1 ? "Yesterday" : "Today"})',
             style: TextStyle(fontSize: ThemeConst.fontSizes.md),
           ),
           Padding(

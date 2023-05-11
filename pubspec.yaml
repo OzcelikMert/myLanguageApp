@@ -23,6 +23,7 @@ dependencies:
   device_info: ^2.0.3
   file_picker: ^5.2.11
   audioplayers: ^4.0.1
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_test:

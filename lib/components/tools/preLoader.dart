@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/constants/theme.const.dart';
+import 'package:my_language_app/lib/provider.lib.dart';
+import 'package:my_language_app/models/providers/page.provider.dart';
 
 class ComponentPreLoader extends StatefulWidget {
-  final bool isLoading;
-
-  const ComponentPreLoader({Key? key, required this.isLoading})
+  const ComponentPreLoader({Key? key})
       : super(key: key);
 
   @override
@@ -14,7 +14,10 @@ class ComponentPreLoader extends StatefulWidget {
 class _ComponentPreLoaderState extends State<ComponentPreLoader> {
   @override
   Widget build(BuildContext context) {
-    return widget.isLoading ? AbsorbPointer(
+    final pageProviderModel =
+   ProviderLib.get<PageProviderModel>(context, listen: true);
+
+    return pageProviderModel.isLoading ? AbsorbPointer(
       absorbing: true,
       child: Container(
         color: ThemeConst.colors.dark,

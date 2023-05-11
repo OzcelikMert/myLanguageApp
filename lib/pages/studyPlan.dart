@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/pages/studyPlan/studyTypeButton.dart';
-import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
-import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
+import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
+import 'package:my_language_app/models/providers/language.provider.dart';
+import 'package:my_language_app/models/providers/page.provider.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
@@ -16,34 +18,40 @@ import 'package:my_language_app/services/language.service.dart';
 import 'package:my_language_app/services/word.service.dart';
 
 class PageStudyPlan extends StatefulWidget {
-  const PageStudyPlan({Key? key}) : super(key: key);
+  final BuildContext context;
+
+  const PageStudyPlan({Key? key, required this.context}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PageStudyPlanState();
 }
 
 class _PageStudyPlanState extends State<PageStudyPlan> {
-  late bool _statePageIsLoading = true;
-  late Map<String, dynamic> _stateLanguage = {};
   late List<Map<String, dynamic>> _stateWordCountReports = [];
 
   @override
   void initState() {
     super.initState();
-    _pageInit();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _pageInit();
+    });
   }
 
   _pageInit() async {
-    var languages = await LanguageService.get(
-        LanguageGetParamModel(languageId: Values.getLanguageId));
+    final pageProviderModel =
+   ProviderLib.get<PageProviderModel>(context);
+    pageProviderModel.setTitle("Study Plan");
+    final languageProviderModel =
+   ProviderLib.get<LanguageProviderModel>(context);
+
     var wordCountReports = await WordService.getCountReport(
-        WordGetCountReportParamModel(wordLanguageId: Values.getLanguageId));
+        WordGetCountReportParamModel(wordLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId]));
 
     setState(() {
-      _stateLanguage = languages[0];
       _stateWordCountReports = wordCountReports;
-      _statePageIsLoading = false;
     });
+
+    pageProviderModel.setIsLoading(false);
   }
 
   void onClickStudy(int type) async {
@@ -88,12 +96,15 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                           content: "Loading...",
                           icon: ComponentDialogIcon.loading));
 
+                  final languageProviderModel =
+                 ProviderLib.get<LanguageProviderModel>(context);
+
                   bool changeRoute = true;
 
                   if (unstudiedWordCount == 0) {
                     var wordUpdate = await WordService.update(
                         WordUpdateParamModel(
-                            whereWordLanguageId: Values.getLanguageId,
+                            whereWordLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
                             whereWordStudyType: type,
                             wordIsStudy: 0));
                     if (wordUpdate < 1) {
@@ -104,7 +115,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                   var date = DateTime.now().toUtc().toString();
                   var languageUpdate =
                   await LanguageService.update(LanguageUpdateParamModel(
-                    whereLanguageId: Values.getLanguageId,
+                    whereLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
                     languageDailyUpdatedAt:
                     type == StudyTypeConst.Daily ? date : null,
                     languageWeeklyUpdatedAt:
@@ -118,8 +129,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                   }
 
                   if (changeRoute) {
-                    await RouteLib(context)
-                        .change(target: "/study", arguments: {DBTableWords.columnStudyType: type});
+                    await RouteLib.change(context: context, target: PageConst.routeNames.study, arguments: {DBTableWords.columnStudyType: type});
                   } else {
                     DialogLib.show(
                         context,
@@ -134,6 +144,8 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   }
 
   Widget componentDaily() {
+    final languageProviderModel =
+   ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -147,7 +159,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.success,
         title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
         onStartPressed: () => onClickStudy(StudyTypeConst.Daily),
-        lastStudyDate: _stateLanguage[DBTableLanguages.columnDailyUpdatedAt].toString(),
+        lastStudyDate: DateTime.parse(languageProviderModel.selectedLanguage[DBTableLanguages.columnDailyUpdatedAt].toString()),
         totalWords: reports.isNotEmpty
             ? reports
                 .map((e) => e[DBTableWords.asColumnCount])
@@ -166,6 +178,8 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   }
 
   Widget componentWeekly() {
+    final languageProviderModel =
+   ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -179,7 +193,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.danger,
         title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
         onStartPressed: () => onClickStudy(StudyTypeConst.Weekly),
-        lastStudyDate: _stateLanguage[DBTableLanguages.columnWeeklyUpdatedAt].toString(),
+        lastStudyDate: DateTime.parse(languageProviderModel.selectedLanguage[DBTableLanguages.columnWeeklyUpdatedAt].toString()),
         totalWords: reports.isNotEmpty
             ? reports
                 .map((e) => e[DBTableWords.asColumnCount])
@@ -198,6 +212,8 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   }
 
   Widget componentMonthly() {
+    final languageProviderModel =
+   ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -211,7 +227,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.info,
         title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
         onStartPressed: () => onClickStudy(StudyTypeConst.Monthly),
-        lastStudyDate: _stateLanguage[DBTableLanguages.columnMonthlyUpdatedAt].toString(),
+        lastStudyDate: DateTime.parse(languageProviderModel.selectedLanguage[DBTableLanguages.columnMonthlyUpdatedAt].toString()),
         totalWords: reports.isNotEmpty
             ? reports
                 .map((e) => e[DBTableWords.asColumnCount])
@@ -231,22 +247,21 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
 
   @override
   Widget build(BuildContext context) {
-    return ComponentPageScaffold(
-        isLoading: _statePageIsLoading,
-        title: "Study Plan",
-        withScroll: true,
-        body: _statePageIsLoading ? Container() : Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              componentDaily(),
-              Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-              componentWeekly(),
-              Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-              componentMonthly(),
-            ],
-          ),
-        ));
+    final pageProviderModel =
+   ProviderLib.get<PageProviderModel>(context, listen: true);
+
+    return pageProviderModel.isLoading ? Container() : Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          componentDaily(),
+          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+          componentWeekly(),
+          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+          componentMonthly(),
+        ],
+      ),
+    );
   }
 }

@@ -3,18 +3,22 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
-import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/file.lib.dart';
+import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
+import 'package:my_language_app/models/providers/language.provider.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/services/language.service.dart';
 import 'package:my_language_app/services/word.service.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 class ComponentSideBar extends StatefulWidget {
   const ComponentSideBar({Key? key}) : super(key: key);
@@ -24,6 +28,11 @@ class ComponentSideBar extends StatefulWidget {
 }
 
 class _ComponentSideBarState extends State<ComponentSideBar> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   Color? getActiveBG(String? routeName, String itemRouteName) {
     return routeName == itemRouteName ? ThemeConst.colors.dark : null;
   }
@@ -63,15 +72,24 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
   void onClickReturnHome() async {
     await DialogLib.show(
         context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
+    final languageProviderModel =
+       ProviderLib.get<LanguageProviderModel>(context);
+
     var result = await LanguageService.update(LanguageUpdateParamModel(
-        whereLanguageId: Values.getLanguageId, languageIsSelected: 0));
+        whereLanguageId:
+            languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
+        languageIsSelected: 0));
     if (result > 0) {
-      await RouteLib(context).change(target: '/');
+      await RouteLib.change(
+          context: context, target: PageConst.routeNames.home);
     }
   }
 
   void onClickExport() async {
     if (await checkFilePermission()) {
+      final languageProviderModel =
+         ProviderLib.get<LanguageProviderModel>(context);
+
       DialogLib.show(
           context,
           ComponentDialogOptions(
@@ -86,17 +104,20 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
                       ComponentDialogOptions(
                           content: "Loading...",
                           icon: ComponentDialogIcon.loading));
-                  var words = await WordService.get(
-                      WordGetParamModel(wordLanguageId: Values.getLanguageId));
+                  var words = await WordService.get(WordGetParamModel(
+                      wordLanguageId: languageProviderModel
+                          .selectedLanguage[DBTableLanguages.columnId]));
                   File? file = await FileLib.exportJsonFile(
-                      fileName: "LangApp-${Values.getLanguageName}-${DateFormat("yyyy-MM-dd-HH-mm").format(DateTime.now().toLocal())}",
+                      fileName:
+                          "LangApp-${languageProviderModel.selectedLanguage[DBTableLanguages.columnName]}-${DateFormat("yyyy-MM-dd-HH-mm").format(DateTime.now().toLocal())}",
                       jsonString: jsonEncode(words));
                   if (file != null) {
                     DialogLib.show(
                         context,
                         ComponentDialogOptions(
                           title: "Successfully!",
-                          content: "The file has saved successfully. Check your downloads folder.",
+                          content:
+                              "The file has saved successfully. Check your downloads folder.",
                           icon: ComponentDialogIcon.success,
                         ));
                   } else {
@@ -115,26 +136,30 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
 
   void onClickImport() async {
     var importedDataList = await FileLib.importJsonFile();
-    if(importedDataList != null && importedDataList is List && importedDataList.length > 0) {
+    if (importedDataList != null &&
+        importedDataList is List &&
+        importedDataList.length > 0) {
+      final languageProviderModel =
+         ProviderLib.get<LanguageProviderModel>(context);
+
       await DialogLib.show(
           context,
           ComponentDialogOptions(
-              content: "Loading...",
-              icon: ComponentDialogIcon.loading));
+              content: "Loading...", icon: ComponentDialogIcon.loading));
 
       List<WordAddParamModel> wordAddParamsList = [];
-      for(var importedData in importedDataList) {
+      for (var importedData in importedDataList) {
         wordAddParamsList.add(WordAddParamModel(
-            wordLanguageId: Values.getLanguageId,
+            wordLanguageId: languageProviderModel
+                .selectedLanguage[DBTableLanguages.columnId],
             wordTextTarget: importedData[DBTableWords.columnTextTarget],
             wordTextNative: importedData[DBTableWords.columnTextNative],
             wordComment: importedData[DBTableWords.columnComment],
             wordStudyType: importedData[DBTableWords.columnStudyType],
-            wordIsStudy: importedData[DBTableWords.columnIsStudy]
-        ));
+            wordIsStudy: importedData[DBTableWords.columnIsStudy]));
       }
       int addWords = await WordService.addMulti(wordAddParamsList);
-      if(addWords > 0){
+      if (addWords > 0) {
         DialogLib.show(
             context,
             ComponentDialogOptions(
@@ -142,7 +167,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
               content: "The file has imported successfully.",
               icon: ComponentDialogIcon.success,
             ));
-      }else {
+      } else {
         DialogLib.show(
             context,
             ComponentDialogOptions(
@@ -161,7 +186,12 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            child: Center(child: Text(Values.getLanguageName)),
+            child: Center(child: Consumer<LanguageProviderModel>(
+              builder: (context, model, child) {
+                return Text(
+                    model.selectedLanguage[DBTableLanguages.columnName]);
+              },
+            )),
             decoration: BoxDecoration(
               color: ThemeConst.colors.primary,
             ),
@@ -172,7 +202,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
               leading: const Icon(Icons.workspace_premium),
               title: const Text('Study Plan'),
               onTap: () async {
-                await RouteLib(context).change(target: '/study/plan');
+                await RouteLib.change(context: context, target: PageConst.routeNames.studyPlan);
               },
             ),
           ),
@@ -182,17 +212,17 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
               leading: const Icon(Icons.add),
               title: const Text('Add New Word'),
               onTap: () async {
-                await RouteLib(context).change(target: '/word/add');
+                await RouteLib.change(context: context, target: PageConst.routeNames.wordAdd);
               },
             ),
           ),
           Container(
             color: getActiveBG(routeName, "/word/list"),
             child: ListTile(
-              leading: const Icon(Icons.list),
+              leading: const Icon(Icons.list_alt),
               title: const Text('List Words'),
               onTap: () async {
-                await RouteLib(context).change(target: '/word/list');
+                await RouteLib.change(context: context, target: PageConst.routeNames.wordList);
               },
             ),
           ),
@@ -216,7 +246,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () async {
-                await RouteLib(context).change(target: '/settings');
+                await RouteLib.change(context: context, target: PageConst.routeNames.settings);
               },
             ),
           ),

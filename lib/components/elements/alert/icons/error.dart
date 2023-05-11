@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/constants/theme.const.dart';
-import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:vector_math/vector_math_64.dart' as math;
 import 'package:flutter_sequence_animation/flutter_sequence_animation.dart';
 

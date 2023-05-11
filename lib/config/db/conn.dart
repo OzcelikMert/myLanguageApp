@@ -33,10 +33,10 @@ class DBConn {
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    var tableLanguages = DBTableLanguages(db);
+    /*var tableLanguages = DBTableLanguages(db);
     tableLanguages.onUpgrade();
 
     var tableWords = DBTableWords(db);
-    tableWords.onUpgrade();
+    tableWords.onUpgrade();*/
   }
 }

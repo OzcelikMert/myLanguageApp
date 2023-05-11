@@ -3,29 +3,30 @@ import 'package:my_language_app/components/elements/dropdown.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/radio.dart';
-import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
-import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
-import 'package:my_language_app/lib/voices.lib.dart';
+import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
+import 'package:my_language_app/models/providers/language.provider.dart';
+import 'package:my_language_app/models/providers/page.provider.dart';
+import 'package:my_language_app/models/providers/tts.provider.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
 import 'package:my_language_app/services/language.service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PageSettings extends StatefulWidget {
-  const PageSettings({Key? key}) : super(key: key);
+  final BuildContext context;
+
+  const PageSettings({Key? key, required this.context}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PageSettingsState();
 }
 
 class _PageSettingsState extends State<PageSettings> {
-  late bool _statePageIsLoading = true;
-  late List<Map<String, dynamic>> _stateTTSVoices = [];
   String _stateSelectedVoiceGenderRadio = "male";
   Map<String, dynamic>? _stateSelectedVoice;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -33,32 +34,45 @@ class _PageSettingsState extends State<PageSettings> {
   @override
   void initState() {
     super.initState();
-    _pageInit();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _pageInit();
+    });
   }
 
   _pageInit() async {
-    var voices = await VoicesLib.getVoices();
-    var languages = await LanguageService.get(LanguageGetParamModel(languageId: Values.getLanguageId));
-    var language = languages[0];
-    var findVoice = MyLibArray.findSingle(array: voices, key: TTSVoiceKeys.keyName, value: language[DBTableLanguages.columnTTSArtist]);
+    final pageProviderModel =
+   ProviderLib.get<PageProviderModel>(context);
+    pageProviderModel.setTitle("Settings");
+
+    final ttsProviderModel =
+   ProviderLib.get<TTSProviderModel>(context);
+
+    final languageProviderModel =
+   ProviderLib.get<LanguageProviderModel>(context);
+
+    var findVoice = MyLibArray.findSingle(array: ttsProviderModel.voices, key: TTSVoiceKeys.keyName, value: languageProviderModel.selectedLanguage[DBTableLanguages.columnTTSArtist]);
     setState(() {
-      _stateTTSVoices = voices;
-      _stateSelectedVoice = findVoice ?? voices[0];
-      _stateSelectedVoiceGenderRadio = language[DBTableLanguages.columnTTSGender];
-      _statePageIsLoading = false;
+      _stateSelectedVoice = findVoice ?? ttsProviderModel.voices[0];
+      _stateSelectedVoiceGenderRadio = languageProviderModel.selectedLanguage[DBTableLanguages.columnTTSGender];
     });
+
+    pageProviderModel.setIsLoading(false);
   }
 
   void onClickTTS() async {
     if (await Permission.speech.request() != PermissionStatus.granted) {
       return;
     }
-    var voice = MyLibArray.findSingle(array: _stateTTSVoices, key: TTSVoiceKeys.keyName, value: _stateSelectedVoice![TTSVoiceKeys.keyName]);
+    final ttsProviderModel =
+   ProviderLib.get<TTSProviderModel>(context);
+
+    var voice = MyLibArray.findSingle(array: ttsProviderModel.voices, key: TTSVoiceKeys.keyName, value: _stateSelectedVoice![TTSVoiceKeys.keyName]);
     if(voice != null){
-      await (await VoicesLib.flutterTts).setVoice({"name": voice[TTSVoiceKeys.keyName], "locale": voice[TTSVoiceKeys.keyLocale], "gender": _stateSelectedVoiceGenderRadio});
-      await (await VoicesLib.flutterTts).setSpeechRate(0.7);
-      await (await VoicesLib.flutterTts).setVolume(1.0);
-      await (await VoicesLib.flutterTts).speak("Text to speech");
+      var flutterTts = ttsProviderModel.flutterTts;
+      await flutterTts.setVoice({"name": voice[TTSVoiceKeys.keyName], "locale": voice[TTSVoiceKeys.keyLocale], "gender": _stateSelectedVoiceGenderRadio});
+      await flutterTts.setSpeechRate(0.7);
+      await flutterTts.setVolume(1.0);
+      await flutterTts.speak("Text to speech");
     }
   }
 
@@ -80,13 +94,15 @@ class _PageSettingsState extends State<PageSettings> {
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
+                final languageProviderModel =
+               ProviderLib.get<LanguageProviderModel>(context);
                 await DialogLib.show(
                     context,
                     ComponentDialogOptions(
                         content: "Saving...",
                         icon: ComponentDialogIcon.loading));
                 var result = await LanguageService.update(LanguageUpdateParamModel(
-                    whereLanguageId: Values.getLanguageId,
+                    whereLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
                     languageTTSArtist: _stateSelectedVoice![TTSVoiceKeys.keyName],
                     languageTTSGender: _stateSelectedVoiceGenderRadio));
                 if (result > 0) {
@@ -117,11 +133,12 @@ class _PageSettingsState extends State<PageSettings> {
 
   @override
   Widget build(BuildContext context) {
-    return ComponentPageScaffold(
-      isLoading: _statePageIsLoading,
-      title: "Settings",
-      withScroll: true,
-      body: _statePageIsLoading ? Container() : Center(
+    final pageProviderModel =
+   ProviderLib.get<PageProviderModel>(context, listen: true);
+    final ttsProviderModel =
+   ProviderLib.get<TTSProviderModel>(context, listen: true);
+
+    return pageProviderModel.isLoading ? Container() : Center(
         child: ComponentForm(
           formKey: _formKey,
           onSubmit: () => onClickSave(),
@@ -141,7 +158,7 @@ class _PageSettingsState extends State<PageSettings> {
             const Text("Language Code"),
             ComponentDropdown<Map<String, dynamic>>(
               selectedItem: _stateSelectedVoice,
-              items: _stateTTSVoices,
+              items: ttsProviderModel.voices,
               itemAsString: (Map<String, dynamic> u) =>
               u[TTSVoiceKeys.keyDisplayName],
               onChanged: (Map<String, dynamic>? data) => setState(() {
@@ -171,7 +188,6 @@ class _PageSettingsState extends State<PageSettings> {
             )
           ],
         ),
-      ),
     );
   }
 }

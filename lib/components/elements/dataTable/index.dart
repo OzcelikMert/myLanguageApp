@@ -93,7 +93,7 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
           bool isContain = false;
           if(widget.searchableKeys != null){
             for(var key in widget.searchableKeys!) {
-              isContain = row[key].toString().toLowerCase().contains(query.toLowerCase());
+              isContain = row[key].toString().toLowerCase().contains(query.trim().toLowerCase());
               if(isContain == true) break;
             }
           }

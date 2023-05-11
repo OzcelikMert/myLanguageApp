@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RouteLib {
-  final BuildContext context;
-
-  RouteLib(this.context);
-
-  change({required String target, dynamic arguments, bool? safeHistory}) async {
+  static change({required BuildContext context, required String target, dynamic arguments, bool? safeHistory}) async {
     if(safeHistory == true){
       return await Navigator.pushNamed(context, target, arguments: arguments);
     }else {

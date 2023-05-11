@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
-import 'package:my_language_app/components/tools/pageScaffold.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
-import 'package:my_language_app/config/values.dart';
+import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
+import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
+import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
+import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
+import 'package:my_language_app/models/providers/language.provider.dart';
+import 'package:my_language_app/models/providers/page.provider.dart';
+import 'package:my_language_app/models/providers/tts.provider.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
@@ -18,64 +23,97 @@ import 'package:my_language_app/services/word.service.dart';
 import '../components/elements/button.dart';
 
 class PageHome extends StatefulWidget {
-  const PageHome({Key? key}) : super(key: key);
+  final BuildContext context;
+
+  const PageHome({Key? key, required this.context}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PageHomeState();
 }
 
 class _PageHomeState extends State<PageHome> {
-  late bool _statePageIsLoading = true;
   late List<Map<String, dynamic>> _stateLanguages = [];
 
   @override
   void initState() {
     super.initState();
-    _pageInit();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _pageInit();
+    });
   }
 
   _pageInit() async {
+    final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
+    pageProviderModel.setTitle("Select Language");
+
+    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
+    ttsProviderModel.setFlutterTts(await VoicesLib.getFlutterTts());
+    if(ttsProviderModel.voices.isEmpty){
+      ttsProviderModel.setVoices(await VoicesLib.getVoices(ttsProviderModel.flutterTts));
+    }
+
     var languages = await LanguageService.get(LanguageGetParamModel());
 
-    if (languages.length > 0) {
-      var findLanguage = MyLibArray.findSingle(
-          array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
-      if (findLanguage != null) {
-        Values.setLanguageId = findLanguage[DBTableLanguages.columnId];
-        Values.setLanguageName = findLanguage[DBTableLanguages.columnName];
-        await RouteLib(context).change(target: '/study/plan');
-        return;
-      }
+    var findLanguage = MyLibArray.findSingle(array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
+    if (findLanguage != null) {
+      onClickSelect(findLanguage);
+      return;
     }
 
     setState(() {
       _stateLanguages = languages;
-      _statePageIsLoading = false;
     });
+
+    pageProviderModel.setIsLoading(false);
   }
 
   void onClickAdd() async {
-    var isAdded = await RouteLib(context)
-        .change(target: '/language/add', safeHistory: true);
-    if (isAdded) {
+    var isAdded = await RouteLib.change(context: context, target: PageConst.routeNames.languageAdd, safeHistory: true);
+    if (isAdded == true) {
       await DialogLib.show(
           context,
-          ComponentDialogOptions(
-              content: "Loading...",
-              icon: ComponentDialogIcon.loading));
+          ComponentDialogOptions(icon: ComponentDialogIcon.loading));
       await _pageInit();
       DialogLib.hide(context);
     }
   }
 
   void onClickSelect(Map<String, dynamic> row) async {
-    await DialogLib.show(context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
-    var result = await LanguageService.update(LanguageUpdateParamModel(
-        whereLanguageId: row[DBTableLanguages.columnId], languageIsSelected: 1));
-    if (result > 0) {
-      Values.setLanguageId = row[DBTableLanguages.columnId];
-      Values.setLanguageName = row[DBTableLanguages.columnName];
-      await RouteLib(context).change(target: '/study/plan');
+    final pageProviderModel =
+   ProviderLib.get<PageProviderModel>(context);
+    final languageProviderModel =
+   ProviderLib.get<LanguageProviderModel>(context);
+
+    int updateWord = 1;
+
+    if(!pageProviderModel.isLoading){
+      await DialogLib.show(context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
+      updateWord = await LanguageService.update(LanguageUpdateParamModel(
+          whereLanguageId: row[DBTableLanguages.columnId], languageIsSelected: 1));
+    }
+
+    if (updateWord > 0) {
+      languageProviderModel.setSelectedLanguage(row);
+
+      final ttsProviderModel =
+     ProviderLib.get<TTSProviderModel>(context);
+
+      var flutterTts = await VoicesLib.getFlutterTts();
+      var voice = MyLibArray.findSingle(
+          array: ttsProviderModel.voices,
+          key: TTSVoiceKeys.keyName,
+          value: languageProviderModel.selectedLanguage[DBTableLanguages.columnTTSArtist]);
+      if (voice != null) {
+        await flutterTts.setVoice({
+          "name": voice[TTSVoiceKeys.keyName],
+          "locale": voice[TTSVoiceKeys.keyLocale],
+          "gender": languageProviderModel.selectedLanguage[DBTableLanguages.columnTTSGender]
+        });
+        await flutterTts.setSpeechRate(0.5);
+        await flutterTts.setVolume(1.0);
+        ttsProviderModel.setFlutterTts(flutterTts);
+      }
+      await RouteLib.change(context: context, target: '/study/plan');
     }
   }
 
@@ -128,62 +166,58 @@ class _PageHomeState extends State<PageHome> {
 
   @override
   Widget build(BuildContext context) {
-    return ComponentPageScaffold(
-      isLoading: _statePageIsLoading,
-      title: "Select Language",
-      hideSidebar: true,
-      withScroll: true,
-      hideBackButton: true,
-      body: _statePageIsLoading ? Container() : Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ComponentButton(
-              onPressed: () => onClickAdd(),
-              text: "Add New",
-            ),
-            Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-            ComponentDataTable<Map<String, dynamic>>(
-              data: _stateLanguages,
-              columns: const [
-                ComponentDataColumnModule(
-                  title: "Name",
-                  sortKeyName: DBTableLanguages.columnName,
-                  sortable: true,
+    final pageProviderModel =
+   ProviderLib.get<PageProviderModel>(context, listen: true);
+
+    return pageProviderModel.isLoading ? Container() : Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          ComponentButton(
+            onPressed: () => onClickAdd(),
+            text: "Add New",
+          ),
+          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+          ComponentDataTable<Map<String, dynamic>>(
+            data: _stateLanguages,
+            columns: const [
+              ComponentDataColumnModule(
+                title: "Name",
+                sortKeyName: DBTableLanguages.columnName,
+                sortable: true,
+              ),
+              ComponentDataColumnModule(
+                title: "Select",
+              ),
+              ComponentDataColumnModule(
+                title: "Delete",
+              )
+            ],
+            cells: [
+              ComponentDataCellModule(
+                child: (row) =>
+                    Text(row[DBTableLanguages.columnName].toString()),
+              ),
+              ComponentDataCellModule(
+                child: (row) => ComponentButton(
+                  text: "Select",
+                  onPressed: () => onClickSelect(row),
+                  icon: Icons.check,
+                  buttonSize: ComponentButtonSize.sm,
                 ),
-                ComponentDataColumnModule(
-                  title: "Select",
+              ),
+              ComponentDataCellModule(
+                child: (row) => ComponentButton(
+                  text: "Delete",
+                  bgColor: ThemeConst.colors.danger,
+                  onPressed: () => onClickDelete(row),
+                  icon: Icons.delete_forever,
+                  buttonSize: ComponentButtonSize.sm,
                 ),
-                ComponentDataColumnModule(
-                  title: "Delete",
-                )
-              ],
-              cells: [
-                ComponentDataCellModule(
-                  child: (row) =>
-                      Text(row[DBTableLanguages.columnName].toString()),
-                ),
-                ComponentDataCellModule(
-                  child: (row) => ComponentButton(
-                    text: "Select",
-                    onPressed: () => onClickSelect(row),
-                    icon: Icons.check,
-                    buttonSize: ComponentButtonSize.sm,
-                  ),
-                ),
-                ComponentDataCellModule(
-                  child: (row) => ComponentButton(
-                    text: "Delete",
-                    bgColor: ThemeConst.colors.danger,
-                    onPressed: () => onClickDelete(row),
-                    icon: Icons.delete_forever,
-                    buttonSize: ComponentButtonSize.sm,
-                  ),
-                )
-              ],
-            )
-          ],
-        ),
+              )
+            ],
+          )
+        ],
       ),
     );
   }
