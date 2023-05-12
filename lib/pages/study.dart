@@ -15,6 +15,7 @@ import 'package:my_language_app/lib/audio.lib.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
+import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/providers/language.provider.dart';
 import 'package:my_language_app/models/providers/page.provider.dart';
@@ -72,6 +73,8 @@ class _PageStudyState extends State<PageStudy> {
           context: context, target: PageConst.routeNames.studyPlan);
       return;
     }
+
+    await VoicesLib.setVoiceSaved(context);
 
     final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
     pageProviderModel.setTitle("Study");
@@ -317,8 +320,7 @@ class _PageStudyState extends State<PageStudy> {
     if (await Permission.speech.request() != PermissionStatus.granted) {
       return;
     }
-    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
-    await ttsProviderModel.flutterTts.speak(_stateTextDisplayed);
+    await (await VoicesLib.flutterTts).speak(_stateTextDisplayed);
   }
 
   void onClickComment() async {
@@ -363,15 +365,25 @@ class _PageStudyState extends State<PageStudy> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "[Answer]: ${_controllerText.text}",
-          style: TextStyle(
-            fontSize: ThemeConst.fontSizes.md,
-            color: _stateIsCorrect
+        Row(
+          children: [
+            Icon(_stateIsCorrect
+                ? Icons.check
+                : Icons.close, size: ThemeConst.fontSizes.xlg, color: _stateIsCorrect
                 ? ThemeConst.colors.success
-                : ThemeConst.colors.danger,
-            fontWeight: FontWeight.bold,
-          ),
+                : ThemeConst.colors.danger),
+            Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.xsm)),
+            Text(
+              "${_controllerText.text}",
+              style: TextStyle(
+                fontSize: ThemeConst.fontSizes.md,
+                color: _stateIsCorrect
+                    ? ThemeConst.colors.success
+                    : ThemeConst.colors.danger,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         _stateIsCorrect
             ? Column(
@@ -401,14 +413,20 @@ class _PageStudyState extends State<PageStudy> {
             : Column(
                 children: [
                   Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
-                  Text(
-                    "[Correct]: ${_stateTextAnswer}",
-                    style: TextStyle(
-                      fontSize: ThemeConst.fontSizes.md,
-                      color: ThemeConst.colors.info,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
+                  Row(
+                    children: [
+                      Icon(Icons.check, size: ThemeConst.fontSizes.xlg, color: ThemeConst.colors.info),
+                      Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.xsm)),
+                      Text(
+                        "${_stateTextAnswer}",
+                        style: TextStyle(
+                          fontSize: ThemeConst.fontSizes.md,
+                          color: ThemeConst.colors.info,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    ],
+                  ),
                 ],
               ),
         Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),

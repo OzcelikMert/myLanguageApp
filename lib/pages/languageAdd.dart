@@ -9,6 +9,7 @@ import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:my_language_app/models/providers/page.provider.dart';
+import 'package:my_language_app/models/providers/tts.provider.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/services/language.service.dart';
 
@@ -22,7 +23,6 @@ class PageLanguageAdd extends StatefulWidget {
 }
 
 class _PageLanguageAddState extends State<PageLanguageAdd> {
-  late List<Map<String, dynamic>> _stateTTSVoices = [];
   String _stateSelectedVoiceGenderRadio = "male";
   Map<String, dynamic>? _stateSelectedVoice;
   final _controllerName = TextEditingController();
@@ -40,11 +40,10 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
     final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
     pageProviderModel.setTitle("Add New Language");
 
-    var voices = await VoicesLib.getVoices(await VoicesLib.getFlutterTts());
+    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
 
     setState(() {
-      _stateTTSVoices = voices;
-      _stateSelectedVoice = voices[0];
+      _stateSelectedVoice = ttsProviderModel.voices[0];
     });
 
     pageProviderModel.setIsLoading(false);
@@ -80,6 +79,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                         _stateSelectedVoice![TTSVoiceKeys.keyName],
                     languageTTSGender: _stateSelectedVoiceGenderRadio));
                 if (result > 0) {
+                  final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
                   final pageProviderModel = ProviderLib.get<PageProviderModel>(
                       context,
                       listen: false);
@@ -91,7 +91,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                               "'${_controllerName.text}' has successfully added!",
                           icon: ComponentDialogIcon.success));
                   _controllerName.text = "";
-                  _stateSelectedVoice = _stateTTSVoices[0];
+                  _stateSelectedVoice = ttsProviderModel.voices[0];
                   _stateSelectedVoiceGenderRadio = "male";
                 } else {
                   DialogLib.show(
@@ -116,6 +116,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   Widget build(BuildContext context) {
     final pageProviderModel =
         ProviderLib.get<PageProviderModel>(context, listen: true);
+    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
 
     return pageProviderModel.isLoading
         ? Container()
@@ -141,7 +142,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
               const Text("Language Code"),
               ComponentDropdown<Map<String, dynamic>>(
                 selectedItem: _stateSelectedVoice,
-                items: _stateTTSVoices,
+                items: ttsProviderModel.voices,
                 itemAsString: (Map<String, dynamic> u) =>
                     u[TTSVoiceKeys.keyDisplayName],
                 onChanged: (Map<String, dynamic>? data) => setState(() {
