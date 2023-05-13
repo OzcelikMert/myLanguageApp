@@ -104,6 +104,12 @@ class _PageWordAddState extends State<PageWordAdd> {
                 }
 
                 if (result > 0) {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content:
+                          "'${_controllerTextNative.text}' has successfully ${_stateWord != null ? "updated" : "added"}!",
+                          icon: ComponentDialogIcon.success));
                   if(_stateWord != null){
                     final pageProviderModel =
                    ProviderLib.get<PageProviderModel>(context);
@@ -113,12 +119,6 @@ class _PageWordAddState extends State<PageWordAdd> {
                     _controllerTextTarget.text = "";
                     _controllerComment.text = "";
                   }
-                  DialogLib.show(
-                      context,
-                      ComponentDialogOptions(
-                          content:
-                          "'${_controllerTextNative.text}' has successfully ${_stateWord != null ? "updated" : "added"}!",
-                          icon: ComponentDialogIcon.success));
                 } else {
                   DialogLib.show(
                       context,
