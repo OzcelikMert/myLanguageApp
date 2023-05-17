@@ -10,6 +10,7 @@ class ComponentDataTable<T> extends StatefulWidget {
   final List<ComponentDataCellModule<T>> cells;
   final bool? isSearchable;
   final List<String>? searchableKeys;
+  final bool isTypeClass;
 
   const ComponentDataTable(
       {Key? key,
@@ -18,7 +19,8 @@ class ComponentDataTable<T> extends StatefulWidget {
       required this.columns,
       required this.cells, 
         this.isSearchable, 
-        this.searchableKeys
+        this.searchableKeys,
+        this.isTypeClass = true
       })
       : super(key: key);
 
@@ -76,7 +78,19 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
           numeric: column.numeric,
           onSort: column.sortable == true
               ? (columnIndex, ascending) {
-                  _sort<dynamic>((dynamic d) => d[column.sortKeyName],
+                  _sort<dynamic>((dynamic d) {
+                    dynamic _d;
+                    if(widget.isTypeClass){
+                      try {
+                        _d = d.toJson();
+                      } catch (ex) {
+                        return 0;
+                      }
+                    }else {
+                      _d = d;
+                    }
+                    return _d[column.sortKeyName];
+                  },
                       columnIndex, ascending, column.isDate);
                 }
               : null));
@@ -89,10 +103,20 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
       _stateSearchText = query;
       if (query.isNotEmpty) {
         _stateFilteredRows = widget.data.where((dynamic row) {
+          dynamic _row;
+          if(widget.isTypeClass){
+            try {
+              _row = row.toJson();
+            } catch (ex) {
+              return false;
+            }
+          }else {
+            _row = row;
+          }
           bool isContain = false;
           if(widget.searchableKeys != null){
             for(var key in widget.searchableKeys!) {
-              isContain = row[key].toString().toLowerCase().contains(query.trim().toLowerCase());
+              isContain = _row[key].toString().toLowerCase().contains(query.trim().toLowerCase());
               if(isContain == true) break;
             }
           }

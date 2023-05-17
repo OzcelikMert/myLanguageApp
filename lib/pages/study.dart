@@ -550,11 +550,11 @@ class _PageStudyState extends State<PageStudy> {
               _stateIsStudied ? _componentCorrectWord() : Container(),
               _stateIsStudied && _stateIsCorrect ? _componentStudyType() : Container(),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-              ComponentButton(
+              _stateIsStudied ? ComponentButton(
                 text: _stateWords.isNotEmpty ? "Next" : "Save",
                 onPressed: onClickNext,
                 bgColor: ThemeConst.colors.success,
-              )
+              ) : Container()
             ],
           );
   }
