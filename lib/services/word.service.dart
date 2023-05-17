@@ -3,8 +3,8 @@ import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 
 class WordService {
-  static Future<List<Map<String, dynamic>>> get(
-      WordGetParamModel params) async {
+  static Future<List<WordGetResultModel>> get(WordGetParamModel params) async {
+    List<WordGetResultModel> returnItems = [];
     String whereString = "";
     List<dynamic> whereArgs = [];
 
@@ -29,11 +29,17 @@ class WordService {
     }
 
     var db = await DBConn.instance.database;
-    return (await db.query(DBTableWords.tableName,
+    var result = (await db.query(DBTableWords.tableName,
         where: whereString.isNotEmpty
             ? whereString.substring(0, whereString.length - 4)
             : null,
         whereArgs: whereArgs.isNotEmpty ? whereArgs : null));
+
+    for (var item in result) {
+      returnItems.add(WordGetResultModel.fromJson(item));
+    }
+
+    return returnItems;
   }
 
   static Future<int> getCount(
@@ -72,8 +78,9 @@ class WordService {
     return count ?? 0;
   }
 
-  static Future<List<Map<String, dynamic>>> getCountReport(
+  static Future<List<WordGetCountReportResultModel>> getCountReport(
       WordGetCountReportParamModel params) async {
+    List<WordGetCountReportResultModel> returnItems = [];
     String whereString = "";
     List<dynamic> whereArgs = [];
 
@@ -88,7 +95,7 @@ class WordService {
     }
 
     var db = await DBConn.instance.database;
-    return (await db.query(DBTableWords.tableName,
+    var result = (await db.query(DBTableWords.tableName,
         columns: [
           DBTableWords.columnStudyType,
           DBTableWords.columnIsStudy,
@@ -99,6 +106,12 @@ class WordService {
             : null,
         whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
         groupBy: "WordStudyType, WordIsStudy"));
+
+    for (var item in result) {
+      returnItems.add(WordGetCountReportResultModel.fromJson(item));
+    }
+
+    return returnItems;
   }
 
   static Future<int> add(WordAddParamModel params) async {
@@ -183,7 +196,7 @@ class WordService {
     }
 
     var db = await DBConn.instance.database;
-    return await db.update(
+    var update = await db.update(
       DBTableWords.tableName,
       setMap,
       where: whereString.isNotEmpty
@@ -191,6 +204,8 @@ class WordService {
           : null,
       whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
     );
+
+    return update;
   }
 
   static Future<int> delete(WordDeleteParamModel params) async {

@@ -3,7 +3,6 @@ import 'package:my_language_app/components/elements/dropdown.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/radio.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
@@ -53,11 +52,11 @@ class _PageSettingsState extends State<PageSettings> {
         array: ttsProviderModel.voices,
         key: TTSVoiceKeys.keyName,
         value: languageProviderModel
-            .selectedLanguage[DBTableLanguages.columnTTSArtist]);
+            .selectedLanguage.languageTTSArtist);
     setState(() {
       _stateSelectedVoice = findVoice ?? ttsProviderModel.voices[0];
       _stateSelectedVoiceGenderRadio = languageProviderModel
-          .selectedLanguage[DBTableLanguages.columnTTSGender];
+          .selectedLanguage.languageTTSGender;
     });
 
     pageProviderModel.setIsLoading(false);
@@ -113,16 +112,11 @@ class _PageSettingsState extends State<PageSettings> {
                 var result = await LanguageService.update(
                     LanguageUpdateParamModel(
                         whereLanguageId: languageProviderModel
-                            .selectedLanguage[DBTableLanguages.columnId],
+                            .selectedLanguage.languageId,
                         languageTTSArtist:
                             _stateSelectedVoice![TTSVoiceKeys.keyName],
-                        languageTTSGender: _stateSelectedVoiceGenderRadio));
+                        languageTTSGender: _stateSelectedVoiceGenderRadio), context);
                 if (result > 0) {
-                  languageProviderModel.setSelectedLanguage({
-                    ...languageProviderModel.selectedLanguage,
-                    DBTableLanguages.columnTTSArtist: _stateSelectedVoice![TTSVoiceKeys.keyName],
-                    DBTableLanguages.columnTTSGender: _stateSelectedVoiceGenderRadio
-                  });
                   DialogLib.show(
                       context,
                       ComponentDialogOptions(

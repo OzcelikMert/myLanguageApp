@@ -5,7 +5,6 @@ import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:my_language_app/models/providers/page.provider.dart';

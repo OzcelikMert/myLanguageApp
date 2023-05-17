@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -40,12 +39,12 @@ class VoicesLib {
         array: ttsProviderModel.voices,
         key: TTSVoiceKeys.keyName,
         value: languageProviderModel
-            .selectedLanguage[DBTableLanguages.columnTTSArtist]);
+            .selectedLanguage.languageTTSArtist);
     if (voice != null) {
       await VoicesLib.setVoice({
         "name": voice[TTSVoiceKeys.keyName],
         "locale": voice[TTSVoiceKeys.keyLocale],
-        "gender": languageProviderModel.selectedLanguage[DBTableLanguages.columnTTSGender]
+        "gender": languageProviderModel.selectedLanguage.languageTTSGender
       });
     }
   }
@@ -70,6 +69,6 @@ class VoicesLib {
         });
       }
     }
-    return MyLibArray.sort(array: voices, key: TTSVoiceKeys.keyDisplayName, sortType: SortType.asc);
+    return MyLibArray.sort(array: voices, key: TTSVoiceKeys.keyDisplayName, sortType: SortType.asc, isTypeClass: false);
   }
 }

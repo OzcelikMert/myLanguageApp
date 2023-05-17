@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/radio.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
@@ -19,7 +18,10 @@ class PageWordAdd extends StatefulWidget {
 
   PageWordAdd({Key? key, required this.context}) : super(key: key) {
     var args =
-    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    ModalRoute
+        .of(context)!
+        .settings
+        .arguments as Map<String, dynamic>?;
     if (args != null && args[DBTableWords.columnId] != null) {
       wordId = int.tryParse(args[DBTableWords.columnId].toString()) ?? 0;
     }
@@ -30,7 +32,7 @@ class PageWordAdd extends StatefulWidget {
 }
 
 class _PageWordAddState extends State<PageWordAdd> {
-  late Map<String, dynamic>? _stateWord = null;
+  late WordGetResultModel? _stateWord = null;
   int _stateSelectedStudyType = StudyTypeConst.Daily;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _controllerTextNative = TextEditingController();
@@ -47,20 +49,22 @@ class _PageWordAddState extends State<PageWordAdd> {
 
   _pageInit() async {
     final pageProviderModel =
-   ProviderLib.get<PageProviderModel>(context);
-    pageProviderModel.setTitle(widget.wordId > 0 ? "Update Word"  : "Add New Word");
+    ProviderLib.get<PageProviderModel>(context);
+    pageProviderModel.setTitle(
+        widget.wordId > 0 ? "Update Word" : "Add New Word");
     final languageProviderModel =
-   ProviderLib.get<LanguageProviderModel>(context);
+    ProviderLib.get<LanguageProviderModel>(context);
 
-    var words = await WordService.get(WordGetParamModel(wordLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId], wordId: widget.wordId));
-    if(words.isNotEmpty){
+    var words = await WordService.get(WordGetParamModel(
+        wordLanguageId: languageProviderModel.selectedLanguage.languageId, wordId: widget.wordId));
+    if (words.isNotEmpty) {
       var word = words[0];
       setState(() {
         _stateWord = word;
-        _stateSelectedStudyType = word[DBTableWords.columnStudyType];
-        _controllerTextNative.text = word[DBTableWords.columnTextNative];
-        _controllerTextTarget.text = word[DBTableWords.columnTextTarget];
-        _controllerComment.text = word[DBTableWords.columnComment];
+        _stateSelectedStudyType = word.wordStudyType;
+        _controllerTextNative.text = word.wordTextNative;
+        _controllerTextTarget.text = word.wordTextTarget;
+        _controllerComment.text = word.wordComment;
       });
     }
 
@@ -75,28 +79,36 @@ class _PageWordAddState extends State<PageWordAdd> {
             icon: ComponentDialogIcon.confirm,
             showCancelButton: true,
             content:
-                "Do you want to ${_stateWord != null ? "update" : "add"} '${_controllerTextNative.text}' as a word for your '${StudyTypeConst.getTypeName(_stateSelectedStudyType)}' study?",
+            "Do you want to ${_stateWord != null
+                ? "update"
+                : "add"} '${_controllerTextNative
+                .text}' as a word for your '${StudyTypeConst.getTypeName(
+                _stateSelectedStudyType)}' study?",
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
                 final languageProviderModel =
-               ProviderLib.get<LanguageProviderModel>(context);
+                ProviderLib.get<LanguageProviderModel>(context);
                 await DialogLib.show(
                     context,
                     ComponentDialogOptions(
-                        content: _stateWord != null ? "Updating..." : "Adding...",
+                        content: _stateWord != null
+                            ? "Updating..."
+                            : "Adding...",
                         icon: ComponentDialogIcon.loading));
                 int result = 0;
-                if(_stateWord != null){
+                if (_stateWord != null) {
                   result = await WordService.update(WordUpdateParamModel(
-                      whereWordLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
-                      whereWordId: _stateWord![DBTableWords.columnId],
+                      whereWordLanguageId: languageProviderModel
+                          .selectedLanguage.languageId,
+                      whereWordId: _stateWord!.wordId,
                       wordTextNative: _controllerTextNative.text.trim(),
                       wordTextTarget: _controllerTextTarget.text.trim(),
                       wordComment: _controllerComment.text.trim(),
                       wordStudyType: _stateSelectedStudyType));
-                }else {
+                } else {
                   result = await WordService.add(WordAddParamModel(
-                      wordLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
+                      wordLanguageId: languageProviderModel
+                          .selectedLanguage.languageId,
                       wordTextNative: _controllerTextNative.text.trim(),
                       wordTextTarget: _controllerTextTarget.text.trim(),
                       wordComment: _controllerComment.text.trim(),
@@ -108,13 +120,16 @@ class _PageWordAddState extends State<PageWordAdd> {
                       context,
                       ComponentDialogOptions(
                           content:
-                          "'${_controllerTextNative.text}' has successfully ${_stateWord != null ? "updated" : "added"}!",
+                          "'${_controllerTextNative
+                              .text}' has successfully ${_stateWord != null
+                              ? "updated"
+                              : "added"}!",
                           icon: ComponentDialogIcon.success));
-                  if(_stateWord != null){
+                  if (_stateWord != null) {
                     final pageProviderModel =
-                   ProviderLib.get<PageProviderModel>(context);
+                    ProviderLib.get<PageProviderModel>(context);
                     pageProviderModel.setLeadingArgs(true);
-                  }else {
+                  } else {
                     _controllerTextNative.text = "";
                     _controllerTextTarget.text = "";
                     _controllerComment.text = "";
@@ -123,7 +138,9 @@ class _PageWordAddState extends State<PageWordAdd> {
                   DialogLib.show(
                       context,
                       ComponentDialogOptions(
-                          content: "It couldn't ${_stateWord != null ? "update" : "add"}!",
+                          content: "It couldn't ${_stateWord != null
+                              ? "update"
+                              : "add"}!",
                           icon: ComponentDialogIcon.error));
                 }
                 return false;
@@ -149,9 +166,9 @@ class _PageWordAddState extends State<PageWordAdd> {
   @override
   Widget build(BuildContext context) {
     final pageProviderModel =
-   ProviderLib.get<PageProviderModel>(context, listen: true);
+    ProviderLib.get<PageProviderModel>(context, listen: true);
     final languageProviderModel =
-   ProviderLib.get<LanguageProviderModel>(context, listen: true);
+    ProviderLib.get<LanguageProviderModel>(context, listen: true);
 
     return pageProviderModel.isLoading ? Container() : Center(
       child: ComponentForm(
@@ -159,7 +176,7 @@ class _PageWordAddState extends State<PageWordAdd> {
         onSubmit: onClickAdd,
         submitButtonText: _stateWord != null ? "Update" : "Add",
         children: <Widget>[
-          Text("Target Language (${languageProviderModel.selectedLanguage[DBTableLanguages.columnName]})"),
+          Text("Target Language (${languageProviderModel.selectedLanguage.languageName})"),
           TextFormField(
             decoration: const InputDecoration(
               hintText: 'Word, Sentence or Question',
@@ -170,7 +187,7 @@ class _PageWordAddState extends State<PageWordAdd> {
           Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
           const Text("Native Language"),
           TextFormField(
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Word, Sentence or Question',
             ),
             validator: onValidator,

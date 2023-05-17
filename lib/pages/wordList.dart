@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_language_app/components/elements/dataTable/index.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
@@ -16,7 +15,6 @@ import 'package:my_language_app/models/components/elements/dataTable/dataColumn.
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
 import 'package:my_language_app/models/providers/language.provider.dart';
 import 'package:my_language_app/models/providers/page.provider.dart';
-import 'package:my_language_app/models/providers/tts.provider.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
 import 'package:my_language_app/services/word.service.dart';
@@ -34,7 +32,7 @@ class PageWordList extends StatefulWidget {
 }
 
 class _PageWordListState extends State<PageWordList> {
-  late List<Map<String, dynamic>> _stateWords = [];
+  late List<WordGetResultModel> _stateWords = [];
 
   @override
   void initState() {
@@ -54,7 +52,7 @@ class _PageWordListState extends State<PageWordList> {
 
     var words = await WordService.get(WordGetParamModel(
         wordLanguageId:
-            languageProviderModel.selectedLanguage[DBTableLanguages.columnId]));
+            languageProviderModel.selectedLanguage.languageId));
 
     setState(() {
       _stateWords = MyLibArray.sort(
@@ -73,11 +71,11 @@ class _PageWordListState extends State<PageWordList> {
     await (await VoicesLib.flutterTts).speak(text);
   }
 
-  void onClickEdit(Map<String, dynamic> row) async {
+  void onClickEdit(WordGetResultModel row) async {
     var isUpdated = await RouteLib.change(
         context: context,
         target: PageConst.routeNames.wordEdit,
-        arguments: {DBTableWords.columnId: row[DBTableWords.columnId]},
+        arguments: {DBTableWords.columnId: row.wordId},
         safeHistory: true);
     if (isUpdated == true) {
       await DialogLib.show(
@@ -89,13 +87,13 @@ class _PageWordListState extends State<PageWordList> {
     }
   }
 
-  void onClickDelete(Map<String, dynamic> row) {
+  void onClickDelete(WordGetResultModel row) {
     DialogLib.show(
         context,
         ComponentDialogOptions(
             title: "Are you sure?",
             content:
-                "Are you sure want to delete '${row[DBTableWords.columnTextNative]}'?",
+                "Are you sure want to delete '${row.wordTextNative}'?",
             icon: ComponentDialogIcon.confirm,
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
@@ -106,20 +104,16 @@ class _PageWordListState extends State<PageWordList> {
                         content: "Deleting...",
                         icon: ComponentDialogIcon.loading));
                 var result = await WordService.delete(
-                    WordDeleteParamModel(wordId: row[DBTableWords.columnId]));
+                    WordDeleteParamModel(wordId: row.wordId));
                 if (result > 0) {
                   setState(() {
-                    _stateWords = _stateWords
-                        .where((element) =>
-                            element[DBTableWords.columnId] !=
-                            row[DBTableWords.columnId])
-                        .toList();
+                    _stateWords = MyLibArray.findMulti(array: _stateWords, key: DBTableWords.columnId, value: row.wordId, isLike: false);
                   });
                   DialogLib.show(
                       context,
                       ComponentDialogOptions(
                           content:
-                              "'${row[DBTableWords.columnTextNative]}' has successfully deleted!",
+                              "'${row.wordTextNative}' has successfully deleted!",
                           icon: ComponentDialogIcon.success));
                 } else {
                   DialogLib.show(
@@ -142,7 +136,7 @@ class _PageWordListState extends State<PageWordList> {
 
     return pageProviderModel.isLoading
         ? Container()
-        : ComponentDataTable<Map<String, dynamic>>(
+        : ComponentDataTable<WordGetResultModel>(
             data: _stateWords,
             isSearchable: true,
             searchableKeys: [
@@ -155,7 +149,7 @@ class _PageWordListState extends State<PageWordList> {
               ),
               ComponentDataColumnModule(
                 title:
-                    "Target (${languageProviderModel.selectedLanguage[DBTableLanguages.columnName]})",
+                    "Target (${languageProviderModel.selectedLanguage.languageName})",
                 sortKeyName: DBTableWords.columnTextTarget,
                 sortable: true,
               ),
@@ -190,29 +184,28 @@ class _PageWordListState extends State<PageWordList> {
               ComponentDataCellModule(
                 child: (row) => ComponentIconButton(
                     onPressed: () => onClickTTS(
-                        row[DBTableWords.columnTextTarget].toString()),
+                        row.wordTextTarget),
                     icon: Icons.volume_up),
               ),
               ComponentDataCellModule(
                 child: (row) =>
-                    Text(row[DBTableWords.columnTextTarget].toString()),
+                    Text(row.wordTextTarget),
               ),
               ComponentDataCellModule(
                 child: (row) =>
-                    Text(row[DBTableWords.columnTextNative].toString()),
+                    Text(row.wordTextNative),
               ),
               ComponentDataCellModule(
                 child: (row) => Text(DateFormat.yMd().add_Hm().format(
-                    DateTime.parse(row[DBTableWords.columnCreatedAt].toString())
+                    DateTime.parse(row.wordCreatedAt)
                         .toLocal())),
               ),
               ComponentDataCellModule(
-                child: (row) => Text(StudyTypeConst.getTypeName(
-                    row[DBTableWords.columnStudyType])),
+                child: (row) => Text(StudyTypeConst.getTypeName(row.wordStudyType)),
               ),
               ComponentDataCellModule(
                 child: (row) =>
-                    Text(row[DBTableWords.columnIsStudy] == 1 ? "Yes" : "No"),
+                    Text(row.wordIsStudy == 1 ? "Yes" : "No"),
               ),
               ComponentDataCellModule(
                 child: (row) => ComponentButton(

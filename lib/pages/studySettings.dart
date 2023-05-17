@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/radio.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
-import 'package:my_language_app/config/values.dart';
 import 'package:my_language_app/constants/displayedLanguage.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
@@ -12,7 +10,6 @@ import 'package:my_language_app/models/providers/language.provider.dart';
 import 'package:my_language_app/models/providers/page.provider.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/services/language.service.dart';
-import 'package:provider/provider.dart';
 
 class PageStudySettings extends StatefulWidget {
   final BuildContext context;
@@ -39,14 +36,13 @@ class _PageStudySettingsState extends State<PageStudySettings> {
   _pageInit() async {
     final pageProviderModel =
    ProviderLib.get<PageProviderModel>(context);
-   // await Future.delayed(Duration(seconds: 1));
     pageProviderModel.setTitle("Study Settings");
     final languageProviderModel =
    ProviderLib.get<LanguageProviderModel>(context);
 
     setState(() {
-      _stateSelectedDisplayedLanguage = languageProviderModel.selectedLanguage[DBTableLanguages.columnDisplayedLanguage];
-      _stateSelectedIsAutoVoice = languageProviderModel.selectedLanguage[DBTableLanguages.columnIsAutoVoice];
+      _stateSelectedDisplayedLanguage = languageProviderModel.selectedLanguage.languageDisplayedLanguage;
+      _stateSelectedIsAutoVoice = languageProviderModel.selectedLanguage.languageIsAutoVoice;
     });
 
     pageProviderModel.setIsLoading(false);
@@ -73,16 +69,11 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                         content: "Saving...",
                         icon: ComponentDialogIcon.loading));
                 var updateLanguage = await LanguageService.update(LanguageUpdateParamModel(
-                    whereLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
+                    whereLanguageId: languageProviderModel.selectedLanguage.languageId,
                     languageDisplayedLanguage: _stateSelectedDisplayedLanguage,
                     languageIsAutoVoice: _stateSelectedIsAutoVoice
-                ));
+                ), context);
                 if (updateLanguage > 0) {
-                  languageProviderModel.setSelectedLanguage({
-                    ...languageProviderModel.selectedLanguage,
-                    DBTableLanguages.columnDisplayedLanguage: _stateSelectedDisplayedLanguage,
-                    DBTableLanguages.columnIsAutoVoice: _stateSelectedIsAutoVoice
-                  });
                   pageProviderModel.setLeadingArgs(true);
                   DialogLib.show(
                       context,
@@ -141,7 +132,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
           children: <Widget>[
             const Text("Displayed Language"),
             ComponentRadio<int>(
-              title: languageProviderModel.selectedLanguage[DBTableLanguages.columnName],
+              title: languageProviderModel.selectedLanguage.languageName,
               value: DisplayedLanguageConst.target,
               groupValue: _stateSelectedDisplayedLanguage,
               onChanged: onChangeDisplayedLanguage,
@@ -159,7 +150,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
               onChanged: onChangeDisplayedLanguage,
             ),
             ComponentRadio<int>(
-              title: 'Only Voice (${languageProviderModel.selectedLanguage[DBTableLanguages.columnName]})',
+              title: 'Only Voice (${languageProviderModel.selectedLanguage.languageName})',
               value: DisplayedLanguageConst.onlyVoiceTarget,
               groupValue: _stateSelectedDisplayedLanguage,
               onChanged: onChangeDisplayedLanguage,

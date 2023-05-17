@@ -10,7 +10,6 @@ import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataCell.dart';
 import 'package:my_language_app/models/components/elements/dataTable/dataColumn.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.dart';
-import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:my_language_app/models/providers/language.provider.dart';
 import 'package:my_language_app/models/providers/page.provider.dart';
 import 'package:my_language_app/models/providers/tts.provider.dart';
@@ -32,7 +31,7 @@ class PageHome extends StatefulWidget {
 }
 
 class _PageHomeState extends State<PageHome> {
-  late List<Map<String, dynamic>> _stateLanguages = [];
+  late List<LanguageGetResultModel> _stateLanguages = [];
 
   @override
   void initState() {
@@ -54,8 +53,7 @@ class _PageHomeState extends State<PageHome> {
 
     var languages = await LanguageService.get(LanguageGetParamModel());
 
-    var findLanguage = MyLibArray.findSingle(
-        array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
+    var findLanguage = MyLibArray.findSingle(array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
     if (findLanguage != null) {
       onClickSelect(findLanguage);
       return;
@@ -81,7 +79,7 @@ class _PageHomeState extends State<PageHome> {
     }
   }
 
-  void onClickSelect(Map<String, dynamic> row) async {
+  void onClickSelect(LanguageGetResultModel row) async {
     final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context);
@@ -92,8 +90,8 @@ class _PageHomeState extends State<PageHome> {
       await DialogLib.show(
           context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
       updateWord = await LanguageService.update(LanguageUpdateParamModel(
-          whereLanguageId: row[DBTableLanguages.columnId],
-          languageIsSelected: 1));
+          whereLanguageId: row.languageId,
+          languageIsSelected: 1), context);
     }
 
     if (updateWord > 0) {
@@ -102,13 +100,13 @@ class _PageHomeState extends State<PageHome> {
     }
   }
 
-  void onClickDelete(Map<String, dynamic> row) async {
+  void onClickDelete(LanguageGetResultModel row) async {
     DialogLib.show(
         context,
         ComponentDialogOptions(
             title: "Are you sure?",
             content:
-                "Are you sure want to delete '${row[DBTableLanguages.columnName]}'?",
+                "Are you sure want to delete '${row.languageName}'?",
             icon: ComponentDialogIcon.confirm,
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
@@ -120,22 +118,18 @@ class _PageHomeState extends State<PageHome> {
                         icon: ComponentDialogIcon.loading));
                 var result = await LanguageService.delete(
                     LanguageDeleteParamModel(
-                        languageId: row[DBTableLanguages.columnId]));
+                        languageId: row.languageId));
                 if (result > 0) {
                   await WordService.delete(WordDeleteParamModel(
-                      wordLanguageId: row[DBTableLanguages.columnId]));
+                      wordLanguageId: row.languageId));
                   setState(() {
-                    _stateLanguages = _stateLanguages
-                        .where((element) =>
-                            element[DBTableLanguages.columnId] !=
-                            row[DBTableLanguages.columnId])
-                        .toList();
+                    _stateLanguages = MyLibArray.findMulti(array: _stateLanguages, key: DBTableLanguages.columnId, value: row.languageId, isLike: false);
                   });
                   DialogLib.show(
                       context,
                       ComponentDialogOptions(
                           content:
-                              "Success! You've deleted '${row[DBTableLanguages.columnName]}'",
+                              "Success! You've deleted '${row.languageName}'",
                           icon: ComponentDialogIcon.success));
                 } else {
                   DialogLib.show(
@@ -165,7 +159,7 @@ class _PageHomeState extends State<PageHome> {
                   text: "Add New",
                 ),
                 Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-                ComponentDataTable<Map<String, dynamic>>(
+                ComponentDataTable<LanguageGetResultModel>(
                   data: _stateLanguages,
                   columns: const [
                     ComponentDataColumnModule(
@@ -183,7 +177,7 @@ class _PageHomeState extends State<PageHome> {
                   cells: [
                     ComponentDataCellModule(
                       child: (row) =>
-                          Text(row[DBTableLanguages.columnName].toString()),
+                          Text(row.languageName.toString()),
                     ),
                     ComponentDataCellModule(
                       child: (row) => ComponentButton(

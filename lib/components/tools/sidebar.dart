@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
@@ -77,8 +76,8 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
 
     var result = await LanguageService.update(LanguageUpdateParamModel(
         whereLanguageId:
-            languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
-        languageIsSelected: 0));
+            languageProviderModel.selectedLanguage.languageId,
+        languageIsSelected: 0), context);
     if (result > 0) {
       await RouteLib.change(
           context: context, target: PageConst.routeNames.home);
@@ -106,10 +105,10 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
                           icon: ComponentDialogIcon.loading));
                   var words = await WordService.get(WordGetParamModel(
                       wordLanguageId: languageProviderModel
-                          .selectedLanguage[DBTableLanguages.columnId]));
+                          .selectedLanguage.languageId));
                   File? file = await FileLib.exportJsonFile(
                       fileName:
-                          "LangApp-${languageProviderModel.selectedLanguage[DBTableLanguages.columnName]}-${DateFormat("yyyy-MM-dd-HH-mm").format(DateTime.now().toLocal())}",
+                          "LangApp-${languageProviderModel.selectedLanguage.languageName}-${DateFormat("yyyy-MM-dd-HH-mm").format(DateTime.now().toLocal())}",
                       jsonString: jsonEncode(words));
                   if (file != null) {
                     DialogLib.show(
@@ -151,7 +150,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
       for (var importedData in importedDataList) {
         wordAddParamsList.add(WordAddParamModel(
             wordLanguageId: languageProviderModel
-                .selectedLanguage[DBTableLanguages.columnId],
+                .selectedLanguage.languageId,
             wordTextTarget: importedData[DBTableWords.columnTextTarget],
             wordTextNative: importedData[DBTableWords.columnTextNative],
             wordComment: importedData[DBTableWords.columnComment],
@@ -189,7 +188,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
             child: Center(child: Consumer<LanguageProviderModel>(
               builder: (context, model, child) {
                 return Text(
-                    model.selectedLanguage[DBTableLanguages.columnName]);
+                    model.selectedLanguage.languageName);
               },
             )),
             decoration: BoxDecoration(

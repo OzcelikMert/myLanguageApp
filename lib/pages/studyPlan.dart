@@ -27,7 +27,7 @@ class PageStudyPlan extends StatefulWidget {
 }
 
 class _PageStudyPlanState extends State<PageStudyPlan> {
-  late List<Map<String, dynamic>> _stateWordCountReports = [];
+  late List<WordGetCountReportResultModel> _stateWordCountReports = [];
 
   @override
   void initState() {
@@ -38,14 +38,14 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   }
 
   _pageInit() async {
-    final pageProviderModel =
-   ProviderLib.get<PageProviderModel>(context);
+    final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
     pageProviderModel.setTitle("Study Plan");
     final languageProviderModel =
-   ProviderLib.get<LanguageProviderModel>(context);
+        ProviderLib.get<LanguageProviderModel>(context);
 
     var wordCountReports = await WordService.getCountReport(
-        WordGetCountReportParamModel(wordLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId]));
+        WordGetCountReportParamModel(
+            wordLanguageId: languageProviderModel.selectedLanguage.languageId));
 
     setState(() {
       _stateWordCountReports = wordCountReports;
@@ -63,29 +63,26 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         array: reports, key: DBTableWords.columnIsStudy, value: 0);
 
     int totalWordCount = reports.isNotEmpty
-        ? reports
-        .map((e) => e[DBTableWords.asColumnCount])
-        .reduce((a, b) => a + b)
+        ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
         : 0;
-
     int unstudiedWordCount = unstudiedReports.isNotEmpty
-        ? unstudiedReports
-        .map((e) => e[DBTableWords.asColumnCount])
-        .reduce((a, b) => a + b)
+        ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
         : 0;
 
-    if(totalWordCount == 0){
+    if (totalWordCount == 0) {
       DialogLib.show(
           context,
           ComponentDialogOptions(
-              content: "There are no words. Please firstly you must add a word.",
+              content:
+                  "There are no words. Please firstly you must add a word.",
               icon: ComponentDialogIcon.error));
-    }else {
+    } else {
       DialogLib.show(
           context,
           ComponentDialogOptions(
               title: "Are you sure?",
-              content: "You have selected '${StudyTypeConst.getTypeName(type)}'. ${unstudiedWordCount == 0 ? "If you continue your all words in '${StudyTypeConst.getTypeName(type)}' will set is 'unstudied'." : ""} Are you sure you want to continue?",
+              content:
+                  "You have selected '${StudyTypeConst.getTypeName(type)}'. ${unstudiedWordCount == 0 ? "If you continue your all words in '${StudyTypeConst.getTypeName(type)}' will set is 'unstudied'." : ""} Are you sure you want to continue?",
               showCancelButton: true,
               icon: ComponentDialogIcon.confirm,
               onPressed: (bool isConfirm) async {
@@ -97,14 +94,15 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                           icon: ComponentDialogIcon.loading));
 
                   final languageProviderModel =
-                 ProviderLib.get<LanguageProviderModel>(context);
+                      ProviderLib.get<LanguageProviderModel>(context);
 
                   bool changeRoute = true;
 
                   if (unstudiedWordCount == 0) {
                     var wordUpdate = await WordService.update(
                         WordUpdateParamModel(
-                            whereWordLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
+                            whereWordLanguageId: languageProviderModel
+                                .selectedLanguage.languageId,
                             whereWordStudyType: type,
                             wordIsStudy: 0));
                     if (wordUpdate < 1) {
@@ -113,23 +111,28 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                   }
 
                   var date = DateTime.now().toUtc().toString();
-                  var languageUpdate =
-                  await LanguageService.update(LanguageUpdateParamModel(
-                    whereLanguageId: languageProviderModel.selectedLanguage[DBTableLanguages.columnId],
-                    languageDailyUpdatedAt:
-                    type == StudyTypeConst.Daily ? date : null,
-                    languageWeeklyUpdatedAt:
-                    type == StudyTypeConst.Weekly ? date : null,
-                    languageMonthlyUpdatedAt:
-                    type == StudyTypeConst.Monthly ? date : null,
-                  ));
+                  var languageUpdate = await LanguageService.update(
+                      LanguageUpdateParamModel(
+                        whereLanguageId:
+                            languageProviderModel.selectedLanguage.languageId,
+                        languageDailyUpdatedAt:
+                            type == StudyTypeConst.Daily ? date : null,
+                        languageWeeklyUpdatedAt:
+                            type == StudyTypeConst.Weekly ? date : null,
+                        languageMonthlyUpdatedAt:
+                            type == StudyTypeConst.Monthly ? date : null,
+                      ),
+                      context);
 
-                  if(languageUpdate < 1){
+                  if (languageUpdate < 1) {
                     changeRoute = false;
                   }
 
                   if (changeRoute) {
-                    await RouteLib.change(context: context, target: PageConst.routeNames.study, arguments: {DBTableWords.columnStudyType: type});
+                    await RouteLib.change(
+                        context: context,
+                        target: PageConst.routeNames.study,
+                        arguments: {DBTableWords.columnStudyType: type});
                   } else {
                     DialogLib.show(
                         context,
@@ -145,7 +148,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
 
   Widget componentDaily() {
     final languageProviderModel =
-   ProviderLib.get<LanguageProviderModel>(context, listen: true);
+        ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -159,27 +162,23 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.success,
         title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
         onStartPressed: () => onClickStudy(StudyTypeConst.Daily),
-        lastStudyDate: DateTime.parse(languageProviderModel.selectedLanguage[DBTableLanguages.columnDailyUpdatedAt].toString()),
+        lastStudyDate: DateTime.parse(languageProviderModel
+            .selectedLanguage.languageDailyUpdatedAt
+            .toString()),
         totalWords: reports.isNotEmpty
-            ? reports
-                .map((e) => e[DBTableWords.asColumnCount])
-                .reduce((a, b) => a + b)
+            ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
         studiedWords: studiedReports.isNotEmpty
-            ? studiedReports
-                .map((e) => e[DBTableWords.asColumnCount])
-                .reduce((a, b) => a + b)
+            ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
         unstudiedWords: unstudiedReports.isNotEmpty
-            ? unstudiedReports
-                .map((e) => e[DBTableWords.asColumnCount])
-                .reduce((a, b) => a + b)
+            ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0);
   }
 
   Widget componentWeekly() {
     final languageProviderModel =
-   ProviderLib.get<LanguageProviderModel>(context, listen: true);
+        ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -193,27 +192,29 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.danger,
         title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
         onStartPressed: () => onClickStudy(StudyTypeConst.Weekly),
-        lastStudyDate: DateTime.parse(languageProviderModel.selectedLanguage[DBTableLanguages.columnWeeklyUpdatedAt].toString()),
+        lastStudyDate: DateTime.parse(languageProviderModel
+            .selectedLanguage.languageWeeklyUpdatedAt
+            .toString()),
         totalWords: reports.isNotEmpty
             ? reports
-                .map((e) => e[DBTableWords.asColumnCount])
+                .map((e) => e.wordCount)
                 .reduce((a, b) => a + b)
             : 0,
         studiedWords: studiedReports.isNotEmpty
             ? studiedReports
-                .map((e) => e[DBTableWords.asColumnCount])
+                .map((e) => e.wordCount)
                 .reduce((a, b) => a + b)
             : 0,
         unstudiedWords: unstudiedReports.isNotEmpty
             ? unstudiedReports
-                .map((e) => e[DBTableWords.asColumnCount])
+                .map((e) => e.wordCount)
                 .reduce((a, b) => a + b)
             : 0);
   }
 
   Widget componentMonthly() {
     final languageProviderModel =
-   ProviderLib.get<LanguageProviderModel>(context, listen: true);
+        ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -227,20 +228,22 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.info,
         title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
         onStartPressed: () => onClickStudy(StudyTypeConst.Monthly),
-        lastStudyDate: DateTime.parse(languageProviderModel.selectedLanguage[DBTableLanguages.columnMonthlyUpdatedAt].toString()),
+        lastStudyDate: DateTime.parse(languageProviderModel
+            .selectedLanguage.languageMonthlyUpdatedAt
+            .toString()),
         totalWords: reports.isNotEmpty
             ? reports
-                .map((e) => e[DBTableWords.asColumnCount])
+                .map((e) => e.wordCount)
                 .reduce((a, b) => a + b)
             : 0,
         studiedWords: studiedReports.isNotEmpty
             ? studiedReports
-                .map((e) => e[DBTableWords.asColumnCount])
+                .map((e) => e.wordCount)
                 .reduce((a, b) => a + b)
             : 0,
         unstudiedWords: unstudiedReports.isNotEmpty
             ? unstudiedReports
-                .map((e) => e[DBTableWords.asColumnCount])
+                .map((e) => e.wordCount)
                 .reduce((a, b) => a + b)
             : 0);
   }
@@ -248,20 +251,22 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   @override
   Widget build(BuildContext context) {
     final pageProviderModel =
-   ProviderLib.get<PageProviderModel>(context, listen: true);
+        ProviderLib.get<PageProviderModel>(context, listen: true);
 
-    return pageProviderModel.isLoading ? Container() : Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          componentDaily(),
-          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-          componentWeekly(),
-          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-          componentMonthly(),
-        ],
-      ),
-    );
+    return pageProviderModel.isLoading
+        ? Container()
+        : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                componentDaily(),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+                componentWeekly(),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+                componentMonthly(),
+              ],
+            ),
+          );
   }
 }
