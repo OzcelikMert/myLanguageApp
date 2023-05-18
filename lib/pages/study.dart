@@ -4,7 +4,6 @@ import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/progress.dart';
 import 'package:my_language_app/components/elements/radio.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/constants/audio.const.dart';
 import 'package:my_language_app/constants/displayedLanguage.const.dart';
@@ -16,9 +15,9 @@ import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
 import 'package:my_language_app/lib/voices.lib.dart';
-import 'package:my_language_app/models/components/elements/dialog/options.dart';
-import 'package:my_language_app/models/providers/language.provider.dart';
-import 'package:my_language_app/models/providers/page.provider.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
+import 'package:my_language_app/models/providers/language.provider.model.dart';
+import 'package:my_language_app/models/providers/page.provider.model.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
 import 'package:my_language_app/services/word.service.dart';
@@ -387,13 +386,13 @@ class _PageStudyState extends State<PageStudy> {
           children: [
             Icon(Icons.check, size: ThemeConst.fontSizes.xlg, color: ThemeConst.colors.success),
             Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.xsm)),
-            Text(_stateTextAnswer,
+            Expanded(child: Text(_stateTextAnswer,
               style: TextStyle(
                 fontSize: ThemeConst.fontSizes.md,
                 color: ThemeConst.colors.success,
                 fontWeight: FontWeight.bold,
               ),
-            )
+            ))
           ],
         ),
       ],
@@ -408,13 +407,13 @@ class _PageStudyState extends State<PageStudy> {
           children: [
             Icon(Icons.close, size: ThemeConst.fontSizes.xlg, color: ThemeConst.colors.danger),
             Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.xsm)),
-            Text(_controllerText.text,
+            Expanded(child: Text(_controllerText.text,
               style: TextStyle(
                 fontSize: ThemeConst.fontSizes.md,
                 color: ThemeConst.colors.danger,
                 fontWeight: FontWeight.bold,
               ),
-            )
+            ))
           ],
         ),
       ],
@@ -540,7 +539,6 @@ class _PageStudyState extends State<PageStudy> {
                       _stateTextDisplayed,
                       style: TextStyle(fontSize: ThemeConst.fontSizes.lg),
                     ),
-              Padding(padding: EdgeInsets.all(ThemeConst.paddings.xsm)),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
               _componentInfo(),
               _stateIsStudied ? _componentStatusMessage() : Container(),
@@ -554,7 +552,7 @@ class _PageStudyState extends State<PageStudy> {
                 text: _stateWords.isNotEmpty ? "Next" : "Save",
                 onPressed: onClickNext,
                 bgColor: ThemeConst.colors.success,
-              ) : Container()
+              ) : Container(),
             ],
           );
   }

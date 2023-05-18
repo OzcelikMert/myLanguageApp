@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/tools/page.dart';
 import 'package:my_language_app/constants/page.const.dart';
-import 'package:my_language_app/models/providers/language.provider.dart';
-import 'package:my_language_app/models/providers/page.provider.dart';
-import 'package:my_language_app/models/providers/tts.provider.dart';
+import 'package:my_language_app/models/providers/keyboard.provider.model.dart';
+import 'package:my_language_app/models/providers/language.provider.model.dart';
+import 'package:my_language_app/models/providers/page.provider.model.dart';
+import 'package:my_language_app/models/providers/tts.provider.model.dart';
 import 'package:my_language_app/pages/settings.dart';
 import 'package:my_language_app/pages/study.dart';
 import 'package:my_language_app/pages/studySettings.dart';
@@ -23,7 +24,9 @@ void main() {
             ChangeNotifierProvider<LanguageProviderModel>(
                 create: (_) => LanguageProviderModel()),
             ChangeNotifierProvider<TTSProviderModel>(
-                create: (_) => TTSProviderModel())
+                create: (_) => TTSProviderModel()),
+            ChangeNotifierProvider<KeyboardProviderModel>(
+                create: (_) => KeyboardProviderModel())
           ],
           child: MyApp()
       )

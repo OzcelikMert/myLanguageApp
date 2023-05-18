@@ -5,9 +5,9 @@ import 'package:my_language_app/constants/displayedLanguage.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/models/components/elements/dialog/options.dart';
-import 'package:my_language_app/models/providers/language.provider.dart';
-import 'package:my_language_app/models/providers/page.provider.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
+import 'package:my_language_app/models/providers/language.provider.model.dart';
+import 'package:my_language_app/models/providers/page.provider.model.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/services/language.service.dart';
 

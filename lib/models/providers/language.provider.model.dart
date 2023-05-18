@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 
 class LanguageProviderModel extends ChangeNotifier {
-  LanguageGetResultModel? _selectedLanguage;
+  LanguageGetResultModel? _selectedLanguage = null;
 
   LanguageGetResultModel get selectedLanguage => _selectedLanguage!;
 

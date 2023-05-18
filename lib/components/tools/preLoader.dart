@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/models/providers/page.provider.dart';
+import 'package:my_language_app/models/providers/page.provider.model.dart';
 
 class ComponentPreLoader extends StatefulWidget {
   const ComponentPreLoader({Key? key})

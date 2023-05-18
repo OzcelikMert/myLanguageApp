@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:my_language_app/config/db/conn.dart';
 import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/models/providers/language.provider.dart';
+import 'package:my_language_app/models/providers/language.provider.model.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 
 class LanguageService {

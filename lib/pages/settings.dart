@@ -7,11 +7,12 @@ import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/voices.lib.dart';
-import 'package:my_language_app/models/components/elements/dialog/options.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
-import 'package:my_language_app/models/providers/language.provider.dart';
-import 'package:my_language_app/models/providers/page.provider.dart';
-import 'package:my_language_app/models/providers/tts.provider.dart';
+import 'package:my_language_app/models/lib/voices.lib.model.dart';
+import 'package:my_language_app/models/providers/language.provider.model.dart';
+import 'package:my_language_app/models/providers/page.provider.model.dart';
+import 'package:my_language_app/models/providers/tts.provider.model.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
 import 'package:my_language_app/services/language.service.dart';
@@ -28,7 +29,7 @@ class PageSettings extends StatefulWidget {
 
 class _PageSettingsState extends State<PageSettings> {
   String _stateSelectedVoiceGenderRadio = "male";
-  Map<String, dynamic>? _stateSelectedVoice;
+  VoicesLibGetVoicesResultModel? _stateSelectedVoice;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -68,19 +69,14 @@ class _PageSettingsState extends State<PageSettings> {
     }
     await DialogLib.show(
         context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
-    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
-    var voice = MyLibArray.findSingle(
-        array: ttsProviderModel.voices,
-        key: TTSVoiceKeys.keyName,
-        value: _stateSelectedVoice![TTSVoiceKeys.keyName]);
-    if (voice != null) {
-      await VoicesLib.setVoice({
-        "name": voice[TTSVoiceKeys.keyName],
-        "locale": voice[TTSVoiceKeys.keyLocale],
-        "gender": _stateSelectedVoiceGenderRadio
-      });
-      await (await VoicesLib.flutterTts).speak("Text to speech");
-    }
+
+    await VoicesLib.setVoiceSaved(context, params: VoicesLibSetVoiceParamModel(
+      locale: _stateSelectedVoice?.locale ?? "",
+      name: _stateSelectedVoice?.name ?? "",
+      gender: _stateSelectedVoiceGenderRadio
+    ));
+    await (await VoicesLib.flutterTts).speak("Text to speech");
+
     DialogLib.hide(context);
   }
 
@@ -114,7 +110,7 @@ class _PageSettingsState extends State<PageSettings> {
                         whereLanguageId: languageProviderModel
                             .selectedLanguage.languageId,
                         languageTTSArtist:
-                            _stateSelectedVoice![TTSVoiceKeys.keyName],
+                            _stateSelectedVoice!.name,
                         languageTTSGender: _stateSelectedVoiceGenderRadio), context);
                 if (result > 0) {
                   DialogLib.show(
@@ -168,12 +164,12 @@ class _PageSettingsState extends State<PageSettings> {
                 )),
                 Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
                 const Text("Language Code"),
-                ComponentDropdown<Map<String, dynamic>>(
+                ComponentDropdown<VoicesLibGetVoicesResultModel>(
                   selectedItem: _stateSelectedVoice,
                   items: ttsProviderModel.voices,
-                  itemAsString: (Map<String, dynamic> u) =>
-                      u[TTSVoiceKeys.keyDisplayName],
-                  onChanged: (Map<String, dynamic>? data) => setState(() {
+                  itemAsString: (VoicesLibGetVoicesResultModel u) =>
+                      u.displayName,
+                  onChanged: (VoicesLibGetVoicesResultModel? data) => setState(() {
                     _stateSelectedVoice = data;
                   }),
                   hintText: "ex: en-UK",

@@ -5,10 +5,11 @@ import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/models/components/elements/dialog/options.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
-import 'package:my_language_app/models/providers/page.provider.dart';
-import 'package:my_language_app/models/providers/tts.provider.dart';
+import 'package:my_language_app/models/lib/voices.lib.model.dart';
+import 'package:my_language_app/models/providers/page.provider.model.dart';
+import 'package:my_language_app/models/providers/tts.provider.model.dart';
 import 'package:my_language_app/models/services/language.model.dart';
 import 'package:my_language_app/services/language.service.dart';
 
@@ -23,7 +24,7 @@ class PageLanguageAdd extends StatefulWidget {
 
 class _PageLanguageAddState extends State<PageLanguageAdd> {
   String _stateSelectedVoiceGenderRadio = "male";
-  Map<String, dynamic>? _stateSelectedVoice;
+  VoicesLibGetVoicesResultModel? _stateSelectedVoice;
   final _controllerName = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -74,14 +75,11 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                         icon: ComponentDialogIcon.loading));
                 var result = await LanguageService.add(LanguageAddParamModel(
                     languageName: _controllerName.text.trim(),
-                    languageTTSArtist:
-                        _stateSelectedVoice![TTSVoiceKeys.keyName],
+                    languageTTSArtist: _stateSelectedVoice!.name,
                     languageTTSGender: _stateSelectedVoiceGenderRadio));
                 if (result > 0) {
                   final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
-                  final pageProviderModel = ProviderLib.get<PageProviderModel>(
-                      context,
-                      listen: false);
+                  final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
                   pageProviderModel.setLeadingArgs(true);
                   DialogLib.show(
                       context,
@@ -139,12 +137,12 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                       style: TextStyle(fontSize: ThemeConst.fontSizes.lg))),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
               const Text("Language Code"),
-              ComponentDropdown<Map<String, dynamic>>(
+              ComponentDropdown<VoicesLibGetVoicesResultModel>(
                 selectedItem: _stateSelectedVoice,
                 items: ttsProviderModel.voices,
-                itemAsString: (Map<String, dynamic> u) =>
-                    u[TTSVoiceKeys.keyDisplayName],
-                onChanged: (Map<String, dynamic>? data) => setState(() {
+                itemAsString: (VoicesLibGetVoicesResultModel u) =>
+                    u.displayName,
+                onChanged: (VoicesLibGetVoicesResultModel? data) => setState(() {
                   _stateSelectedVoice = data;
                 }),
                 hintText: "ex: en-UK",

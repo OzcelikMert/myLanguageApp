@@ -4,7 +4,7 @@ import 'package:my_language_app/components/tools/sidebar.dart';
 import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/models/providers/page.provider.dart';
+import 'package:my_language_app/models/providers/page.provider.model.dart';
 import 'package:provider/provider.dart';
 
 class ComponentPage extends StatefulWidget {
@@ -53,9 +53,6 @@ class _ComponentPageState extends State<ComponentPage> {
   }
 
   Widget _componentBody() {
-    final pageProviderModel =
-        ProviderLib.get<PageProviderModel>(context, listen: true);
-
     return Container(
         padding: EdgeInsets.all(ThemeConst.paddings.md), child: widget.child);
   }
@@ -83,7 +80,7 @@ class _ComponentPageState extends State<ComponentPage> {
         body: Stack(
           children: [
             ComponentPreLoader(),
-            SingleChildScrollView(child: _componentBody())
+            SingleChildScrollView(child:  _componentBody()),
           ],
         ),
         drawer: _componentSidebar());

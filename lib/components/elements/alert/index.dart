@@ -4,7 +4,7 @@ import 'package:my_language_app/components/elements/alert/icons/confirm.dart';
 import 'package:my_language_app/components/elements/alert/icons/success.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
-import 'package:my_language_app/models/components/elements/dialog/options.dart';
+import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
 
 class ComponentDialog extends StatefulWidget {
   final ComponentDialogOptions options;

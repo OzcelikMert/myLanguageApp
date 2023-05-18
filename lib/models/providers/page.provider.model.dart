@@ -19,7 +19,7 @@ class PageProviderModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  dynamic _leadingArgs;
+  dynamic _leadingArgs = null;
 
   dynamic get leadingArgs => _leadingArgs;
 

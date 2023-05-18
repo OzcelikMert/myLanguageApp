@@ -4,8 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:my_language_app/models/providers/language.provider.dart';
-import 'package:my_language_app/models/providers/tts.provider.dart';
+import 'package:my_language_app/models/lib/voices.lib.model.dart';
+import 'package:my_language_app/models/providers/language.provider.model.dart';
+import 'package:my_language_app/models/providers/tts.provider.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
 
 class VoicesLib {
@@ -25,13 +26,13 @@ class VoicesLib {
     return _flutterTts!;
   }
 
-  static Future<void> setVoice(Map<String, String> voice) async {
+  static Future<void> _setVoice(Map<String, String> voice) async {
     await (await flutterTts).setVoice(voice);
     await (await flutterTts).setSpeechRate(0.5);
     await (await flutterTts).setVolume(1.0);
   }
 
-  static Future<void> setVoiceSaved(BuildContext context) async {
+  static Future<void> setVoiceSaved(BuildContext context, {VoicesLibSetVoiceParamModel? params}) async {
     final languageProviderModel =
     ProviderLib.get<LanguageProviderModel>(context);
     final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
@@ -41,16 +42,26 @@ class VoicesLib {
         value: languageProviderModel
             .selectedLanguage.languageTTSArtist);
     if (voice != null) {
-      await VoicesLib.setVoice({
-        "name": voice[TTSVoiceKeys.keyName],
-        "locale": voice[TTSVoiceKeys.keyLocale],
-        "gender": languageProviderModel.selectedLanguage.languageTTSGender
+      String name = voice.name;
+      String locale = voice.locale;
+      String gender = languageProviderModel.selectedLanguage.languageTTSGender;
+
+      if(params != null){
+        name = params.name;
+        locale = params.locale;
+        gender = params.gender;
+      }
+
+      await VoicesLib._setVoice({
+        TTSVoiceKeys.keyName: name,
+        TTSVoiceKeys.keyLocale: locale,
+        TTSVoiceKeys.keyGender: gender
       });
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getVoices() async {
-    List<Map<String, dynamic>> voices = [];
+  static Future<List<VoicesLibGetVoicesResultModel>> getVoices() async {
+    List<VoicesLibGetVoicesResultModel> voices = [];
     List<dynamic> availableVoices = await (await flutterTts).getVoices;
     if (availableVoices != null) {
       for (var voice in availableVoices) {
@@ -58,17 +69,9 @@ class VoicesLib {
         if (voice["locale"] != null) {
           displayName += " (${voice["locale"]})";
         }
-        voices.add({
-          TTSVoiceKeys.keyName: voice["name"],
-          TTSVoiceKeys.keyDisplayName: displayName,
-          TTSVoiceKeys.keyLocale: voice["locale"],
-          TTSVoiceKeys.keyGender: voice["gender"],
-          TTSVoiceKeys.keyRate: voice["rate"],
-          TTSVoiceKeys.keyPitch: voice["pitch"],
-          TTSVoiceKeys.keyVolume: voice["volume"],
-        });
+        voices.add(VoicesLibGetVoicesResultModel.fromJson({...voice, TTSVoiceKeys.keyDisplayName: displayName}));
       }
     }
-    return MyLibArray.sort(array: voices, key: TTSVoiceKeys.keyDisplayName, sortType: SortType.asc, isTypeClass: false);
+    return MyLibArray.sort(array: voices, key: TTSVoiceKeys.keyDisplayName, sortType: SortType.asc);
   }
 }
