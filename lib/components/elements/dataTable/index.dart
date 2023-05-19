@@ -11,17 +11,18 @@ class ComponentDataTable<T> extends StatefulWidget {
   final bool? isSearchable;
   final List<String>? searchableKeys;
   final bool isTypeClass;
+  final Color? selectedColor;
 
   const ComponentDataTable(
       {Key? key,
       this.title,
       required this.data,
       required this.columns,
-      required this.cells, 
-        this.isSearchable, 
-        this.searchableKeys,
-        this.isTypeClass = true
-      })
+      required this.cells,
+      this.isSearchable,
+      this.searchableKeys,
+      this.isTypeClass = true,
+      this.selectedColor})
       : super(key: key);
 
   @override
@@ -34,6 +35,7 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
   late bool _stateSortAscending = true;
   late List<T> _stateFilteredRows = [];
   late String _stateSearchText = "";
+  late int _stateSelectedIndex = -1;
 
   @override
   void initState() {
@@ -54,8 +56,8 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
     }
   }
 
-  void _sort<P>(
-      Comparable<P> Function(T d) getField, int columnIndex, bool ascending, bool isDate) {
+  void _sort<P>(Comparable<P> Function(T d) getField, int columnIndex,
+      bool ascending, bool isDate) {
     _stateFilteredRows.sort((a, b) {
       dynamic aValue = getField(a);
       dynamic bValue = getField(b);
@@ -80,18 +82,17 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
               ? (columnIndex, ascending) {
                   _sort<dynamic>((dynamic d) {
                     dynamic _d;
-                    if(widget.isTypeClass){
+                    if (widget.isTypeClass) {
                       try {
                         _d = d.toJson();
                       } catch (ex) {
                         return 0;
                       }
-                    }else {
+                    } else {
                       _d = d;
                     }
                     return _d[column.sortKeyName];
-                  },
-                      columnIndex, ascending, column.isDate);
+                  }, columnIndex, ascending, column.isDate);
                 }
               : null));
     }
@@ -104,20 +105,23 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
       if (query.isNotEmpty) {
         _stateFilteredRows = widget.data.where((dynamic row) {
           dynamic _row;
-          if(widget.isTypeClass){
+          if (widget.isTypeClass) {
             try {
               _row = row.toJson();
             } catch (ex) {
               return false;
             }
-          }else {
+          } else {
             _row = row;
           }
           bool isContain = false;
-          if(widget.searchableKeys != null){
-            for(var key in widget.searchableKeys!) {
-              isContain = _row[key].toString().toLowerCase().contains(query.trim().toLowerCase());
-              if(isContain == true) break;
+          if (widget.searchableKeys != null) {
+            for (var key in widget.searchableKeys!) {
+              isContain = _row[key]
+                  .toString()
+                  .toLowerCase()
+                  .contains(query.trim().toLowerCase());
+              if (isContain == true) break;
             }
           }
           return isContain;
@@ -128,30 +132,45 @@ class _ComponentDataTableState<T> extends State<ComponentDataTable<T>> {
     });
   }
 
+  void onLongPressRow(int index) {
+    setState(() {
+      _stateSelectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       child: Column(
         children: [
-          widget.isSearchable == true ? ComponentSearchTextField(
-            onTextChanged: (query) {
-              search(query);
-            },
-          ) : Container(),
+          widget.isSearchable == true
+              ? ComponentSearchTextField(
+                  onTextChanged: (query) {
+                    search(query);
+                  },
+                )
+              : Container(),
           PaginatedDataTable(
-              columnSpacing: 35,
-              dataRowHeight: 70,
-              showFirstLastButtons: true,
-              header: widget.title != null
-                  ? Center(child: Text(widget.title.toString()))
-                  : null,
-              rowsPerPage: _stateRowsPerPage,
-              source: _DataSource<T>(
-                  context: context, data: _stateFilteredRows, cells: widget.cells),
-              sortColumnIndex: _stateSortColumnIndex,
-              sortAscending: _stateSortAscending,
-              columns: _getColumns())
+            columnSpacing: 35,
+            dataRowHeight: 70,
+            showFirstLastButtons: true,
+            header: widget.title != null
+                ? Center(child: Text(widget.title.toString()))
+                : null,
+            rowsPerPage: _stateRowsPerPage,
+            source: _DataSource<T>(
+                context: context,
+                data: _stateFilteredRows,
+                cells: widget.cells,
+                selectedIndex: _stateSelectedIndex,
+                selectedColor: widget.selectedColor,
+                onLongPress: onLongPressRow
+            ),
+            sortColumnIndex: _stateSortColumnIndex,
+            sortAscending: _stateSortAscending,
+            columns: _getColumns(),
+          )
         ],
       ),
     );
@@ -162,8 +181,17 @@ class _DataSource<T> extends DataTableSource {
   final BuildContext context;
   final List<T> data;
   final List<ComponentDataCellModule<T>> cells;
+  final int? selectedIndex;
+  final Color? selectedColor;
+  final void Function(int index)? onLongPress;
 
-  _DataSource({required this.context, required this.data, required this.cells});
+  _DataSource(
+      {required this.context,
+      required this.data,
+      required this.cells,
+      this.selectedIndex,
+      this.selectedColor,
+      this.onLongPress});
 
   List<DataCell> _getCells(T row) {
     List<DataCell> dataCells = [];
@@ -180,7 +208,19 @@ class _DataSource<T> extends DataTableSource {
       return null!;
     }
     final row = data[index];
-    return DataRow.byIndex(index: index, cells: _getCells(row));
+    bool isSelected = (selectedIndex != null) ? selectedIndex == index : false;
+    return DataRow.byIndex(
+        index: index,
+        onLongPress: () => onLongPress!(index),
+        cells: _getCells(row),
+        selected: isSelected,
+        color: MaterialStateColor.resolveWith((states) {
+          if (states.contains(MaterialState.selected) &&
+              selectedColor != null) {
+            return selectedColor!;
+          }
+          return Colors.transparent;
+        }));
   }
 
   @override

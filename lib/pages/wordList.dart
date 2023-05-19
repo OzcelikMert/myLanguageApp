@@ -138,6 +138,7 @@ class _PageWordListState extends State<PageWordList> {
         ? Container()
         : ComponentDataTable<WordGetResultModel>(
             data: _stateWords,
+            selectedColor: ThemeConst.colors.info,
             isSearchable: true,
             searchableKeys: [
               DBTableWords.columnTextTarget,
@@ -173,19 +174,21 @@ class _PageWordListState extends State<PageWordList> {
                 sortKeyName: DBTableWords.columnIsStudy,
                 sortable: true,
               ),
-              const ComponentDataColumnModule(
-                title: "Edit",
+              ComponentDataColumnModule(
+                title: "",
               ),
-              const ComponentDataColumnModule(
-                title: "Delete",
-              )
+              ComponentDataColumnModule(
+                title: "",
+              ),
             ],
             cells: [
               ComponentDataCellModule(
                 child: (row) => ComponentIconButton(
                     onPressed: () => onClickTTS(
                         row.wordTextTarget),
-                    icon: Icons.volume_up),
+                    color: ThemeConst.colors.primary,
+                    icon: Icons.volume_up
+                ),
               ),
               ComponentDataCellModule(
                 child: (row) =>
@@ -208,21 +211,17 @@ class _PageWordListState extends State<PageWordList> {
                     Text(row.wordIsStudy == 1 ? "Yes" : "No"),
               ),
               ComponentDataCellModule(
-                child: (row) => ComponentButton(
-                  text: "Edit",
-                  onPressed: () => onClickEdit(row),
-                  icon: Icons.edit,
-                  buttonSize: ComponentButtonSize.sm,
-                  bgColor: ThemeConst.colors.warning,
+                child: (row) => ComponentIconButton(
+                  onPressed: () => onClickDelete(row),
+                  icon: Icons.delete_forever,
+                  color: ThemeConst.colors.danger,
                 ),
               ),
               ComponentDataCellModule(
-                child: (row) => ComponentButton(
-                  text: "Delete",
-                  bgColor: ThemeConst.colors.danger,
-                  onPressed: () => onClickDelete(row),
-                  icon: Icons.delete_forever,
-                  buttonSize: ComponentButtonSize.sm,
+                child: (row) => ComponentIconButton(
+                  onPressed: () => onClickEdit(row),
+                  color: ThemeConst.colors.warning,
+                  icon: Icons.edit,
                 ),
               )
             ],

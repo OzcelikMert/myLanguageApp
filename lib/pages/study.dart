@@ -47,10 +47,9 @@ class _PageStudyState extends State<PageStudy> {
   late bool _stateIsCorrect = false;
   int _stateSelectedStudyType = StudyTypeConst.Daily;
   late List<WordGetResultModel> _stateWords = [];
-  late WordGetResultModel _stateCurrentWord;
+  late WordGetResultModel? _stateCurrentWord = null;
   late String _stateTextDisplayed = "";
   late String _stateTextAnswer = "";
-  late bool _stateIsActiveVoice = false;
   late int _stateTotalWords = 0;
   late int _stateStudiedWords = 0;
   late bool _stateIsDisplayedTarget = false;
@@ -141,9 +140,8 @@ class _PageStudyState extends State<PageStudy> {
     }
 
     setState(() {
-      _stateTextDisplayed = isDisplayedTarget ? _stateCurrentWord.wordTextTarget :  _stateCurrentWord.wordTextNative;
-      _stateTextAnswer = isDisplayedTarget ? _stateCurrentWord.wordTextNative :  _stateCurrentWord.wordTextTarget;
-      _stateIsActiveVoice = isDisplayedTarget;
+      _stateTextDisplayed = isDisplayedTarget ? _stateCurrentWord!.wordTextTarget :  _stateCurrentWord!.wordTextNative;
+      _stateTextAnswer = isDisplayedTarget ? _stateCurrentWord!.wordTextNative :  _stateCurrentWord!.wordTextTarget;
       _stateIsDisplayedTarget = isDisplayedTarget;
     });
 
@@ -158,9 +156,15 @@ class _PageStudyState extends State<PageStudy> {
   void setCurrentWord() {
     var random = Random();
     int randomNumber = random.nextInt(_stateWords.length);
+
+    if(_stateCurrentWord != null && _stateWords[randomNumber].wordId == _stateCurrentWord!.wordId){
+      setCurrentWord();
+      return;
+    }
+
     setState(() {
       _stateCurrentWord = _stateWords[randomNumber];
-      _stateSelectedStudyType = _stateCurrentWord.wordStudyType;
+      _stateSelectedStudyType = _stateCurrentWord!.wordStudyType;
       _stateIsCorrect = false;
       _stateIsStudied = false;
     });
@@ -193,14 +197,14 @@ class _PageStudyState extends State<PageStudy> {
       var updateWord = await WordService.update(WordUpdateParamModel(
           whereWordLanguageId:
               languageProviderModel.selectedLanguage.languageId,
-          whereWordId: _stateCurrentWord.wordId,
+          whereWordId: _stateCurrentWord!.wordId,
           wordIsStudy: 1));
       if (updateWord > 0) {
         setState(() {
           _stateWords = MyLibArray.findMulti(
               array: _stateWords,
               key: DBTableWords.columnId,
-              value: _stateCurrentWord.wordId,
+              value: _stateCurrentWord!.wordId,
               isLike: false);
           _stateStudiedWords += 1;
         });
@@ -283,12 +287,12 @@ class _PageStudyState extends State<PageStudy> {
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context);
 
-    if (_stateCurrentWord.wordStudyType !=
+    if (_stateCurrentWord!.wordStudyType !=
         _stateSelectedStudyType) {
       await WordService.update(WordUpdateParamModel(
           whereWordLanguageId:
               languageProviderModel.selectedLanguage.languageId,
-          whereWordId: _stateCurrentWord.wordId,
+          whereWordId: _stateCurrentWord!.wordId,
           wordStudyType: _stateSelectedStudyType));
     }
 
@@ -310,7 +314,7 @@ class _PageStudyState extends State<PageStudy> {
     if (await Permission.speech.request() != PermissionStatus.granted) {
       return;
     }
-    await (await VoicesLib.flutterTts).speak(_stateTextDisplayed);
+    await (await VoicesLib.flutterTts).speak(_stateIsDisplayedTarget ? _stateTextDisplayed : _stateTextAnswer);
   }
 
   void onClickComment() async {
@@ -318,7 +322,7 @@ class _PageStudyState extends State<PageStudy> {
         context,
         ComponentDialogOptions(
             title: "🧐 Comment 🧐",
-            content: _stateCurrentWord.wordComment));
+            content: _stateCurrentWord!.wordComment));
   }
 
   String? onValidator(String? value) {
@@ -422,7 +426,7 @@ class _PageStudyState extends State<PageStudy> {
 
   Widget _componentInfo() {
     Widget _componentVoice() {
-      return _stateIsActiveVoice
+      return _stateIsDisplayedTarget || _stateIsStudied
           ? ComponentIconButton(
               onPressed: onClickTTS,
               icon: Icons.volume_up,
@@ -439,7 +443,7 @@ class _PageStudyState extends State<PageStudy> {
       );
     }
 
-    return _stateCurrentWord.wordComment.toString().isNotEmpty
+    return _stateCurrentWord!.wordComment.toString().isNotEmpty
         ? _stateIsDisplayedTarget
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
