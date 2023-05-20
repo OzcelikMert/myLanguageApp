@@ -157,7 +157,7 @@ class _PageStudyState extends State<PageStudy> {
     var random = Random();
     int randomNumber = random.nextInt(_stateWords.length);
 
-    if(_stateCurrentWord != null && _stateWords[randomNumber].wordId == _stateCurrentWord!.wordId){
+    if(_stateCurrentWord != null && _stateWords.length > 1 && _stateWords[randomNumber].wordId == _stateCurrentWord!.wordId){
       setCurrentWord();
       return;
     }
@@ -325,6 +325,40 @@ class _PageStudyState extends State<PageStudy> {
             content: _stateCurrentWord!.wordComment));
   }
 
+  void onClickEdit() async {
+    WordGetResultModel? updateData = await RouteLib.change(
+        context: context,
+        target: PageConst.routeNames.wordEdit,
+        arguments: {DBTableWords.columnId: _stateCurrentWord!.wordId},
+        safeHistory: true);
+    if (updateData != null) {
+      await DialogLib.show(
+          context,
+          ComponentDialogOptions(
+              content: "Loading...", icon: ComponentDialogIcon.loading));
+
+      if(!_stateIsCorrect) {
+        setState(() {
+          _stateWords = _stateWords.map((word) {
+            if(word.wordId == updateData.wordId) {
+              word = updateData;
+            }
+            return word;
+          }).toList();
+        });
+      }
+
+      setState(() {
+        _stateCurrentWord = updateData;
+        _stateSelectedStudyType = updateData.wordStudyType;
+      });
+
+      setTextDisplayedAndAnswer();
+
+      DialogLib.hide(context);
+    }
+  }
+
   String? onValidator(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter some text';
@@ -439,24 +473,32 @@ class _PageStudyState extends State<PageStudy> {
       return ComponentIconButton(
         onPressed: onClickComment,
         icon: Icons.lightbulb,
+        color: ThemeConst.colors.success,
+      );
+    }
+
+    Widget _componentEdit() {
+      return ComponentIconButton(
+        onPressed: onClickEdit,
+        icon: Icons.edit,
         color: ThemeConst.colors.warning,
       );
     }
 
-    return _stateCurrentWord!.wordComment.toString().isNotEmpty
-        ? _stateIsDisplayedTarget
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _componentVoice(),
-                  Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ThemeConst.paddings.sm)),
-                  _componentComment(),
-                ],
-              )
-            : _componentComment()
-        : _componentVoice();
+    Widget _componentPadding() {
+      return Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.sm));
+    }
+
+    List<Widget> children  = [
+      ...(_stateIsDisplayedTarget || _stateIsStudied ? [_componentVoice(), _componentPadding()] : []),
+      ...(_stateCurrentWord!.wordComment.toString().isNotEmpty ? [_componentComment(), _componentPadding()] : []),
+      ...(_stateIsStudied ? [_componentEdit(), _componentPadding()] : []),
+    ];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: children.length > 0 ? children.sublist(0, children.length - 1) : children,
+    );
   }
 
   Widget _componentProgress() {

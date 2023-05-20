@@ -72,17 +72,27 @@ class _PageWordListState extends State<PageWordList> {
   }
 
   void onClickEdit(WordGetResultModel row) async {
-    var isUpdated = await RouteLib.change(
+    WordGetResultModel? updateData = await RouteLib.change(
         context: context,
         target: PageConst.routeNames.wordEdit,
         arguments: {DBTableWords.columnId: row.wordId},
         safeHistory: true);
-    if (isUpdated == true) {
+    print(updateData);
+    if (updateData != null) {
       await DialogLib.show(
           context,
           ComponentDialogOptions(
               content: "Loading...", icon: ComponentDialogIcon.loading));
-      await _pageInit();
+
+      setState(() {
+        _stateWords = _stateWords.map((word) {
+          if(word.wordId == updateData.wordId) {
+            word = updateData;
+          }
+          return word;
+        }).toList();
+      });
+
       DialogLib.hide(context);
     }
   }
@@ -212,18 +222,18 @@ class _PageWordListState extends State<PageWordList> {
               ),
               ComponentDataCellModule(
                 child: (row) => ComponentIconButton(
+                  onPressed: () => onClickEdit(row),
+                  color: ThemeConst.colors.warning,
+                  icon: Icons.edit,
+                ),
+              ),
+              ComponentDataCellModule(
+                child: (row) => ComponentIconButton(
                   onPressed: () => onClickDelete(row),
                   icon: Icons.delete_forever,
                   color: ThemeConst.colors.danger,
                 ),
               ),
-              ComponentDataCellModule(
-                child: (row) => ComponentIconButton(
-                  onPressed: () => onClickEdit(row),
-                  color: ThemeConst.colors.warning,
-                  icon: Icons.edit,
-                ),
-              )
             ],
           );
   }
