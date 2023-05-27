@@ -23,6 +23,11 @@ class WordService {
       whereArgs.add(params.wordStudyType);
     }
 
+    if (params.wordType != null) {
+      whereString += "${DBTableWords.columnType} = ? AND ";
+      whereArgs.add(params.wordType);
+    }
+
     if (params.wordIsStudy != null) {
       whereString += "${DBTableWords.columnIsStudy} = ? AND ";
       whereArgs.add(params.wordIsStudy);
@@ -62,6 +67,11 @@ class WordService {
       whereArgs.add(params.wordStudyType);
     }
 
+    if (params.wordType != null) {
+      whereString += "${DBTableWords.columnType} = ? AND ";
+      whereArgs.add(params.wordType);
+    }
+
     var db = await DBConn.instance.database;
 
     var words = (await db.query(
@@ -92,6 +102,11 @@ class WordService {
     if (params.wordStudyType != null) {
       whereString += "${DBTableWords.columnStudyType} = ? AND ";
       whereArgs.add(params.wordStudyType);
+    }
+
+    if (params.wordType != null) {
+      whereString += "${DBTableWords.columnType} = ? AND ";
+      whereArgs.add(params.wordType);
     }
 
     var db = await DBConn.instance.database;
@@ -126,6 +141,7 @@ class WordService {
       DBTableWords.columnCreatedAt: date,
       DBTableWords.columnUpdatedAt: date,
       DBTableWords.columnStudyType: params.wordStudyType,
+      DBTableWords.columnType: params.wordType,
       DBTableWords.columnIsStudy: params.wordIsStudy,
     });
   }
@@ -145,6 +161,7 @@ class WordService {
         DBTableWords.columnCreatedAt: date,
         DBTableWords.columnUpdatedAt: date,
         DBTableWords.columnStudyType: params.wordStudyType,
+        DBTableWords.columnType: params.wordType,
         DBTableWords.columnIsStudy: params.wordIsStudy,
       });
     }
@@ -175,6 +192,11 @@ class WordService {
       whereArgs.add(params.whereWordStudyType);
     }
 
+    if (params.whereWordType != null) {
+      whereString += "${DBTableWords.columnType} = ? AND ";
+      whereArgs.add(params.whereWordType);
+    }
+
     if (params.wordTextTarget != null) {
       setMap[DBTableWords.columnTextTarget] = params.wordTextTarget;
     }
@@ -189,6 +211,10 @@ class WordService {
 
     if (params.wordStudyType != null) {
       setMap[DBTableWords.columnStudyType] = params.wordStudyType;
+    }
+
+    if (params.wordType != null) {
+      setMap[DBTableWords.columnType] = params.wordType;
     }
 
     if (params.wordIsStudy != null) {

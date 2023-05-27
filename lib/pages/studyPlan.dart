@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/components/elements/button.dart';
 import 'package:my_language_app/components/pages/studyPlan/studyTypeButton.dart';
-import 'package:my_language_app/config/db/tables/languages.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
+import 'package:my_language_app/constants/wordType.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
@@ -19,8 +20,15 @@ import 'package:my_language_app/services/word.service.dart';
 
 class PageStudyPlan extends StatefulWidget {
   final BuildContext context;
+  late int wordType = WordTypeConst.word;
 
-  const PageStudyPlan({Key? key, required this.context}) : super(key: key);
+  PageStudyPlan({Key? key, required this.context}) : super(key: key) {
+    var args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args[DBTableWords.columnType] != null) {
+      wordType = int.tryParse(args[DBTableWords.columnType].toString()) ?? 0;
+    }
+  }
 
   @override
   State<StatefulWidget> createState() => _PageStudyPlanState();
@@ -28,6 +36,7 @@ class PageStudyPlan extends StatefulWidget {
 
 class _PageStudyPlanState extends State<PageStudyPlan> {
   late List<WordGetCountReportResultModel> _stateWordCountReports = [];
+  late int _stateWordType = WordTypeConst.word;
 
   @override
   void initState() {
@@ -39,19 +48,35 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
 
   _pageInit() async {
     final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
-    pageProviderModel.setTitle("Study Plan");
+
+    setState(() {
+      _stateWordType =
+          widget.wordType != 0 ? widget.wordType : WordTypeConst.word;
+    });
+
+    await setWordCountReports();
+    await setPageTitle();
+
+    pageProviderModel.setIsLoading(false);
+  }
+
+  Future<void> setPageTitle() async {
+    final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
+    pageProviderModel.setTitle("Study Plan (${WordTypeConst.getTypeName(_stateWordType)})");
+  }
+
+  Future<void> setWordCountReports() async {
     final languageProviderModel =
-        ProviderLib.get<LanguageProviderModel>(context);
+    ProviderLib.get<LanguageProviderModel>(context);
 
     var wordCountReports = await WordService.getCountReport(
         WordGetCountReportParamModel(
-            wordLanguageId: languageProviderModel.selectedLanguage.languageId));
+            wordLanguageId: languageProviderModel.selectedLanguage.languageId,
+            wordType: _stateWordType));
 
     setState(() {
       _stateWordCountReports = wordCountReports;
     });
-
-    pageProviderModel.setIsLoading(false);
   }
 
   void onClickStudy(int type) async {
@@ -116,11 +141,11 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                         whereLanguageId:
                             languageProviderModel.selectedLanguage.languageId,
                         languageDailyUpdatedAt:
-                            type == StudyTypeConst.Daily ? date : null,
+                            type == StudyTypeConst.daily ? date : null,
                         languageWeeklyUpdatedAt:
-                            type == StudyTypeConst.Weekly ? date : null,
+                            type == StudyTypeConst.weekly ? date : null,
                         languageMonthlyUpdatedAt:
-                            type == StudyTypeConst.Monthly ? date : null,
+                            type == StudyTypeConst.monthly ? date : null,
                       ),
                       context);
 
@@ -132,7 +157,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                     await RouteLib.change(
                         context: context,
                         target: PageConst.routeNames.study,
-                        arguments: {DBTableWords.columnStudyType: type});
+                        arguments: {DBTableWords.columnStudyType: type, DBTableWords.columnType: _stateWordType});
                   } else {
                     DialogLib.show(
                         context,
@@ -146,13 +171,33 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
     }
   }
 
+  Future<void> onClickChangeWordType(int type) async {
+    if(type == _stateWordType) return;
+
+    await DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            content: "Loading...",
+            icon: ComponentDialogIcon.loading));
+
+
+    setState(() {
+      _stateWordType = type;
+    });
+
+    await setWordCountReports();
+    await setPageTitle();
+
+    DialogLib.hide(context);
+  }
+
   Widget componentDaily() {
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
-        value: StudyTypeConst.Daily);
+        value: StudyTypeConst.daily);
     var studiedReports = MyLibArray.findMulti(
         array: reports, key: DBTableWords.columnIsStudy, value: 1);
     var unstudiedReports = MyLibArray.findMulti(
@@ -160,8 +205,8 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
 
     return ComponentStudyTypeButton(
         bgColor: ThemeConst.colors.success,
-        title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
-        onStartPressed: () => onClickStudy(StudyTypeConst.Daily),
+        title: StudyTypeConst.getTypeName(StudyTypeConst.daily),
+        onStartPressed: () => onClickStudy(StudyTypeConst.daily),
         lastStudyDate: DateTime.parse(languageProviderModel
             .selectedLanguage.languageDailyUpdatedAt
             .toString()),
@@ -182,7 +227,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
-        value: StudyTypeConst.Weekly);
+        value: StudyTypeConst.weekly);
     var studiedReports = MyLibArray.findMulti(
         array: reports, key: DBTableWords.columnIsStudy, value: 1);
     var unstudiedReports = MyLibArray.findMulti(
@@ -190,25 +235,19 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
 
     return ComponentStudyTypeButton(
         bgColor: ThemeConst.colors.danger,
-        title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
-        onStartPressed: () => onClickStudy(StudyTypeConst.Weekly),
+        title: StudyTypeConst.getTypeName(StudyTypeConst.weekly),
+        onStartPressed: () => onClickStudy(StudyTypeConst.weekly),
         lastStudyDate: DateTime.parse(languageProviderModel
             .selectedLanguage.languageWeeklyUpdatedAt
             .toString()),
         totalWords: reports.isNotEmpty
-            ? reports
-                .map((e) => e.wordCount)
-                .reduce((a, b) => a + b)
+            ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
         studiedWords: studiedReports.isNotEmpty
-            ? studiedReports
-                .map((e) => e.wordCount)
-                .reduce((a, b) => a + b)
+            ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
         unstudiedWords: unstudiedReports.isNotEmpty
-            ? unstudiedReports
-                .map((e) => e.wordCount)
-                .reduce((a, b) => a + b)
+            ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0);
   }
 
@@ -218,7 +257,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
-        value: StudyTypeConst.Monthly);
+        value: StudyTypeConst.monthly);
     var studiedReports = MyLibArray.findMulti(
         array: reports, key: DBTableWords.columnIsStudy, value: 1);
     var unstudiedReports = MyLibArray.findMulti(
@@ -226,25 +265,19 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
 
     return ComponentStudyTypeButton(
         bgColor: ThemeConst.colors.info,
-        title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
-        onStartPressed: () => onClickStudy(StudyTypeConst.Monthly),
+        title: StudyTypeConst.getTypeName(StudyTypeConst.monthly),
+        onStartPressed: () => onClickStudy(StudyTypeConst.monthly),
         lastStudyDate: DateTime.parse(languageProviderModel
             .selectedLanguage.languageMonthlyUpdatedAt
             .toString()),
         totalWords: reports.isNotEmpty
-            ? reports
-                .map((e) => e.wordCount)
-                .reduce((a, b) => a + b)
+            ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
         studiedWords: studiedReports.isNotEmpty
-            ? studiedReports
-                .map((e) => e.wordCount)
-                .reduce((a, b) => a + b)
+            ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
         unstudiedWords: unstudiedReports.isNotEmpty
-            ? unstudiedReports
-                .map((e) => e.wordCount)
-                .reduce((a, b) => a + b)
+            ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0);
   }
 
@@ -260,10 +293,26 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Row(
+                  children: [
+                    Expanded(child: ComponentButton(
+                        text: WordTypeConst.getTypeName(WordTypeConst.word),
+                        onPressed: () => onClickChangeWordType(WordTypeConst.word),
+                        bgColor: _stateWordType == WordTypeConst.word ? ThemeConst.colors.success : null,
+                    )),
+                    Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+                    Expanded(child: ComponentButton(
+                        text: WordTypeConst.getTypeName(WordTypeConst.sentence),
+                        onPressed: () => onClickChangeWordType(WordTypeConst.sentence),
+                        bgColor: _stateWordType == WordTypeConst.sentence ? ThemeConst.colors.success : null,
+                    )),
+                  ],
+                ),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
                 componentDaily(),
-                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
                 componentWeekly(),
-                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+                Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
                 componentMonthly(),
               ],
             ),

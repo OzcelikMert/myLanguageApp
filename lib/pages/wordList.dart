@@ -6,6 +6,7 @@ import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
+import 'package:my_language_app/constants/wordType.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/lib/route.lib.dart';
@@ -77,7 +78,6 @@ class _PageWordListState extends State<PageWordList> {
         target: PageConst.routeNames.wordEdit,
         arguments: {DBTableWords.columnId: row.wordId},
         safeHistory: true);
-    print(updateData);
     if (updateData != null) {
       await DialogLib.show(
           context,
@@ -175,6 +175,11 @@ class _PageWordListState extends State<PageWordList> {
                 sortable: true,
               ),
               const ComponentDataColumnModule(
+                title: "Word Type",
+                sortKeyName: DBTableWords.columnType,
+                sortable: true,
+              ),
+              const ComponentDataColumnModule(
                 title: "Study Type",
                 sortKeyName: DBTableWords.columnStudyType,
                 sortable: true,
@@ -212,6 +217,9 @@ class _PageWordListState extends State<PageWordList> {
                 child: (row) => Text(DateFormat.yMd().add_Hm().format(
                     DateTime.parse(row.wordCreatedAt)
                         .toLocal())),
+              ),
+              ComponentDataCellModule(
+                child: (row) => Text(WordTypeConst.getTypeName(row.wordType)),
               ),
               ComponentDataCellModule(
                 child: (row) => Text(StudyTypeConst.getTypeName(row.wordStudyType)),

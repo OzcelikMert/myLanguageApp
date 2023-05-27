@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:my_language_app/components/elements/dropdown.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
+import 'package:my_language_app/constants/wordType.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
@@ -18,7 +20,10 @@ class PageWordAdd extends StatefulWidget {
 
   PageWordAdd({Key? key, required this.context}) : super(key: key) {
     var args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    ModalRoute
+        .of(context)!
+        .settings
+        .arguments as Map<String, dynamic>?;
     if (args != null && args[DBTableWords.columnId] != null) {
       wordId = int.tryParse(args[DBTableWords.columnId].toString()) ?? 0;
     }
@@ -30,7 +35,8 @@ class PageWordAdd extends StatefulWidget {
 
 class _PageWordAddState extends State<PageWordAdd> {
   late WordGetResultModel? _stateWord = null;
-  int _stateSelectedStudyType = StudyTypeConst.Daily;
+  late int _stateSelectedStudyType = StudyTypeConst.daily;
+  late int _stateSelectedWordType = WordTypeConst.word;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _controllerTextNative = TextEditingController();
   final _controllerTextTarget = TextEditingController();
@@ -49,7 +55,7 @@ class _PageWordAddState extends State<PageWordAdd> {
     pageProviderModel
         .setTitle(widget.wordId > 0 ? "Update Word" : "Add New Word");
     final languageProviderModel =
-        ProviderLib.get<LanguageProviderModel>(context);
+    ProviderLib.get<LanguageProviderModel>(context);
 
     var words = await WordService.get(WordGetParamModel(
         wordLanguageId: languageProviderModel.selectedLanguage.languageId,
@@ -77,35 +83,43 @@ class _PageWordAddState extends State<PageWordAdd> {
             icon: ComponentDialogIcon.confirm,
             showCancelButton: true,
             content:
-                "Do you want to ${_stateWord != null ? "update" : "add"} '${_controllerTextNative.text}' as a word for your '${StudyTypeConst.getTypeName(_stateSelectedStudyType)}' study?",
+            "Do you want to ${_stateWord != null
+                ? "update"
+                : "add"} '${_controllerTextNative
+                .text}' as a word for your '${StudyTypeConst.getTypeName(
+                _stateSelectedStudyType)}' study?",
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
                 final languageProviderModel =
-                    ProviderLib.get<LanguageProviderModel>(context);
+                ProviderLib.get<LanguageProviderModel>(context);
                 await DialogLib.show(
                     context,
                     ComponentDialogOptions(
                         content:
-                            _stateWord != null ? "Updating..." : "Adding...",
+                        _stateWord != null ? "Updating..." : "Adding...",
                         icon: ComponentDialogIcon.loading));
                 int result = 0;
                 if (_stateWord != null) {
                   result = await WordService.update(WordUpdateParamModel(
                       whereWordLanguageId:
-                          languageProviderModel.selectedLanguage.languageId,
+                      languageProviderModel.selectedLanguage.languageId,
                       whereWordId: _stateWord!.wordId,
                       wordTextNative: _controllerTextNative.text.trim(),
                       wordTextTarget: _controllerTextTarget.text.trim(),
                       wordComment: _controllerComment.text.trim(),
-                      wordStudyType: _stateSelectedStudyType));
+                      wordStudyType: _stateSelectedStudyType,
+                      wordType: _stateSelectedWordType
+                  ));
                 } else {
                   result = await WordService.add(WordAddParamModel(
                       wordLanguageId:
-                          languageProviderModel.selectedLanguage.languageId,
+                      languageProviderModel.selectedLanguage.languageId,
                       wordTextNative: _controllerTextNative.text.trim(),
                       wordTextTarget: _controllerTextTarget.text.trim(),
                       wordComment: _controllerComment.text.trim(),
-                      wordStudyType: _stateSelectedStudyType));
+                      wordStudyType: _stateSelectedStudyType,
+                      wordType: _stateSelectedWordType
+                  ));
                 }
 
                 if (result > 0) {
@@ -113,11 +127,14 @@ class _PageWordAddState extends State<PageWordAdd> {
                       context,
                       ComponentDialogOptions(
                           content:
-                              "'${_controllerTextNative.text}' has successfully ${_stateWord != null ? "updated" : "added"}!",
+                          "'${_controllerTextNative
+                              .text}' has successfully ${_stateWord != null
+                              ? "updated"
+                              : "added"}!",
                           icon: ComponentDialogIcon.success));
                   if (_stateWord != null) {
                     final pageProviderModel =
-                        ProviderLib.get<PageProviderModel>(context);
+                    ProviderLib.get<PageProviderModel>(context);
                     var wordList = await WordService.get(
                         WordGetParamModel(
                             wordLanguageId: languageProviderModel
@@ -134,7 +151,9 @@ class _PageWordAddState extends State<PageWordAdd> {
                       context,
                       ComponentDialogOptions(
                           content:
-                              "It couldn't ${_stateWord != null ? "update" : "add"}!",
+                          "It couldn't ${_stateWord != null
+                              ? "update"
+                              : "add"}!",
                           icon: ComponentDialogIcon.error));
                 }
                 return false;
@@ -150,6 +169,14 @@ class _PageWordAddState extends State<PageWordAdd> {
     }
   }
 
+  void onChangeWordType(int? value) {
+    if (value != null) {
+      setState(() {
+        _stateSelectedWordType = value;
+      });
+    }
+  }
+
   String? onValidator(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter some text';
@@ -160,66 +187,81 @@ class _PageWordAddState extends State<PageWordAdd> {
   @override
   Widget build(BuildContext context) {
     final pageProviderModel =
-        ProviderLib.get<PageProviderModel>(context, listen: true);
+    ProviderLib.get<PageProviderModel>(context, listen: true);
     final languageProviderModel =
-        ProviderLib.get<LanguageProviderModel>(context, listen: true);
+    ProviderLib.get<LanguageProviderModel>(context, listen: true);
 
     return pageProviderModel.isLoading
         ? Container()
         : Center(
-            child: ComponentForm(
-              formKey: _formKey,
-              onSubmit: onClickAdd,
-              submitButtonText: _stateWord != null ? "Update" : "Add",
-              children: <Widget>[
-                Text(
-                    "Target Language (${languageProviderModel.selectedLanguage.languageName})"),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Word, Sentence or Question',
-                  ),
-                  validator: onValidator,
-                  controller: _controllerTextTarget,
-                ),
-                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-                const Text("Native Language"),
-                TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'Word, Sentence or Question',
-                  ),
-                  validator: onValidator,
-                  controller: _controllerTextNative,
-                ),
-                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-                const Text("Comment"),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: '...',
-                  ),
-                  controller: _controllerComment,
-                ),
-                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-                const Text("Study Type"),
-                ComponentRadio<int>(
-                  title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
-                  value: StudyTypeConst.Daily,
-                  groupValue: _stateSelectedStudyType,
-                  onChanged: onChangeStudyType,
-                ),
-                ComponentRadio<int>(
-                  title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
-                  value: StudyTypeConst.Weekly,
-                  groupValue: _stateSelectedStudyType,
-                  onChanged: onChangeStudyType,
-                ),
-                ComponentRadio<int>(
-                  title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
-                  value: StudyTypeConst.Monthly,
-                  groupValue: _stateSelectedStudyType,
-                  onChanged: onChangeStudyType,
-                )
-              ],
+      child: ComponentForm(
+        formKey: _formKey,
+        onSubmit: onClickAdd,
+        submitButtonText: _stateWord != null ? "Update" : "Add",
+        children: <Widget>[
+          Text(
+              "Target Language (${languageProviderModel.selectedLanguage
+                  .languageName})"),
+          TextFormField(
+            decoration: const InputDecoration(
+              hintText: 'Word, Sentence or Question',
             ),
-          );
+            validator: onValidator,
+            controller: _controllerTextTarget,
+          ),
+          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+          const Text("Native Language"),
+          TextFormField(
+            decoration: InputDecoration(
+              hintText: 'Word, Sentence or Question',
+            ),
+            validator: onValidator,
+            controller: _controllerTextNative,
+          ),
+          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+          const Text("Comment"),
+          TextFormField(
+            decoration: const InputDecoration(
+              hintText: '...',
+            ),
+            controller: _controllerComment,
+          ),
+          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+          const Text("Word Type"),
+          ComponentRadio<int>(
+            title: WordTypeConst.getTypeName(WordTypeConst.word),
+            value: WordTypeConst.word,
+            groupValue: _stateSelectedWordType,
+            onChanged: onChangeWordType,
+          ),
+          ComponentRadio<int>(
+            title: WordTypeConst.getTypeName(WordTypeConst.sentence),
+            value: WordTypeConst.sentence,
+            groupValue: _stateSelectedWordType,
+            onChanged: onChangeWordType,
+          ),
+          Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+          const Text("Study Type"),
+          ComponentRadio<int>(
+            title: StudyTypeConst.getTypeName(StudyTypeConst.daily),
+            value: StudyTypeConst.daily,
+            groupValue: _stateSelectedStudyType,
+            onChanged: onChangeStudyType,
+          ),
+          ComponentRadio<int>(
+            title: StudyTypeConst.getTypeName(StudyTypeConst.weekly),
+            value: StudyTypeConst.weekly,
+            groupValue: _stateSelectedStudyType,
+            onChanged: onChangeStudyType,
+          ),
+          ComponentRadio<int>(
+            title: StudyTypeConst.getTypeName(StudyTypeConst.monthly),
+            value: StudyTypeConst.monthly,
+            groupValue: _stateSelectedStudyType,
+            onChanged: onChangeStudyType,
+          )
+        ],
+      ),
+    );
   }
 }

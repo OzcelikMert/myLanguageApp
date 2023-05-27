@@ -10,6 +10,7 @@ import 'package:my_language_app/constants/displayedLanguage.const.dart';
 import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/studyType.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
+import 'package:my_language_app/constants/wordType.const.dart';
 import 'package:my_language_app/lib/audio.lib.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
@@ -27,14 +28,15 @@ import '../components/elements/button.dart';
 
 class PageStudy extends StatefulWidget {
   late int studyType = 0;
+  late int wordType = 0;
   final BuildContext context;
 
   PageStudy({Key? key, required this.context}) : super(key: key) {
     var args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     if (args != null && args[DBTableWords.columnStudyType] != null) {
-      studyType =
-          int.tryParse(args[DBTableWords.columnStudyType].toString()) ?? 0;
+      studyType = int.tryParse(args[DBTableWords.columnStudyType].toString()) ?? 0;
+      wordType = int.tryParse(args[DBTableWords.columnType].toString()) ?? 0;
     }
   }
 
@@ -45,7 +47,7 @@ class PageStudy extends StatefulWidget {
 class _PageStudyState extends State<PageStudy> {
   late bool _stateIsStudied = false;
   late bool _stateIsCorrect = false;
-  int _stateSelectedStudyType = StudyTypeConst.Daily;
+  late int _stateSelectedStudyType = StudyTypeConst.daily;
   late List<WordGetResultModel> _stateWords = [];
   late WordGetResultModel? _stateCurrentWord = null;
   late String _stateTextDisplayed = "";
@@ -65,7 +67,7 @@ class _PageStudyState extends State<PageStudy> {
   }
 
   _pageInit() async {
-    if (widget.studyType == 0) {
+    if (widget.studyType == 0 || widget.wordType == 0) {
       await RouteLib.change(
           context: context, target: PageConst.routeNames.studyPlan);
       return;
@@ -83,7 +85,9 @@ class _PageStudyState extends State<PageStudy> {
         WordGetCountReportParamModel(
             wordLanguageId: languageProviderModel
                 .selectedLanguage.languageId,
-            wordStudyType: widget.studyType));
+            wordStudyType: widget.studyType,
+            wordType: widget.wordType
+        ));
 
     var studiedReports = MyLibArray.findMulti(
         array: wordCountReports, key: DBTableWords.columnIsStudy, value: 1);
@@ -92,6 +96,7 @@ class _PageStudyState extends State<PageStudy> {
         wordLanguageId:
             languageProviderModel.selectedLanguage.languageId,
         wordStudyType: widget.studyType,
+        wordType: widget.wordType,
         wordIsStudy: 0));
 
     setState(() {
@@ -260,7 +265,10 @@ class _PageStudyState extends State<PageStudy> {
             onPressed: (bool isConfirm) async {
               if (isConfirm) {
                 await RouteLib.change(
-                    context: context, target: PageConst.routeNames.studyPlan);
+                    context: context,
+                    target: PageConst.routeNames.studyPlan,
+                    arguments: {DBTableWords.columnType: widget.wordType}
+                );
               }
             }));
   }
@@ -395,20 +403,20 @@ class _PageStudyState extends State<PageStudy> {
         Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
         const Text("Word Study Type"),
         ComponentRadio<int>(
-          title: StudyTypeConst.getTypeName(StudyTypeConst.Daily),
-          value: StudyTypeConst.Daily,
+          title: StudyTypeConst.getTypeName(StudyTypeConst.daily),
+          value: StudyTypeConst.daily,
           groupValue: _stateSelectedStudyType,
           onChanged: onChangeStudyType,
         ),
         ComponentRadio<int>(
-          title: StudyTypeConst.getTypeName(StudyTypeConst.Weekly),
-          value: StudyTypeConst.Weekly,
+          title: StudyTypeConst.getTypeName(StudyTypeConst.weekly),
+          value: StudyTypeConst.weekly,
           groupValue: _stateSelectedStudyType,
           onChanged: onChangeStudyType,
         ),
         ComponentRadio<int>(
-          title: StudyTypeConst.getTypeName(StudyTypeConst.Monthly),
-          value: StudyTypeConst.Monthly,
+          title: StudyTypeConst.getTypeName(StudyTypeConst.monthly),
+          value: StudyTypeConst.monthly,
           groupValue: _stateSelectedStudyType,
           onChanged: onChangeStudyType,
         )
@@ -546,8 +554,8 @@ class _PageStudyState extends State<PageStudy> {
           ),
         ),
         Container(
-          child: Text(StudyTypeConst.getTypeName(widget.studyType),
-              style: TextStyle(fontSize: ThemeConst.fontSizes.lg)),
+          child: Text("${StudyTypeConst.getTypeName(widget.studyType)} (${WordTypeConst.getTypeName(widget.wordType)})",
+              style: TextStyle(fontSize: ThemeConst.fontSizes.md))
         ),
         Container(
           child: ComponentIconButton(

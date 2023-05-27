@@ -38,7 +38,7 @@ class DBTableLanguages {
   }
 
   Future onUpgrade() async {
-    await db.execute("DROP TABLE IF EXISTS $tableName");
-    await onCreate();
+    /*await db.execute("DROP TABLE IF EXISTS $tableName");
+    await onCreate();*/
   }
 }

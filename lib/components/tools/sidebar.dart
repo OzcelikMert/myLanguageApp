@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
 import 'package:my_language_app/constants/page.const.dart';
 import 'package:my_language_app/constants/theme.const.dart';
+import 'package:my_language_app/constants/wordType.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/file.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
@@ -155,7 +156,9 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
             wordTextNative: importedData[DBTableWords.columnTextNative],
             wordComment: importedData[DBTableWords.columnComment],
             wordStudyType: importedData[DBTableWords.columnStudyType],
-            wordIsStudy: importedData[DBTableWords.columnIsStudy]));
+            wordIsStudy: importedData[DBTableWords.columnIsStudy],
+            wordType: importedData[DBTableWords.columnType] ?? WordTypeConst.word
+        ));
       }
       int addWords = await WordService.addMulti(wordAddParamsList);
       if (addWords > 0) {

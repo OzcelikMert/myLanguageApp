@@ -10,6 +10,7 @@ class WordGetResultModel {
   final String wordUpdatedAt;
   final int wordStudyType;
   final int wordIsStudy;
+  final int wordType;
 
   WordGetResultModel({
     required this.wordId,
@@ -20,7 +21,9 @@ class WordGetResultModel {
     required this.wordCreatedAt,
     required this.wordUpdatedAt,
     required this.wordStudyType,
-    required this.wordIsStudy});
+    required this.wordIsStudy,
+    required this.wordType
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -32,7 +35,8 @@ class WordGetResultModel {
       DBTableWords.columnCreatedAt: wordCreatedAt,
       DBTableWords.columnUpdatedAt: wordUpdatedAt,
       DBTableWords.columnStudyType: wordStudyType,
-      DBTableWords.columnIsStudy: wordIsStudy
+      DBTableWords.columnIsStudy: wordIsStudy,
+      DBTableWords.columnType: wordType
     };
   }
 
@@ -47,6 +51,7 @@ class WordGetResultModel {
         wordUpdatedAt: json[DBTableWords.columnUpdatedAt].toString(),
         wordStudyType: int.tryParse(json[DBTableWords.columnStudyType].toString()) ?? 0,
         wordIsStudy: int.tryParse(json[DBTableWords.columnIsStudy].toString()) ?? 0,
+        wordType: int.tryParse(json[DBTableWords.columnType].toString()) ?? 0
     );
   }
 }
@@ -54,19 +59,22 @@ class WordGetResultModel {
 class WordGetCountReportResultModel {
   final int wordCount;
   final int wordStudyType;
+  final int wordType;
   final int wordIsStudy;
 
   WordGetCountReportResultModel({
     required this.wordCount,
     required this.wordStudyType,
-    required this.wordIsStudy
+    required this.wordIsStudy,
+    required this.wordType
   });
 
   Map<String, dynamic> toJson() {
     return {
       DBTableWords.asColumnCount: wordCount,
       DBTableWords.columnStudyType: wordStudyType,
-      DBTableWords.columnIsStudy: wordIsStudy
+      DBTableWords.columnIsStudy: wordIsStudy,
+      DBTableWords.columnType: wordType,
     };
   }
 
@@ -75,6 +83,7 @@ class WordGetCountReportResultModel {
       wordCount: int.tryParse(json[DBTableWords.asColumnCount].toString()) ?? 0,
       wordStudyType: int.tryParse(json[DBTableWords.columnStudyType].toString()) ?? 0,
       wordIsStudy: int.tryParse(json[DBTableWords.columnIsStudy].toString()) ?? 0,
+      wordType: int.tryParse(json[DBTableWords.columnType].toString()) ?? 0
     );
   }
 }
@@ -84,12 +93,14 @@ class WordGetParamModel {
   final int wordLanguageId;
   final int? wordStudyType;
   final int? wordIsStudy;
+  final int? wordType;
 
   WordGetParamModel({
     required this.wordLanguageId,
     this.wordId,
     this.wordStudyType,
-    this.wordIsStudy
+    this.wordIsStudy,
+    this.wordType
   });
 }
 
@@ -97,21 +108,25 @@ class WordGetCountParamModel {
   final int wordLanguageId;
   final int? wordStudyType;
   final int? wordIsStudy;
+  final int? wordType;
 
   WordGetCountParamModel({
     required this.wordLanguageId,
     this.wordStudyType,
-    this.wordIsStudy
+    this.wordIsStudy,
+    this.wordType
   });
 }
 
 class WordGetCountReportParamModel {
   final int wordLanguageId;
   final int? wordStudyType;
+  final int? wordType;
 
   WordGetCountReportParamModel({
     required this.wordLanguageId,
-    this.wordStudyType
+    this.wordStudyType,
+    this.wordType
   });
 }
 
@@ -123,6 +138,7 @@ class WordAddParamModel {
   final String wordComment;
   final int wordStudyType;
   final int wordIsStudy;
+  final int wordType;
 
   WordAddParamModel({
     required this.wordTextTarget,
@@ -130,6 +146,7 @@ class WordAddParamModel {
     required this.wordLanguageId,
     required this.wordComment,
     required this.wordStudyType,
+    required this.wordType,
     this.wordIsStudy = 0
   });
 }
@@ -138,21 +155,25 @@ class WordUpdateParamModel {
   final int whereWordLanguageId;
   final int? whereWordId;
   final int? whereWordStudyType;
+  final int? whereWordType;
   final String? wordTextTarget;
   final String? wordTextNative;
   final String? wordComment;
   final int? wordStudyType;
   final int? wordIsStudy;
+  final int? wordType;
 
   WordUpdateParamModel({
     required this.whereWordLanguageId,
     this.whereWordId,
     this.whereWordStudyType,
+    this.whereWordType,
     this.wordTextTarget,
     this.wordTextNative,
     this.wordComment,
     this.wordStudyType,
-    this.wordIsStudy
+    this.wordIsStudy,
+    this.wordType
   });
 }
 

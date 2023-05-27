@@ -6,6 +6,7 @@ class DBTableWords {
   static const columnLanguageId = 'wordLanguageId';
   static const columnTextTarget = 'wordTextTarget';
   static const columnTextNative = 'wordTextNative';
+  static const columnType = 'wordType';
   static const columnComment = 'wordComment';
   static const columnCreatedAt = 'wordCreatedAt';
   static const columnUpdatedAt = 'wordUpdatedAt';
@@ -27,6 +28,7 @@ class DBTableWords {
         $columnCreatedAt TEXT NOT NULL,
         $columnUpdatedAt TEXT NOT NULL,
         $columnComment TEXT NOT NULL,
+        $columnType INTEGER NOT NULL,
         $columnStudyType INTEGER NOT NULL,
         $columnIsStudy INTEGER NOT NULL
       )
@@ -34,7 +36,7 @@ class DBTableWords {
   }
 
   Future onUpgrade() async {
-    await db.execute("DROP TABLE IF EXISTS $tableName");
-    await onCreate();
+    /*await db.execute("DROP TABLE IF EXISTS $tableName");
+    await onCreate();*/
   }
 }
