@@ -2,4 +2,6 @@
 Learning a language app
 
 list of will do:
-    - word ekleme ekraninda inputa tiklandiginda hangi dilse otomatik klavyeyide o dil yapsin
+    - study ekraninda soru bilince daily weekly guncellemesi kalkicak zaten ordan kelimenin guncellemesini yapabiliyorsun
+    - study plan ekranina calismayi 0 la butonu konulacak (yuzdesini)
+    
