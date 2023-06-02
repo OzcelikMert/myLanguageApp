@@ -8,9 +8,12 @@ class DBTableLanguages {
   static const columnUpdatedAt = 'languageUpdatedAt';
   static const columnTTSArtist = 'languageTTSArtist';
   static const columnTTSGender = 'languageTTSGender';
-  static const columnDailyUpdatedAt = 'languageDailyUpdatedAt';
-  static const columnWeeklyUpdatedAt = 'languageWeeklyUpdatedAt';
-  static const columnMonthlyUpdatedAt = 'languageMonthlyUpdatedAt';
+  static const columnDailyWordUpdatedAt = 'languageDailyWordUpdatedAt';
+  static const columnWeeklyWordUpdatedAt = 'languageWeeklyWordUpdatedAt';
+  static const columnMonthlyWordUpdatedAt = 'languageMonthlyWordUpdatedAt';
+  static const columnDailySentenceUpdatedAt = 'languageDailySentenceUpdatedAt';
+  static const columnWeeklySentenceUpdatedAt = 'languageWeeklySentenceUpdatedAt';
+  static const columnMonthlySentenceUpdatedAt = 'languageMonthlySentenceUpdatedAt';
   static const columnIsSelected = 'languageIsSelected';
   static const columnDisplayedLanguage = 'languageDisplayedLanguage';
   static const columnIsAutoVoice = 'languageIsAutoVoice';
@@ -27,9 +30,12 @@ class DBTableLanguages {
         $columnUpdatedAt TEXT NOT NULL,
         $columnTTSArtist TEXT NOT NULL,
         $columnTTSGender TEXT NOT NULL,
-        $columnDailyUpdatedAt TEXT NOT NULL,
-        $columnWeeklyUpdatedAt TEXT NOT NULL,
-        $columnMonthlyUpdatedAt TEXT NOT NULL,
+        $columnDailyWordUpdatedAt TEXT NOT NULL,
+        $columnWeeklyWordUpdatedAt TEXT NOT NULL,
+        $columnMonthlyWordUpdatedAt TEXT NOT NULL,
+        $columnDailySentenceUpdatedAt TEXT NOT NULL,
+        $columnWeeklySentenceUpdatedAt TEXT NOT NULL,
+        $columnMonthlySentenceUpdatedAt TEXT NOT NULL,
         $columnIsSelected INTEGER NOT NULL,
         $columnDisplayedLanguage INTEGER NOT NULL,
         $columnIsAutoVoice INTEGER NOT NULL

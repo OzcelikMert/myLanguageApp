@@ -199,7 +199,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
             ),
           ),
           Container(
-            color: getActiveBG(routeName, "/study/plan"),
+            color: getActiveBG(routeName, PageConst.routeNames.studyPlan),
             child: ListTile(
               leading: const Icon(Icons.workspace_premium),
               title: const Text('Study Plan'),
@@ -209,7 +209,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
             ),
           ),
           Container(
-            color: getActiveBG(routeName, "/word/add"),
+            color: getActiveBG(routeName, PageConst.routeNames.wordAdd),
             child: ListTile(
               leading: const Icon(Icons.add),
               title: const Text('Add New Word'),
@@ -219,7 +219,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
             ),
           ),
           Container(
-            color: getActiveBG(routeName, "/word/list"),
+            color: getActiveBG(routeName, PageConst.routeNames.wordList),
             child: ListTile(
               leading: const Icon(Icons.list_alt),
               title: const Text('List Words'),
@@ -243,7 +243,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
             ),
           ),
           Container(
-            color: getActiveBG(routeName, "/settings"),
+            color: getActiveBG(routeName, PageConst.routeNames.settings),
             child: ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
@@ -253,7 +253,7 @@ class _ComponentSideBarState extends State<ComponentSideBar> {
             ),
           ),
           Container(
-            color: getActiveBG(routeName, "/"),
+            color: getActiveBG(routeName, PageConst.routeNames.home),
             child: ListTile(
               leading: const Icon(Icons.keyboard_return),
               title: const Text('Return Home'),

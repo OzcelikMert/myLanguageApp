@@ -54,7 +54,9 @@ class _ComponentPageState extends State<ComponentPage> {
 
   Widget _componentBody() {
     return Container(
-        padding: EdgeInsets.all(ThemeConst.paddings.md), child: widget.child);
+        padding: EdgeInsets.all(ThemeConst.paddings.md),
+        child: widget.child
+    );
   }
 
   Widget? _componentSidebar() {
@@ -83,6 +85,7 @@ class _ComponentPageState extends State<ComponentPage> {
             SingleChildScrollView(child:  _componentBody()),
           ],
         ),
-        drawer: _componentSidebar());
+        drawer: _componentSidebar(),
+    );
   }
 }

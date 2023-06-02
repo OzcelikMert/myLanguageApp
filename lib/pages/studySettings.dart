@@ -119,7 +119,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
   @override
   Widget build(BuildContext context) {
     final pageProviderModel =
-   ProviderLib.get<PageProviderModel>(context, listen: true);
+   ProviderLib.get<PageProviderModel>(context);
     final languageProviderModel =
    ProviderLib.get<LanguageProviderModel>(context, listen: true);
 

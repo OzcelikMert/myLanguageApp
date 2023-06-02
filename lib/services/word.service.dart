@@ -33,6 +33,16 @@ class WordService {
       whereArgs.add(params.wordIsStudy);
     }
 
+    if (params.wordTextTarget != null) {
+      whereString += "${DBTableWords.columnTextTarget} LIKE ? AND ";
+      whereArgs.add('%${params.wordTextTarget}%');
+    }
+
+    if (params.wordTextNative != null) {
+      whereString += "${DBTableWords.columnTextNative} LIKE ? AND ";
+      whereArgs.add('%${params.wordTextNative}%');
+    }
+
     var db = await DBConn.instance.database;
     var result = (await db.query(DBTableWords.tableName,
         where: whereString.isNotEmpty

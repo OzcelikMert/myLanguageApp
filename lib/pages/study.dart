@@ -47,7 +47,6 @@ class PageStudy extends StatefulWidget {
 class _PageStudyState extends State<PageStudy> {
   late bool _stateIsStudied = false;
   late bool _stateIsCorrect = false;
-  late int _stateSelectedStudyType = StudyTypeConst.daily;
   late List<WordGetResultModel> _stateWords = [];
   late WordGetResultModel? _stateCurrentWord = null;
   late String _stateTextDisplayed = "";
@@ -169,18 +168,9 @@ class _PageStudyState extends State<PageStudy> {
 
     setState(() {
       _stateCurrentWord = _stateWords[randomNumber];
-      _stateSelectedStudyType = _stateCurrentWord!.wordStudyType;
       _stateIsCorrect = false;
       _stateIsStudied = false;
     });
-  }
-
-  void onChangeStudyType(int? value) {
-    if (value != null) {
-      setState(() {
-        _stateSelectedStudyType = value;
-      });
-    }
   }
 
   void onClickCheck() async {
@@ -292,30 +282,11 @@ class _PageStudyState extends State<PageStudy> {
         ComponentDialogOptions(
             content: "Loading...", icon: ComponentDialogIcon.loading));
 
-    final languageProviderModel =
-        ProviderLib.get<LanguageProviderModel>(context);
+    setCurrentWord();
+    setTextDisplayedAndAnswer();
+    _controllerText.text = "";
 
-    if (_stateCurrentWord!.wordStudyType !=
-        _stateSelectedStudyType) {
-      await WordService.update(WordUpdateParamModel(
-          whereWordLanguageId:
-              languageProviderModel.selectedLanguage.languageId,
-          whereWordId: _stateCurrentWord!.wordId,
-          wordStudyType: _stateSelectedStudyType));
-    }
-
-    if (_stateWords.isEmpty) {
-      DialogLib.show(
-          context,
-          ComponentDialogOptions(
-              content: "Word's study type has successfully saved!",
-              icon: ComponentDialogIcon.success));
-    } else {
-      setCurrentWord();
-      setTextDisplayedAndAnswer();
-      _controllerText.text = "";
-      DialogLib.hide(context);
-    }
+    DialogLib.hide(context);
   }
 
   void onClickTTS() async {
@@ -345,20 +316,14 @@ class _PageStudyState extends State<PageStudy> {
           ComponentDialogOptions(
               content: "Loading...", icon: ComponentDialogIcon.loading));
 
-      if(!_stateIsCorrect) {
-        setState(() {
-          _stateWords = _stateWords.map((word) {
-            if(word.wordId == updateData.wordId) {
-              word = updateData;
-            }
-            return word;
-          }).toList();
-        });
-      }
-
       setState(() {
+        _stateWords = _stateWords.map((word) {
+          if(word.wordId == updateData.wordId) {
+            word = updateData;
+          }
+          return word;
+        }).toList();
         _stateCurrentWord = updateData;
-        _stateSelectedStudyType = updateData.wordStudyType;
       });
 
       setTextDisplayedAndAnswer();
@@ -393,33 +358,6 @@ class _PageStudyState extends State<PageStudy> {
             decoration: const InputDecoration(
               hintText: '...',
             ))
-      ],
-    );
-  }
-
-  Widget _componentStudyType() {
-    return Column(
-      children: [
-        Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-        const Text("Word Study Type"),
-        ComponentRadio<int>(
-          title: StudyTypeConst.getTypeName(StudyTypeConst.daily),
-          value: StudyTypeConst.daily,
-          groupValue: _stateSelectedStudyType,
-          onChanged: onChangeStudyType,
-        ),
-        ComponentRadio<int>(
-          title: StudyTypeConst.getTypeName(StudyTypeConst.weekly),
-          value: StudyTypeConst.weekly,
-          groupValue: _stateSelectedStudyType,
-          onChanged: onChangeStudyType,
-        ),
-        ComponentRadio<int>(
-          title: StudyTypeConst.getTypeName(StudyTypeConst.monthly),
-          value: StudyTypeConst.monthly,
-          groupValue: _stateSelectedStudyType,
-          onChanged: onChangeStudyType,
-        )
       ],
     );
   }
@@ -600,10 +538,9 @@ class _PageStudyState extends State<PageStudy> {
               !_stateIsStudied ? _componentAnswer() : Container(),
               _stateIsStudied && !_stateIsCorrect ? _componentWrongWord() : Container(),
               _stateIsStudied ? _componentCorrectWord() : Container(),
-              _stateIsStudied && _stateIsCorrect ? _componentStudyType() : Container(),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-              _stateIsStudied ? ComponentButton(
-                text: _stateWords.isNotEmpty ? "Next" : "Save",
+              _stateIsStudied && _stateWords.isNotEmpty ? ComponentButton(
+                text: "Next",
                 onPressed: onClickNext,
                 bgColor: ThemeConst.colors.success,
               ) : Container(),

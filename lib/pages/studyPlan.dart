@@ -62,12 +62,13 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
 
   Future<void> setPageTitle() async {
     final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
-    pageProviderModel.setTitle("Study Plan (${WordTypeConst.getTypeName(_stateWordType)})");
+    pageProviderModel
+        .setTitle("Study Plan (${WordTypeConst.getTypeName(_stateWordType)})");
   }
 
   Future<void> setWordCountReports() async {
     final languageProviderModel =
-    ProviderLib.get<LanguageProviderModel>(context);
+        ProviderLib.get<LanguageProviderModel>(context);
 
     var wordCountReports = await WordService.getCountReport(
         WordGetCountReportParamModel(
@@ -129,6 +130,7 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                             whereWordLanguageId: languageProviderModel
                                 .selectedLanguage.languageId,
                             whereWordStudyType: type,
+                            whereWordType: _stateWordType,
                             wordIsStudy: 0));
                     if (wordUpdate < 1) {
                       changeRoute = false;
@@ -140,12 +142,36 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                       LanguageUpdateParamModel(
                         whereLanguageId:
                             languageProviderModel.selectedLanguage.languageId,
-                        languageDailyUpdatedAt:
-                            type == StudyTypeConst.daily ? date : null,
-                        languageWeeklyUpdatedAt:
-                            type == StudyTypeConst.weekly ? date : null,
-                        languageMonthlyUpdatedAt:
-                            type == StudyTypeConst.monthly ? date : null,
+                        languageDailyWordUpdatedAt:
+                            _stateWordType == WordTypeConst.word &&
+                                    type == StudyTypeConst.daily
+                                ? date
+                                : null,
+                        languageWeeklyWordUpdatedAt:
+                            _stateWordType == WordTypeConst.word &&
+                                    type == StudyTypeConst.weekly
+                                ? date
+                                : null,
+                        languageMonthlyWordUpdatedAt:
+                            _stateWordType == WordTypeConst.word &&
+                                    type == StudyTypeConst.monthly
+                                ? date
+                                : null,
+                        languageDailySentenceUpdatedAt:
+                            _stateWordType == WordTypeConst.sentence &&
+                                    type == StudyTypeConst.daily
+                                ? date
+                                : null,
+                        languageWeeklySentenceUpdatedAt:
+                            _stateWordType == WordTypeConst.sentence &&
+                                    type == StudyTypeConst.weekly
+                                ? date
+                                : null,
+                        languageMonthlySentenceUpdatedAt:
+                            _stateWordType == WordTypeConst.sentence &&
+                                    type == StudyTypeConst.monthly
+                                ? date
+                                : null,
                       ),
                       context);
 
@@ -157,7 +183,10 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
                     await RouteLib.change(
                         context: context,
                         target: PageConst.routeNames.study,
-                        arguments: {DBTableWords.columnStudyType: type, DBTableWords.columnType: _stateWordType});
+                        arguments: {
+                          DBTableWords.columnStudyType: type,
+                          DBTableWords.columnType: _stateWordType
+                        });
                   } else {
                     DialogLib.show(
                         context,
@@ -171,15 +200,90 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
     }
   }
 
+  void onClickRestart(int type) async {
+    var reports = MyLibArray.findMulti(
+        array: _stateWordCountReports,
+        key: DBTableWords.columnStudyType,
+        value: type);
+    var unstudiedReports = MyLibArray.findMulti(
+        array: reports, key: DBTableWords.columnIsStudy, value: 0);
+
+    int totalWordCount = reports.isNotEmpty
+        ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
+    int unstudiedWordCount = unstudiedReports.isNotEmpty
+        ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
+
+    if (totalWordCount == 0) {
+      DialogLib.show(
+          context,
+          ComponentDialogOptions(
+              content:
+                  "There are no words. Please firstly you must add a word.",
+              icon: ComponentDialogIcon.error));
+    } else if (totalWordCount == unstudiedWordCount) {
+      DialogLib.show(
+          context,
+          ComponentDialogOptions(
+              content:
+                  "There are no studied words. Please firstly you must study a word.",
+              icon: ComponentDialogIcon.error));
+    } else {
+      DialogLib.show(
+          context,
+          ComponentDialogOptions(
+              title: "Are you sure?",
+              content:
+                  "You have selected '${StudyTypeConst.getTypeName(type)}'. Are you sure you want to restart your progress?",
+              showCancelButton: true,
+              icon: ComponentDialogIcon.confirm,
+              onPressed: (bool isConfirm) async {
+                if (isConfirm) {
+                  await DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content: "Loading...",
+                          icon: ComponentDialogIcon.loading));
+
+                  final languageProviderModel =
+                      ProviderLib.get<LanguageProviderModel>(context);
+
+                  var wordUpdate = await WordService.update(
+                      WordUpdateParamModel(
+                          whereWordLanguageId:
+                              languageProviderModel.selectedLanguage.languageId,
+                          whereWordStudyType: type,
+                          whereWordType: _stateWordType,
+                          wordIsStudy: 0));
+
+                  if (wordUpdate > 0) {
+                    await setWordCountReports();
+                    DialogLib.show(
+                        context,
+                        ComponentDialogOptions(
+                            content: "Restart is successful!",
+                            icon: ComponentDialogIcon.success));
+                  } else {
+                    DialogLib.show(
+                        context,
+                        ComponentDialogOptions(
+                            content: "It couldn't update!",
+                            icon: ComponentDialogIcon.error));
+                  }
+                  return false;
+                }
+              }));
+    }
+  }
+
   Future<void> onClickChangeWordType(int type) async {
-    if(type == _stateWordType) return;
+    if (type == _stateWordType) return;
 
     await DialogLib.show(
         context,
         ComponentDialogOptions(
-            content: "Loading...",
-            icon: ComponentDialogIcon.loading));
-
+            content: "Loading...", icon: ComponentDialogIcon.loading));
 
     setState(() {
       _stateWordType = type;
@@ -194,6 +298,9 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   Widget componentDaily() {
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context, listen: true);
+    var lastStudyDate = _stateWordType == WordTypeConst.word
+        ? languageProviderModel.selectedLanguage.languageDailyWordUpdatedAt
+        : languageProviderModel.selectedLanguage.languageDailySentenceUpdatedAt;
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -207,9 +314,8 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.success,
         title: StudyTypeConst.getTypeName(StudyTypeConst.daily),
         onStartPressed: () => onClickStudy(StudyTypeConst.daily),
-        lastStudyDate: DateTime.parse(languageProviderModel
-            .selectedLanguage.languageDailyUpdatedAt
-            .toString()),
+        onRestartPressed: () => onClickRestart(StudyTypeConst.daily),
+        lastStudyDate: DateTime.parse(lastStudyDate.toString()),
         totalWords: reports.isNotEmpty
             ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
@@ -224,6 +330,9 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   Widget componentWeekly() {
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context, listen: true);
+    var lastStudyDate = _stateWordType == WordTypeConst.word
+        ? languageProviderModel.selectedLanguage.languageWeeklyWordUpdatedAt
+        : languageProviderModel.selectedLanguage.languageWeeklySentenceUpdatedAt;
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -237,9 +346,8 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.danger,
         title: StudyTypeConst.getTypeName(StudyTypeConst.weekly),
         onStartPressed: () => onClickStudy(StudyTypeConst.weekly),
-        lastStudyDate: DateTime.parse(languageProviderModel
-            .selectedLanguage.languageWeeklyUpdatedAt
-            .toString()),
+        onRestartPressed: () => onClickRestart(StudyTypeConst.weekly),
+        lastStudyDate: DateTime.parse(lastStudyDate.toString()),
         totalWords: reports.isNotEmpty
             ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
@@ -254,6 +362,9 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
   Widget componentMonthly() {
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context, listen: true);
+    var lastStudyDate = _stateWordType == WordTypeConst.word
+        ? languageProviderModel.selectedLanguage.languageMonthlyWordUpdatedAt
+        : languageProviderModel.selectedLanguage.languageMonthlySentenceUpdatedAt;
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
@@ -267,9 +378,8 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         bgColor: ThemeConst.colors.info,
         title: StudyTypeConst.getTypeName(StudyTypeConst.monthly),
         onStartPressed: () => onClickStudy(StudyTypeConst.monthly),
-        lastStudyDate: DateTime.parse(languageProviderModel
-            .selectedLanguage.languageMonthlyUpdatedAt
-            .toString()),
+        onRestartPressed: () => onClickRestart(StudyTypeConst.monthly),
+        lastStudyDate: DateTime.parse(lastStudyDate.toString()),
         totalWords: reports.isNotEmpty
             ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
             : 0,
@@ -295,16 +405,24 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
               children: [
                 Row(
                   children: [
-                    Expanded(child: ComponentButton(
-                        text: WordTypeConst.getTypeName(WordTypeConst.word),
-                        onPressed: () => onClickChangeWordType(WordTypeConst.word),
-                        bgColor: _stateWordType == WordTypeConst.word ? ThemeConst.colors.success : null,
+                    Expanded(
+                        child: ComponentButton(
+                      text: WordTypeConst.getTypeName(WordTypeConst.word),
+                      onPressed: () =>
+                          onClickChangeWordType(WordTypeConst.word),
+                      bgColor: _stateWordType == WordTypeConst.word
+                          ? ThemeConst.colors.success
+                          : null,
                     )),
                     Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-                    Expanded(child: ComponentButton(
-                        text: WordTypeConst.getTypeName(WordTypeConst.sentence),
-                        onPressed: () => onClickChangeWordType(WordTypeConst.sentence),
-                        bgColor: _stateWordType == WordTypeConst.sentence ? ThemeConst.colors.success : null,
+                    Expanded(
+                        child: ComponentButton(
+                      text: WordTypeConst.getTypeName(WordTypeConst.sentence),
+                      onPressed: () =>
+                          onClickChangeWordType(WordTypeConst.sentence),
+                      bgColor: _stateWordType == WordTypeConst.sentence
+                          ? ThemeConst.colors.success
+                          : null,
                     )),
                   ],
                 ),

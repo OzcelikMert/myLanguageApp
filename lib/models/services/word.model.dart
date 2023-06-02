@@ -91,6 +91,8 @@ class WordGetCountReportResultModel {
 class WordGetParamModel {
   final int? wordId;
   final int wordLanguageId;
+  final String? wordTextTarget;
+  final String? wordTextNative;
   final int? wordStudyType;
   final int? wordIsStudy;
   final int? wordType;
@@ -100,7 +102,9 @@ class WordGetParamModel {
     this.wordId,
     this.wordStudyType,
     this.wordIsStudy,
-    this.wordType
+    this.wordType,
+    this.wordTextTarget,
+    this.wordTextNative
   });
 }
 

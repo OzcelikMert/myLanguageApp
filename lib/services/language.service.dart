@@ -46,9 +46,12 @@ class LanguageService {
       DBTableLanguages.columnUpdatedAt: date,
       DBTableLanguages.columnTTSArtist: params.languageTTSArtist,
       DBTableLanguages.columnTTSGender: params.languageTTSGender,
-      DBTableLanguages.columnDailyUpdatedAt: date,
-      DBTableLanguages.columnWeeklyUpdatedAt: date,
-      DBTableLanguages.columnMonthlyUpdatedAt: date,
+      DBTableLanguages.columnDailyWordUpdatedAt: date,
+      DBTableLanguages.columnWeeklyWordUpdatedAt: date,
+      DBTableLanguages.columnMonthlyWordUpdatedAt: date,
+      DBTableLanguages.columnDailySentenceUpdatedAt: date,
+      DBTableLanguages.columnWeeklySentenceUpdatedAt: date,
+      DBTableLanguages.columnMonthlySentenceUpdatedAt: date,
       DBTableLanguages.columnIsSelected: 0,
       DBTableLanguages.columnDisplayedLanguage: 0,
       DBTableLanguages.columnIsAutoVoice: 0
@@ -79,19 +82,34 @@ class LanguageService {
       setMap[DBTableLanguages.columnTTSGender] = params.languageTTSGender;
     }
 
-    if (params.languageDailyUpdatedAt != null) {
-      setMap[DBTableLanguages.columnDailyUpdatedAt] =
-          params.languageDailyUpdatedAt;
+    if (params.languageDailyWordUpdatedAt != null) {
+      setMap[DBTableLanguages.columnDailyWordUpdatedAt] =
+          params.languageDailyWordUpdatedAt;
     }
 
-    if (params.languageWeeklyUpdatedAt != null) {
-      setMap[DBTableLanguages.columnWeeklyUpdatedAt] =
-          params.languageWeeklyUpdatedAt;
+    if (params.languageWeeklyWordUpdatedAt != null) {
+      setMap[DBTableLanguages.columnWeeklyWordUpdatedAt] =
+          params.languageWeeklyWordUpdatedAt;
     }
 
-    if (params.languageMonthlyUpdatedAt != null) {
-      setMap[DBTableLanguages.columnMonthlyUpdatedAt] =
-          params.languageMonthlyUpdatedAt;
+    if (params.languageMonthlyWordUpdatedAt != null) {
+      setMap[DBTableLanguages.columnMonthlyWordUpdatedAt] =
+          params.languageMonthlyWordUpdatedAt;
+    }
+
+    if (params.languageDailySentenceUpdatedAt != null) {
+      setMap[DBTableLanguages.columnDailySentenceUpdatedAt] =
+          params.languageDailySentenceUpdatedAt;
+    }
+
+    if (params.languageWeeklySentenceUpdatedAt != null) {
+      setMap[DBTableLanguages.columnWeeklySentenceUpdatedAt] =
+          params.languageWeeklySentenceUpdatedAt;
+    }
+
+    if (params.languageMonthlySentenceUpdatedAt != null) {
+      setMap[DBTableLanguages.columnMonthlySentenceUpdatedAt] =
+          params.languageMonthlySentenceUpdatedAt;
     }
 
     if (params.languageIsSelected != null) {

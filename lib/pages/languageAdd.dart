@@ -6,7 +6,6 @@ import 'package:my_language_app/constants/theme.const.dart';
 import 'package:my_language_app/lib/dialog.lib.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
-import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:my_language_app/models/lib/voices.lib.model.dart';
 import 'package:my_language_app/models/providers/page.provider.model.dart';
 import 'package:my_language_app/models/providers/tts.provider.model.dart';
@@ -113,7 +112,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
   Widget build(BuildContext context) {
     final pageProviderModel =
         ProviderLib.get<PageProviderModel>(context, listen: true);
-    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
+    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context, listen: true);
 
     return pageProviderModel.isLoading
         ? Container()

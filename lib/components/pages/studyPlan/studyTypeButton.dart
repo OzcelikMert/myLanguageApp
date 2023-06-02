@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_language_app/components/elements/button.dart';
+import 'package:my_language_app/components/elements/iconButton.dart';
 import 'package:my_language_app/components/elements/progress.dart';
 import 'package:my_language_app/constants/theme.const.dart';
 
@@ -12,16 +13,17 @@ class ComponentStudyTypeButton extends StatelessWidget {
   final int unstudiedWords;
   final Function onStartPressed;
   final Color? bgColor;
+  final Function onRestartPressed;
 
-  ComponentStudyTypeButton({
-    required this.title,
-    required this.totalWords,
-    required this.onStartPressed,
-    required this.studiedWords,
-    required this.unstudiedWords,
-    this.bgColor,
-    required this.lastStudyDate,
-  });
+  ComponentStudyTypeButton(
+      {required this.title,
+      required this.totalWords,
+      required this.onStartPressed,
+      required this.studiedWords,
+      required this.unstudiedWords,
+      this.bgColor,
+      required this.lastStudyDate,
+      required this.onRestartPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -79,9 +81,17 @@ class ComponentStudyTypeButton extends StatelessWidget {
           ),
           Padding(
               padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
-          ComponentProgress(
-            maxValue: totalWords.toDouble(),
-            currentValue: studiedWords.toDouble(),
+          Row(
+            children: [
+              Expanded(flex: 9, child: ComponentProgress(
+                maxValue: totalWords.toDouble(),
+                currentValue: studiedWords.toDouble(),
+              )),
+              Expanded(flex: 1, child: ComponentIconButton(
+                onPressed: () => onRestartPressed(),
+                icon: Icons.restart_alt,
+              )),
+            ],
           ),
           Padding(
               padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
@@ -91,7 +101,7 @@ class ComponentStudyTypeButton extends StatelessWidget {
             onPressed: () => onStartPressed(),
             icon: Icons.not_started_outlined,
             reverseIconAlign: true,
-          ),
+          )
         ],
       ),
     );

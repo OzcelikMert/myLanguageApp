@@ -7,26 +7,32 @@ class LanguageGetResultModel {
   final String languageUpdatedAt;
   final String languageTTSArtist;
   final String languageTTSGender;
-  final String languageDailyUpdatedAt;
-  final String languageWeeklyUpdatedAt;
-  final String languageMonthlyUpdatedAt;
+  final String languageDailyWordUpdatedAt;
+  final String languageWeeklyWordUpdatedAt;
+  final String languageMonthlyWordUpdatedAt;
+  final String languageDailySentenceUpdatedAt;
+  final String languageWeeklySentenceUpdatedAt;
+  final String languageMonthlySentenceUpdatedAt;
   final int languageIsSelected;
   final int languageDisplayedLanguage;
   final int languageIsAutoVoice;
 
-  LanguageGetResultModel({
-    required this.languageId,
-    required this.languageName,
-    required this.languageCreatedAt,
-    required this.languageUpdatedAt,
-    required this.languageTTSArtist,
-    required this.languageTTSGender,
-    required this.languageDailyUpdatedAt,
-    required this.languageWeeklyUpdatedAt,
-    required this.languageMonthlyUpdatedAt,
-    required this.languageIsSelected,
-    required this.languageDisplayedLanguage,
-    required this.languageIsAutoVoice});
+  LanguageGetResultModel(
+      {required this.languageId,
+      required this.languageName,
+      required this.languageCreatedAt,
+      required this.languageUpdatedAt,
+      required this.languageTTSArtist,
+      required this.languageTTSGender,
+      required this.languageDailyWordUpdatedAt,
+      required this.languageWeeklyWordUpdatedAt,
+      required this.languageMonthlyWordUpdatedAt,
+      required this.languageDailySentenceUpdatedAt,
+      required this.languageWeeklySentenceUpdatedAt,
+      required this.languageMonthlySentenceUpdatedAt,
+      required this.languageIsSelected,
+      required this.languageDisplayedLanguage,
+      required this.languageIsAutoVoice});
 
   Map<String, dynamic> toJson() {
     return {
@@ -35,9 +41,15 @@ class LanguageGetResultModel {
       DBTableLanguages.columnCreatedAt: languageCreatedAt,
       DBTableLanguages.columnUpdatedAt: languageUpdatedAt,
       DBTableLanguages.columnTTSArtist: languageTTSArtist,
-      DBTableLanguages.columnDailyUpdatedAt: languageDailyUpdatedAt,
-      DBTableLanguages.columnWeeklyUpdatedAt: languageWeeklyUpdatedAt,
-      DBTableLanguages.columnMonthlyUpdatedAt: languageMonthlyUpdatedAt,
+      DBTableLanguages.columnDailyWordUpdatedAt: languageDailyWordUpdatedAt,
+      DBTableLanguages.columnWeeklyWordUpdatedAt: languageWeeklyWordUpdatedAt,
+      DBTableLanguages.columnMonthlyWordUpdatedAt: languageMonthlyWordUpdatedAt,
+      DBTableLanguages.columnDailySentenceUpdatedAt:
+          languageDailySentenceUpdatedAt,
+      DBTableLanguages.columnWeeklySentenceUpdatedAt:
+          languageWeeklySentenceUpdatedAt,
+      DBTableLanguages.columnMonthlySentenceUpdatedAt:
+          languageMonthlySentenceUpdatedAt,
       DBTableLanguages.columnIsSelected: languageIsSelected,
       DBTableLanguages.columnDisplayedLanguage: languageDisplayedLanguage,
       DBTableLanguages.columnIsAutoVoice: languageIsAutoVoice,
@@ -46,19 +58,34 @@ class LanguageGetResultModel {
 
   static LanguageGetResultModel fromJson(Map<String, dynamic> json) {
     return LanguageGetResultModel(
-        languageId: int.tryParse(json[DBTableLanguages.columnId].toString()) ?? 0,
+        languageId:
+            int.tryParse(json[DBTableLanguages.columnId].toString()) ?? 0,
         languageName: json[DBTableLanguages.columnName].toString(),
         languageCreatedAt: json[DBTableLanguages.columnCreatedAt].toString(),
         languageUpdatedAt: json[DBTableLanguages.columnUpdatedAt].toString(),
         languageTTSArtist: json[DBTableLanguages.columnTTSArtist].toString(),
         languageTTSGender: json[DBTableLanguages.columnTTSGender].toString(),
-        languageDailyUpdatedAt: json[DBTableLanguages.columnDailyUpdatedAt].toString(),
-        languageWeeklyUpdatedAt: json[DBTableLanguages.columnWeeklyUpdatedAt].toString(),
-        languageMonthlyUpdatedAt: json[DBTableLanguages.columnMonthlyUpdatedAt].toString(),
-        languageIsSelected: int.tryParse(json[DBTableLanguages.columnIsSelected].toString()) ?? 0,
-        languageDisplayedLanguage: int.tryParse(json[DBTableLanguages.columnDisplayedLanguage].toString()) ?? 0,
-        languageIsAutoVoice: int.tryParse(json[DBTableLanguages.columnIsAutoVoice].toString()) ?? 0
-    );
+        languageDailyWordUpdatedAt:
+            json[DBTableLanguages.columnDailyWordUpdatedAt].toString(),
+        languageWeeklyWordUpdatedAt:
+            json[DBTableLanguages.columnWeeklyWordUpdatedAt].toString(),
+        languageMonthlyWordUpdatedAt:
+            json[DBTableLanguages.columnMonthlyWordUpdatedAt].toString(),
+        languageDailySentenceUpdatedAt:
+            json[DBTableLanguages.columnDailySentenceUpdatedAt].toString(),
+        languageWeeklySentenceUpdatedAt:
+            json[DBTableLanguages.columnWeeklySentenceUpdatedAt].toString(),
+        languageMonthlySentenceUpdatedAt:
+            json[DBTableLanguages.columnMonthlySentenceUpdatedAt].toString(),
+        languageIsSelected:
+            int.tryParse(json[DBTableLanguages.columnIsSelected].toString()) ??
+                0,
+        languageDisplayedLanguage: int.tryParse(
+                json[DBTableLanguages.columnDisplayedLanguage].toString()) ??
+            0,
+        languageIsAutoVoice:
+            int.tryParse(json[DBTableLanguages.columnIsAutoVoice].toString()) ??
+                0);
   }
 }
 
@@ -85,9 +112,12 @@ class LanguageUpdateParamModel {
   final String? languageName;
   final String? languageTTSArtist;
   final String? languageTTSGender;
-  final String? languageDailyUpdatedAt;
-  final String? languageWeeklyUpdatedAt;
-  final String? languageMonthlyUpdatedAt;
+  final String? languageDailyWordUpdatedAt;
+  final String? languageWeeklyWordUpdatedAt;
+  final String? languageMonthlyWordUpdatedAt;
+  final String? languageDailySentenceUpdatedAt;
+  final String? languageWeeklySentenceUpdatedAt;
+  final String? languageMonthlySentenceUpdatedAt;
   final int? languageIsSelected;
   final int? languageDisplayedLanguage;
   final int? languageIsAutoVoice;
@@ -97,9 +127,12 @@ class LanguageUpdateParamModel {
       this.languageName,
       this.languageTTSArtist,
       this.languageTTSGender,
-      this.languageDailyUpdatedAt,
-      this.languageWeeklyUpdatedAt,
-      this.languageMonthlyUpdatedAt,
+      this.languageDailyWordUpdatedAt,
+      this.languageWeeklyWordUpdatedAt,
+      this.languageMonthlyWordUpdatedAt,
+      this.languageDailySentenceUpdatedAt,
+      this.languageWeeklySentenceUpdatedAt,
+      this.languageMonthlySentenceUpdatedAt,
       this.languageIsSelected,
       this.languageDisplayedLanguage,
       this.languageIsAutoVoice});

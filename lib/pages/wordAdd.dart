@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/elements/dropdown.dart';
+import 'package:my_language_app/components/elements/autoCompleteTextField.dart';
 import 'package:my_language_app/components/elements/form.dart';
 import 'package:my_language_app/components/elements/radio.dart';
 import 'package:my_language_app/config/db/tables/words.dart';
@@ -13,6 +15,7 @@ import 'package:my_language_app/models/providers/language.provider.model.dart';
 import 'package:my_language_app/models/providers/page.provider.model.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/services/word.service.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class PageWordAdd extends StatefulWidget {
   final BuildContext context;
@@ -161,6 +164,26 @@ class _PageWordAddState extends State<PageWordAdd> {
             }));
   }
 
+  Future<List<WordGetResultModel>> getTargetSuggestions(String pattern) async {
+    final languageProviderModel =
+    ProviderLib.get<LanguageProviderModel>(context);
+
+    return await WordService.get(WordGetParamModel(
+        wordLanguageId: languageProviderModel.selectedLanguage.languageId,
+        wordTextTarget: pattern
+    ));
+  }
+
+  Future<List<WordGetResultModel>> getNativeSuggestions(String pattern) async {
+    final languageProviderModel =
+    ProviderLib.get<LanguageProviderModel>(context);
+
+    return await WordService.get(WordGetParamModel(
+        wordLanguageId: languageProviderModel.selectedLanguage.languageId,
+        wordTextNative: pattern
+    ));
+  }
+
   void onChangeStudyType(int? value) {
     if (value != null) {
       setState(() {
@@ -202,21 +225,31 @@ class _PageWordAddState extends State<PageWordAdd> {
           Text(
               "Target Language (${languageProviderModel.selectedLanguage
                   .languageName})"),
-          TextFormField(
-            decoration: const InputDecoration(
+          ComponentAutoCompleteTextField<WordGetResultModel>(
+              controller: _controllerTextTarget,
               hintText: 'Word, Sentence or Question',
-            ),
-            validator: onValidator,
-            controller: _controllerTextTarget,
+              onValidator: onValidator,
+              suggestionItems: getTargetSuggestions,
+              itemBuilderText: (item) => item.wordTextTarget,
+              onSuggestionSelected: (suggestion) {
+                setState(() {
+                  _controllerTextTarget.text = suggestion.wordTextTarget;
+                });
+              }
           ),
           Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
           const Text("Native Language"),
-          TextFormField(
-            decoration: InputDecoration(
+          ComponentAutoCompleteTextField<WordGetResultModel>(
+              controller: _controllerTextNative,
               hintText: 'Word, Sentence or Question',
-            ),
-            validator: onValidator,
-            controller: _controllerTextNative,
+              onValidator: onValidator,
+              suggestionItems: getNativeSuggestions,
+              itemBuilderText: (item) => item.wordTextNative,
+              onSuggestionSelected: (suggestion) {
+                setState(() {
+                  _controllerTextNative.text = suggestion.wordTextTarget;
+                });
+              }
           ),
           Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
           const Text("Comment"),
@@ -259,7 +292,7 @@ class _PageWordAddState extends State<PageWordAdd> {
             value: StudyTypeConst.monthly,
             groupValue: _stateSelectedStudyType,
             onChanged: onChangeStudyType,
-          )
+          ),
         ],
       ),
     );

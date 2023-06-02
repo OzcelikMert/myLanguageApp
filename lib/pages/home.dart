@@ -84,6 +84,8 @@ class _PageHomeState extends State<PageHome> {
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context);
 
+    languageProviderModel.setSelectedLanguage(row);
+
     int updateWord = 1;
 
     if (!pageProviderModel.isLoading) {
@@ -95,7 +97,6 @@ class _PageHomeState extends State<PageHome> {
     }
 
     if (updateWord > 0) {
-      languageProviderModel.setSelectedLanguage(row);
       await RouteLib.change(context: context, target: '/study/plan');
     }
   }
