@@ -8,3 +8,4 @@ list of will do:
     -? kelimeyi guncelleyince eger calimsa tipi degisirse kelimenin ona gore liste yeniden guncellensin
     -? kelime ekleme ve liste sayfasini tek bir syafada yap yana kaydirince diger sayfa gelsin
     - kelime eklerken nativede optionlsrdan option secinde trsi cikmiyor
+    - kelime guncelledigimizde word typi sentence olanlarda sentence isaretli olarak gelmiyor 
