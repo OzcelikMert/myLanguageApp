@@ -76,7 +76,7 @@ class ComponentStudyTypeButton extends StatelessWidget {
           Padding(
               padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
           Text(
-            'Last Study Date: ${DateFormat.yMd().add_Hm().format(lastStudyDate.toLocal())} (${dateDiff.inDays > 0 ? "${dateDiff.inDays} Days ago" : dateDiff.inDays == -1 ? "Yesterday" : "Today"})',
+            'Last Study Date: ${DateFormat.yMd().add_Hm().format(lastStudyDate.toLocal())} (${dateDiff.inDays > 0 ? "${dateDiff.inDays} Days ago" : "${dateDiff.inHours} Hours"})',
             style: TextStyle(fontSize: ThemeConst.fontSizes.md),
           ),
           Padding(

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/elements/autoCompleteTextField.dart';
 import 'package:my_language_app/components/elements/form.dart';
@@ -15,7 +14,6 @@ import 'package:my_language_app/models/providers/language.provider.model.dart';
 import 'package:my_language_app/models/providers/page.provider.model.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/services/word.service.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class PageWordAdd extends StatefulWidget {
   final BuildContext context;
@@ -60,18 +58,21 @@ class _PageWordAddState extends State<PageWordAdd> {
     final languageProviderModel =
     ProviderLib.get<LanguageProviderModel>(context);
 
-    var words = await WordService.get(WordGetParamModel(
-        wordLanguageId: languageProviderModel.selectedLanguage.languageId,
-        wordId: widget.wordId));
-    if (words.isNotEmpty) {
-      var word = words[0];
-      setState(() {
-        _stateWord = word;
-        _stateSelectedStudyType = word.wordStudyType;
-        _controllerTextNative.text = word.wordTextNative;
-        _controllerTextTarget.text = word.wordTextTarget;
-        _controllerComment.text = word.wordComment;
-      });
+    if(widget.wordId > 0){
+      var words = await WordService.get(WordGetParamModel(
+          wordLanguageId: languageProviderModel.selectedLanguage.languageId,
+          wordId: widget.wordId));
+      if (words.isNotEmpty) {
+        var word = words[0];
+        setState(() {
+          _stateWord = word;
+          _stateSelectedStudyType = word.wordStudyType;
+          _stateSelectedWordType = word.wordType;
+          _controllerTextNative.text = word.wordTextNative;
+          _controllerTextTarget.text = word.wordTextTarget;
+          _controllerComment.text = word.wordComment;
+        });
+      }
     }
 
     pageProviderModel.setLeadingArgs(null);
@@ -247,7 +248,7 @@ class _PageWordAddState extends State<PageWordAdd> {
               itemBuilderText: (item) => item.wordTextNative,
               onSuggestionSelected: (suggestion) {
                 setState(() {
-                  _controllerTextNative.text = suggestion.wordTextTarget;
+                  _controllerTextNative.text = suggestion.wordTextNative;
                 });
               }
           ),
