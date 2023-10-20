@@ -132,14 +132,14 @@ class _PageStudySettingsState extends State<PageStudySettings> {
           children: <Widget>[
             const Text("Displayed Language"),
             ComponentRadio<int>(
-              title: languageProviderModel.selectedLanguage.languageName,
-              value: DisplayedLanguageConst.target,
+              title: '${languageProviderModel.selectedLanguage.languageName} to Native',
+              value: DisplayedLanguageConst.targetToNative,
               groupValue: _stateSelectedDisplayedLanguage,
               onChanged: onChangeDisplayedLanguage,
             ),
             ComponentRadio<int>(
-              title: 'Native',
-              value: DisplayedLanguageConst.native,
+              title: 'Native to ${languageProviderModel.selectedLanguage.languageName}',
+              value: DisplayedLanguageConst.nativeToTarget,
               groupValue: _stateSelectedDisplayedLanguage,
               onChanged: onChangeDisplayedLanguage,
             ),
@@ -150,8 +150,14 @@ class _PageStudySettingsState extends State<PageStudySettings> {
               onChanged: onChangeDisplayedLanguage,
             ),
             ComponentRadio<int>(
-              title: 'Only Voice (${languageProviderModel.selectedLanguage.languageName})',
-              value: DisplayedLanguageConst.onlyVoiceTarget,
+              title: '${languageProviderModel.selectedLanguage.languageName} Voice to Native',
+              value: DisplayedLanguageConst.targetVoiceToNative,
+              groupValue: _stateSelectedDisplayedLanguage,
+              onChanged: onChangeDisplayedLanguage,
+            ),
+            ComponentRadio<int>(
+              title: '${languageProviderModel.selectedLanguage.languageName} Voice to ${languageProviderModel.selectedLanguage.languageName}',
+              value: DisplayedLanguageConst.targetVoiceToTarget,
               groupValue: _stateSelectedDisplayedLanguage,
               onChanged: onChangeDisplayedLanguage,
             ),

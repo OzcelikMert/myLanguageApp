@@ -24,9 +24,19 @@ import 'package:permission_handler/permission_handler.dart';
 import '../components/elements/button.dart';
 
 class PageWordList extends StatefulWidget {
+  late int studyType = 0;
+  late int wordType = 0;
   final BuildContext context;
 
-  const PageWordList({Key? key, required this.context}) : super(key: key);
+  PageWordList({Key? key, required this.context}) : super(key: key) {
+    var args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args[DBTableWords.columnStudyType] != null) {
+      studyType =
+          int.tryParse(args[DBTableWords.columnStudyType].toString()) ?? 0;
+      wordType = int.tryParse(args[DBTableWords.columnType].toString()) ?? 0;
+    }
+  }
 
   @override
   State<StatefulWidget> createState() => _PageWordListState();
@@ -34,6 +44,8 @@ class PageWordList extends StatefulWidget {
 
 class _PageWordListState extends State<PageWordList> {
   late List<WordGetResultModel> _stateWords = [];
+  late int _stateStudyState = 1;
+  late bool _stateIsThereStudyType = false;
 
   @override
   void initState() {
@@ -45,15 +57,46 @@ class _PageWordListState extends State<PageWordList> {
 
   _pageInit() async {
     final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
-    pageProviderModel.setTitle("List of Words");
-    final languageProviderModel =
-        ProviderLib.get<LanguageProviderModel>(context);
+    setState(() {
+      _stateIsThereStudyType = widget.studyType > 0;
+    });
+
+    await setPageTitle();
 
     await VoicesLib.setVoiceSaved(context);
 
-    var words = await WordService.get(WordGetParamModel(
-        wordLanguageId:
-            languageProviderModel.selectedLanguage.languageId));
+    await getWords();
+
+
+
+    pageProviderModel.setIsLoading(false);
+  }
+
+  Future<void> setPageTitle() async {
+    final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
+    if (_stateIsThereStudyType) {
+      pageProviderModel.setTitle(
+          "List of Words (${_stateStudyState == 0 ? "Unstudied" : "Studied"})");
+    } else {
+      pageProviderModel.setTitle("List of Words");
+    }
+  }
+
+  Future<void> getWords() async {
+    final languageProviderModel =
+        ProviderLib.get<LanguageProviderModel>(context);
+
+    List<WordGetResultModel> words = [];
+
+    if (_stateIsThereStudyType) {
+      words = await WordService.get(WordGetParamModel(
+          wordLanguageId: languageProviderModel.selectedLanguage.languageId,
+          wordStudyType: widget.studyType,
+          wordType: widget.wordType));
+    } else {
+      words = await WordService.get(WordGetParamModel(
+          wordLanguageId: languageProviderModel.selectedLanguage.languageId));
+    }
 
     setState(() {
       _stateWords = MyLibArray.sort(
@@ -61,8 +104,6 @@ class _PageWordListState extends State<PageWordList> {
           key: DBTableWords.columnCreatedAt,
           sortType: SortType.desc);
     });
-
-    pageProviderModel.setIsLoading(false);
   }
 
   void onClickTTS(String text) async {
@@ -86,7 +127,7 @@ class _PageWordListState extends State<PageWordList> {
 
       setState(() {
         _stateWords = _stateWords.map((word) {
-          if(word.wordId == updateData.wordId) {
+          if (word.wordId == updateData.wordId) {
             word = updateData;
           }
           return word;
@@ -102,8 +143,7 @@ class _PageWordListState extends State<PageWordList> {
         context,
         ComponentDialogOptions(
             title: "Are you sure?",
-            content:
-                "Are you sure want to delete '${row.wordTextNative}'?",
+            content: "Are you sure want to delete '${row.wordTextNative}'?",
             icon: ComponentDialogIcon.confirm,
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
@@ -117,7 +157,11 @@ class _PageWordListState extends State<PageWordList> {
                     WordDeleteParamModel(wordId: row.wordId));
                 if (result > 0) {
                   setState(() {
-                    _stateWords = MyLibArray.findMulti(array: _stateWords, key: DBTableWords.columnId, value: row.wordId, isLike: false);
+                    _stateWords = MyLibArray.findMulti(
+                        array: _stateWords,
+                        key: DBTableWords.columnId,
+                        value: row.wordId,
+                        isLike: false);
                   });
                   DialogLib.show(
                       context,
@@ -137,6 +181,43 @@ class _PageWordListState extends State<PageWordList> {
             }));
   }
 
+  Future<void> onClickChangeStudyState(int state) async {
+    if (state == _stateStudyState) return;
+
+    await DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            content: "Loading...", icon: ComponentDialogIcon.loading));
+
+    setState(() {
+      _stateStudyState = state;
+    });
+
+    await setPageTitle();
+
+    DialogLib.hide(context);
+  }
+
+  Widget StudyNav() {
+    return Row(
+      children: [
+        Expanded(
+            child: ComponentButton(
+          text: "Unstudied",
+          onPressed: () => onClickChangeStudyState(0),
+          bgColor: _stateStudyState == 0 ? ThemeConst.colors.success : null,
+        )),
+        Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+        Expanded(
+            child: ComponentButton(
+          text: "Studied",
+          onPressed: () => onClickChangeStudyState(1),
+          bgColor: _stateStudyState == 1 ? ThemeConst.colors.success : null,
+        )),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pageProviderModel =
@@ -146,102 +227,106 @@ class _PageWordListState extends State<PageWordList> {
 
     return pageProviderModel.isLoading
         ? Container()
-        : ComponentDataTable<WordGetResultModel>(
-            data: _stateWords,
-            selectedColor: ThemeConst.colors.info,
-            isSearchable: true,
-            searchableKeys: [
-              DBTableWords.columnTextTarget,
-              DBTableWords.columnTextNative
-            ],
-            columns: [
-              ComponentDataColumnModule(
-                title: "",
-              ),
-              ComponentDataColumnModule(
-                title:
-                    "Target (${languageProviderModel.selectedLanguage.languageName})",
-                sortKeyName: DBTableWords.columnTextTarget,
-                sortable: true,
-              ),
-              const ComponentDataColumnModule(
-                title: "Native",
-                sortKeyName: DBTableWords.columnTextNative,
-                sortable: true,
-              ),
-              const ComponentDataColumnModule(
-                title: "Create Date",
-                sortKeyName: DBTableWords.columnCreatedAt,
-                sortable: true,
-              ),
-              const ComponentDataColumnModule(
-                title: "Word Type",
-                sortKeyName: DBTableWords.columnType,
-                sortable: true,
-              ),
-              const ComponentDataColumnModule(
-                title: "Study Type",
-                sortKeyName: DBTableWords.columnStudyType,
-                sortable: true,
-              ),
-              const ComponentDataColumnModule(
-                title: "Is Study",
-                sortKeyName: DBTableWords.columnIsStudy,
-                sortable: true,
-              ),
-              ComponentDataColumnModule(
-                title: "",
-              ),
-              ComponentDataColumnModule(
-                title: "",
-              ),
-            ],
-            cells: [
-              ComponentDataCellModule(
-                child: (row) => ComponentIconButton(
-                    onPressed: () => onClickTTS(
-                        row.wordTextTarget),
-                    color: ThemeConst.colors.primary,
-                    icon: Icons.volume_up
-                ),
-              ),
-              ComponentDataCellModule(
-                child: (row) =>
-                    Text(row.wordTextTarget),
-              ),
-              ComponentDataCellModule(
-                child: (row) =>
-                    Text(row.wordTextNative),
-              ),
-              ComponentDataCellModule(
-                child: (row) => Text(DateFormat.yMd().add_Hm().format(
-                    DateTime.parse(row.wordCreatedAt)
-                        .toLocal())),
-              ),
-              ComponentDataCellModule(
-                child: (row) => Text(WordTypeConst.getTypeName(row.wordType)),
-              ),
-              ComponentDataCellModule(
-                child: (row) => Text(StudyTypeConst.getTypeName(row.wordStudyType)),
-              ),
-              ComponentDataCellModule(
-                child: (row) =>
-                    Text(row.wordIsStudy == 1 ? "Yes" : "No"),
-              ),
-              ComponentDataCellModule(
-                child: (row) => ComponentIconButton(
-                  onPressed: () => onClickEdit(row),
-                  color: ThemeConst.colors.warning,
-                  icon: Icons.edit,
-                ),
-              ),
-              ComponentDataCellModule(
-                child: (row) => ComponentIconButton(
-                  onPressed: () => onClickDelete(row),
-                  icon: Icons.delete_forever,
-                  color: ThemeConst.colors.danger,
-                ),
-              ),
+        : Column(
+            children: [
+              ComponentDataTable<WordGetResultModel>(
+                data: (_stateIsThereStudyType) ? MyLibArray.findMulti(
+                    array: _stateWords,
+                    key: DBTableWords.columnIsStudy,
+                    value: _stateStudyState) : _stateWords,
+                selectedColor: ThemeConst.colors.info,
+                isSearchable: true,
+                searchableKeys: [
+                  DBTableWords.columnTextTarget,
+                  DBTableWords.columnTextNative
+                ],
+                columns: [
+                  ComponentDataColumnModule(
+                    title: "",
+                  ),
+                  ComponentDataColumnModule(
+                    title:
+                        "Target (${languageProviderModel.selectedLanguage.languageName})",
+                    sortKeyName: DBTableWords.columnTextTarget,
+                    sortable: true,
+                  ),
+                  const ComponentDataColumnModule(
+                    title: "Native",
+                    sortKeyName: DBTableWords.columnTextNative,
+                    sortable: true,
+                  ),
+                  const ComponentDataColumnModule(
+                    title: "Create Date",
+                    sortKeyName: DBTableWords.columnCreatedAt,
+                    sortable: true,
+                  ),
+                  const ComponentDataColumnModule(
+                    title: "Word Type",
+                    sortKeyName: DBTableWords.columnType,
+                    sortable: true,
+                  ),
+                  const ComponentDataColumnModule(
+                    title: "Study Type",
+                    sortKeyName: DBTableWords.columnStudyType,
+                    sortable: true,
+                  ),
+                  const ComponentDataColumnModule(
+                    title: "Is Studied",
+                    sortKeyName: DBTableWords.columnIsStudy,
+                    sortable: true,
+                  ),
+                  ComponentDataColumnModule(
+                    title: "",
+                  ),
+                  ComponentDataColumnModule(
+                    title: "",
+                  ),
+                ],
+                cells: [
+                  ComponentDataCellModule(
+                    child: (row) => ComponentIconButton(
+                        onPressed: () => onClickTTS(row.wordTextTarget),
+                        color: ThemeConst.colors.primary,
+                        icon: Icons.volume_up),
+                  ),
+                  ComponentDataCellModule(
+                    child: (row) => Text(row.wordTextTarget),
+                  ),
+                  ComponentDataCellModule(
+                    child: (row) => Text(row.wordTextNative),
+                  ),
+                  ComponentDataCellModule(
+                    child: (row) => Text(DateFormat.yMd()
+                        .add_Hm()
+                        .format(DateTime.parse(row.wordCreatedAt).toLocal())),
+                  ),
+                  ComponentDataCellModule(
+                    child: (row) =>
+                        Text(WordTypeConst.getTypeName(row.wordType)),
+                  ),
+                  ComponentDataCellModule(
+                    child: (row) =>
+                        Text(StudyTypeConst.getTypeName(row.wordStudyType)),
+                  ),
+                  ComponentDataCellModule(
+                    child: (row) => Text(row.wordIsStudy == 1 ? "Yes" : "No"),
+                  ),
+                  ComponentDataCellModule(
+                    child: (row) => (_stateIsThereStudyType) ? Container() : ComponentIconButton(
+                      onPressed: () => onClickEdit(row),
+                      color: ThemeConst.colors.warning,
+                      icon: Icons.edit,
+                    ),
+                  ),
+                  ComponentDataCellModule(
+                    child: (row) => (_stateIsThereStudyType) ? Container() : ComponentIconButton(
+                      onPressed: () => onClickDelete(row),
+                      icon: Icons.delete_forever,
+                      color: ThemeConst.colors.danger,
+                    ),
+                  ),
+                ],
+              )
             ],
           );
   }

@@ -64,6 +64,8 @@ class _MyAppState extends State<MyApp> {
             returnPage = (context) => PageWordAdd(context: context);
           }else if(routeName == PageConst.routeNames.wordList) {
             returnPage = (context) => PageWordList(context: context);
+          }else if(routeName == PageConst.routeNames.wordListStudied) {
+            returnPage = (context) => PageWordList(context: context);
           }else if(routeName == PageConst.routeNames.study) {
             returnPage = (context) => PageStudy(context: context);
           }else if(routeName == PageConst.routeNames.studyPlan) {

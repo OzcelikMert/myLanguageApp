@@ -9,6 +9,7 @@ class _RouteNames {
   String wordAdd = "/word/add";
   String wordEdit = "/word/edit";
   String wordList = "/word/list";
+  String wordListStudied = "/word/list/studied";
   String study = "/study";
   String studyPlan = "/study/plan";
   String studySettings = "/study/settings";

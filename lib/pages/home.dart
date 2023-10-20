@@ -47,7 +47,7 @@ class _PageHomeState extends State<PageHome> {
 
     final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
     if (ttsProviderModel.voices.isEmpty) {
-      ttsProviderModel
+      await ttsProviderModel
           .setVoices(await VoicesLib.getVoices());
     }
 

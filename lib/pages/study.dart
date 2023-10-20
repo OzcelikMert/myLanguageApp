@@ -21,6 +21,7 @@ import 'package:my_language_app/models/providers/language.provider.model.dart';
 import 'package:my_language_app/models/providers/page.provider.model.dart';
 import 'package:my_language_app/models/services/word.model.dart';
 import 'package:my_language_app/myLib/variable/array.dart';
+import 'package:my_language_app/myLib/variable/string.dart';
 import 'package:my_language_app/services/word.service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,8 @@ class PageStudy extends StatefulWidget {
     var args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     if (args != null && args[DBTableWords.columnStudyType] != null) {
-      studyType = int.tryParse(args[DBTableWords.columnStudyType].toString()) ?? 0;
+      studyType =
+          int.tryParse(args[DBTableWords.columnStudyType].toString()) ?? 0;
       wordType = int.tryParse(args[DBTableWords.columnType].toString()) ?? 0;
     }
   }
@@ -48,11 +50,10 @@ class _PageStudyState extends State<PageStudy> {
   late bool _stateIsStudied = false;
   late bool _stateIsCorrect = false;
   late List<WordGetResultModel> _stateWords = [];
+  late List<WordGetResultModel> _stateStudiedWords = [];
   late WordGetResultModel? _stateCurrentWord = null;
   late String _stateTextDisplayed = "";
   late String _stateTextAnswer = "";
-  late int _stateTotalWords = 0;
-  late int _stateStudiedWords = 0;
   late bool _stateIsDisplayedTarget = false;
   final _controllerText = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -82,34 +83,20 @@ class _PageStudyState extends State<PageStudy> {
 
     var wordCountReports = await WordService.getCountReport(
         WordGetCountReportParamModel(
-            wordLanguageId: languageProviderModel
-                .selectedLanguage.languageId,
+            wordLanguageId: languageProviderModel.selectedLanguage.languageId,
             wordStudyType: widget.studyType,
-            wordType: widget.wordType
-        ));
-
-    var studiedReports = MyLibArray.findMulti(
-        array: wordCountReports, key: DBTableWords.columnIsStudy, value: 1);
+            wordType: widget.wordType));
 
     var words = await WordService.get(WordGetParamModel(
-        wordLanguageId:
-            languageProviderModel.selectedLanguage.languageId,
+        wordLanguageId: languageProviderModel.selectedLanguage.languageId,
         wordStudyType: widget.studyType,
-        wordType: widget.wordType,
-        wordIsStudy: 0));
+        wordType: widget.wordType));
 
     setState(() {
-      _stateWords = words;
-      _stateTotalWords = wordCountReports.isNotEmpty
-          ? wordCountReports
-              .map((e) => e.wordCount)
-              .reduce((a, b) => a + b)
-          : 0;
-      _stateStudiedWords = studiedReports.isNotEmpty
-          ? studiedReports
-              .map((e) => e.wordCount)
-              .reduce((a, b) => a + b)
-          : 0;
+      _stateWords = MyLibArray.findMulti(
+          array: words, key: DBTableWords.columnIsStudy, value: 0);
+      _stateStudiedWords = MyLibArray.findMulti(
+          array: words, key: DBTableWords.columnIsStudy, value: 1);
     });
     setCurrentWord();
 
@@ -118,19 +105,20 @@ class _PageStudyState extends State<PageStudy> {
     pageProviderModel.setIsLoading(false);
   }
 
-  setTextDisplayedAndAnswer() {
+  setTextDisplayedAndAnswer({bool setTTS = true}) {
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context);
 
-    int displayedLanguage = languageProviderModel
-        .selectedLanguage.languageDisplayedLanguage;
+    int displayedLanguage =
+        languageProviderModel.selectedLanguage.languageDisplayedLanguage;
 
     bool isDisplayedTarget = false;
 
     if ([
-      DisplayedLanguageConst.target,
+      DisplayedLanguageConst.targetToNative,
       DisplayedLanguageConst.random,
-      DisplayedLanguageConst.onlyVoiceTarget
+      DisplayedLanguageConst.targetVoiceToNative,
+      DisplayedLanguageConst.targetVoiceToTarget
     ].contains(displayedLanguage)) {
       isDisplayedTarget = true;
 
@@ -144,15 +132,18 @@ class _PageStudyState extends State<PageStudy> {
     }
 
     setState(() {
-      _stateTextDisplayed = isDisplayedTarget ? _stateCurrentWord!.wordTextTarget :  _stateCurrentWord!.wordTextNative;
-      _stateTextAnswer = isDisplayedTarget ? _stateCurrentWord!.wordTextNative :  _stateCurrentWord!.wordTextTarget;
+      _stateTextDisplayed = isDisplayedTarget
+          ? _stateCurrentWord!.wordTextTarget
+          : _stateCurrentWord!.wordTextNative;
+      _stateTextAnswer = isDisplayedTarget && displayedLanguage != DisplayedLanguageConst.targetVoiceToTarget
+          ? _stateCurrentWord!.wordTextNative
+          : _stateCurrentWord!.wordTextTarget;
       _stateIsDisplayedTarget = isDisplayedTarget;
     });
 
     if (isDisplayedTarget &&
-        languageProviderModel
-                .selectedLanguage.languageIsAutoVoice ==
-            1) {
+        languageProviderModel.selectedLanguage.languageIsAutoVoice == 1 &&
+        setTTS == true) {
       onClickTTS();
     }
   }
@@ -161,7 +152,9 @@ class _PageStudyState extends State<PageStudy> {
     var random = Random();
     int randomNumber = random.nextInt(_stateWords.length);
 
-    if(_stateCurrentWord != null && _stateWords.length > 1 && _stateWords[randomNumber].wordId == _stateCurrentWord!.wordId){
+    if (_stateCurrentWord != null &&
+        _stateWords.length > 1 &&
+        _stateWords[randomNumber].wordId == _stateCurrentWord!.wordId) {
       setCurrentWord();
       return;
     }
@@ -181,8 +174,10 @@ class _PageStudyState extends State<PageStudy> {
 
     setState(() {
       _stateIsStudied = true;
-      _stateIsCorrect = _stateTextAnswer.toLowerCase() ==
-          _controllerText.text.toString().toLowerCase().trim();
+      _stateIsCorrect = MyLibString.removePunctuation(
+              _stateTextAnswer.toString().toLowerCase()) ==
+          MyLibString.removePunctuation(
+              _controllerText.text.toString().toLowerCase().trim());
     });
 
     if (_stateIsCorrect) {
@@ -201,7 +196,7 @@ class _PageStudyState extends State<PageStudy> {
               key: DBTableWords.columnId,
               value: _stateCurrentWord!.wordId,
               isLike: false);
-          _stateStudiedWords += 1;
+          _stateStudiedWords.add(_stateCurrentWord!);
         });
         AudioLib.play(AudioConst.positive);
         DialogLib.show(
@@ -244,23 +239,29 @@ class _PageStudyState extends State<PageStudy> {
     }
   }
 
-  void onClickBack() {
-    DialogLib.show(
-        context,
-        ComponentDialogOptions(
-            title: "Are you sure?",
-            content: "You have selected 'daily'. Are you sure about this?",
-            showCancelButton: true,
-            icon: ComponentDialogIcon.confirm,
-            onPressed: (bool isConfirm) async {
-              if (isConfirm) {
-                await RouteLib.change(
-                    context: context,
-                    target: PageConst.routeNames.studyPlan,
-                    arguments: {DBTableWords.columnType: widget.wordType}
-                );
-              }
-            }));
+  void onClickBack() async {
+    if (_stateWords.length > 0) {
+      DialogLib.show(
+          context,
+          ComponentDialogOptions(
+              title: "Are you sure?",
+              content: "You have selected 'daily'. Are you sure about this?",
+              showCancelButton: true,
+              icon: ComponentDialogIcon.confirm,
+              onPressed: (bool isConfirm) async {
+                if (isConfirm) {
+                  await RouteLib.change(
+                      context: context,
+                      target: PageConst.routeNames.studyPlan,
+                      arguments: {DBTableWords.columnType: widget.wordType});
+                }
+              }));
+    } else {
+      await RouteLib.change(
+          context: context,
+          target: PageConst.routeNames.studyPlan,
+          arguments: {DBTableWords.columnType: widget.wordType});
+    }
   }
 
   void onClickSettings() async {
@@ -293,15 +294,15 @@ class _PageStudyState extends State<PageStudy> {
     if (await Permission.speech.request() != PermissionStatus.granted) {
       return;
     }
-    await (await VoicesLib.flutterTts).speak(_stateIsDisplayedTarget ? _stateTextDisplayed : _stateTextAnswer);
+    await (await VoicesLib.flutterTts).speak(
+        _stateIsDisplayedTarget ? _stateTextDisplayed : _stateTextAnswer);
   }
 
   void onClickComment() async {
     DialogLib.show(
         context,
         ComponentDialogOptions(
-            title: "🧐 Comment 🧐",
-            content: _stateCurrentWord!.wordComment));
+            title: "🧐 Comment 🧐", content: _stateCurrentWord!.wordComment));
   }
 
   void onClickEdit() async {
@@ -318,18 +319,56 @@ class _PageStudyState extends State<PageStudy> {
 
       setState(() {
         _stateWords = _stateWords.map((word) {
-          if(word.wordId == updateData.wordId) {
+          if (word.wordId == updateData.wordId) {
             word = updateData;
           }
           return word;
         }).toList();
         _stateCurrentWord = updateData;
+        if (updateData.wordIsStudy == 1 &&
+            MyLibArray.findSingle(
+                    array: _stateStudiedWords,
+                    key: DBTableWords.columnId,
+                    value: updateData.wordId) ==
+                null) {
+          _stateWords = MyLibArray.findMulti(
+              array: _stateWords,
+              key: DBTableWords.columnId,
+              value: _stateCurrentWord!.wordId,
+              isLike: false);
+          _stateStudiedWords.add(_stateCurrentWord!);
+          _stateIsCorrect = true;
+        } else if (updateData.wordIsStudy == 0 &&
+            MyLibArray.findSingle(
+                    array: _stateWords,
+                    key: DBTableWords.columnId,
+                    value: updateData.wordId) ==
+                null) {
+          _stateStudiedWords = MyLibArray.findMulti(
+              array: _stateStudiedWords,
+              key: DBTableWords.columnId,
+              value: _stateCurrentWord!.wordId,
+              isLike: false);
+          _stateWords.add(_stateCurrentWord!);
+          _stateIsCorrect = false;
+        }
       });
 
-      setTextDisplayedAndAnswer();
+      setTextDisplayedAndAnswer(setTTS: false);
 
       DialogLib.hide(context);
     }
+  }
+
+  void onClickProgress() async {
+    await RouteLib.change(
+        context: context,
+        target: PageConst.routeNames.wordListStudied,
+        arguments: {
+          DBTableWords.columnStudyType: widget.studyType,
+          DBTableWords.columnType: widget.wordType
+        },
+        safeHistory: true);
   }
 
   String? onValidator(String? value) {
@@ -368,9 +407,15 @@ class _PageStudyState extends State<PageStudy> {
         Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
         Row(
           children: [
-            Icon(Icons.check, size: ThemeConst.fontSizes.xlg, color: ThemeConst.colors.success),
-            Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.xsm)),
-            Expanded(child: Text(_stateTextAnswer,
+            Icon(Icons.check,
+                size: ThemeConst.fontSizes.xlg,
+                color: ThemeConst.colors.success),
+            Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: ThemeConst.paddings.xsm)),
+            Expanded(
+                child: Text(
+              _stateTextAnswer,
               style: TextStyle(
                 fontSize: ThemeConst.fontSizes.md,
                 color: ThemeConst.colors.success,
@@ -389,9 +434,15 @@ class _PageStudyState extends State<PageStudy> {
         Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
         Row(
           children: [
-            Icon(Icons.close, size: ThemeConst.fontSizes.xlg, color: ThemeConst.colors.danger),
-            Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.xsm)),
-            Expanded(child: Text(_controllerText.text,
+            Icon(Icons.close,
+                size: ThemeConst.fontSizes.xlg,
+                color: ThemeConst.colors.danger),
+            Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: ThemeConst.paddings.xsm)),
+            Expanded(
+                child: Text(
+              _controllerText.text,
               style: TextStyle(
                 fontSize: ThemeConst.fontSizes.md,
                 color: ThemeConst.colors.danger,
@@ -432,33 +483,44 @@ class _PageStudyState extends State<PageStudy> {
     }
 
     Widget _componentPadding() {
-      return Padding(padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.sm));
+      return Padding(
+          padding: EdgeInsets.symmetric(horizontal: ThemeConst.paddings.sm));
     }
 
-    List<Widget> children  = [
-      ...(_stateIsDisplayedTarget || _stateIsStudied ? [_componentVoice(), _componentPadding()] : []),
-      ...(_stateCurrentWord!.wordComment.toString().isNotEmpty ? [_componentComment(), _componentPadding()] : []),
+    List<Widget> children = [
+      ...(_stateIsDisplayedTarget || _stateIsStudied
+          ? [_componentVoice(), _componentPadding()]
+          : []),
+      ...(_stateCurrentWord!.wordComment.toString().isNotEmpty
+          ? [_componentComment(), _componentPadding()]
+          : []),
       ...(_stateIsStudied ? [_componentEdit(), _componentPadding()] : []),
     ];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: children.length > 0 ? children.sublist(0, children.length - 1) : children,
+      children: children.length > 0
+          ? children.sublist(0, children.length - 1)
+          : children,
     );
   }
 
   Widget _componentProgress() {
+    var totalWords = _stateWords.length + _stateStudiedWords.length;
     return Column(
       children: [
-        Text(
-          "$_stateTotalWords / $_stateStudiedWords",
-          style: TextStyle(fontSize: ThemeConst.fontSizes.md),
+        GestureDetector(
+          onTap: onClickProgress,
+          child: Text(
+            "$totalWords / ${_stateStudiedWords.length}",
+            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
+          ),
         ),
         Padding(
             padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
         ComponentProgress(
-            maxValue: _stateTotalWords.toDouble(),
-            currentValue: _stateStudiedWords.toDouble()),
+            maxValue: totalWords.toDouble(),
+            currentValue: _stateStudiedWords.length.toDouble()),
       ],
     );
   }
@@ -492,9 +554,9 @@ class _PageStudyState extends State<PageStudy> {
           ),
         ),
         Container(
-          child: Text("${StudyTypeConst.getTypeName(widget.studyType)} (${WordTypeConst.getTypeName(widget.wordType)})",
-              style: TextStyle(fontSize: ThemeConst.fontSizes.md))
-        ),
+            child: Text(
+                "${StudyTypeConst.getTypeName(widget.studyType)} (${WordTypeConst.getTypeName(widget.wordType)})",
+                style: TextStyle(fontSize: ThemeConst.fontSizes.md))),
         Container(
           child: ComponentIconButton(
               onPressed: onClickSettings, icon: Icons.settings),
@@ -509,6 +571,8 @@ class _PageStudyState extends State<PageStudy> {
         ProviderLib.get<LanguageProviderModel>(context, listen: true);
     final pageProviderModel =
         ProviderLib.get<PageProviderModel>(context, listen: true);
+    final selectedLanguage =
+        languageProviderModel.selectedLanguage.languageDisplayedLanguage;
 
     return pageProviderModel.isLoading
         ? Container()
@@ -523,8 +587,7 @@ class _PageStudyState extends State<PageStudy> {
                       EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
               _componentProgress(),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
-              languageProviderModel.selectedLanguage.languageDisplayedLanguage ==
-                          DisplayedLanguageConst.onlyVoiceTarget &&
+              [DisplayedLanguageConst.targetVoiceToNative, DisplayedLanguageConst.targetVoiceToTarget].contains(selectedLanguage) &&
                       !_stateIsStudied
                   ? Container()
                   : Text(
@@ -536,14 +599,18 @@ class _PageStudyState extends State<PageStudy> {
               _stateIsStudied ? _componentStatusMessage() : Container(),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
               !_stateIsStudied ? _componentAnswer() : Container(),
-              _stateIsStudied && !_stateIsCorrect ? _componentWrongWord() : Container(),
+              _stateIsStudied && !_stateIsCorrect
+                  ? _componentWrongWord()
+                  : Container(),
               _stateIsStudied ? _componentCorrectWord() : Container(),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-              _stateIsStudied && _stateWords.isNotEmpty ? ComponentButton(
-                text: "Next",
-                onPressed: onClickNext,
-                bgColor: ThemeConst.colors.success,
-              ) : Container(),
+              _stateIsStudied && _stateWords.isNotEmpty
+                  ? ComponentButton(
+                      text: "Next",
+                      onPressed: onClickNext,
+                      bgColor: ThemeConst.colors.success,
+                    )
+                  : Container(),
             ],
           );
   }
