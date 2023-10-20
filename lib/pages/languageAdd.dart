@@ -22,7 +22,6 @@ class PageLanguageAdd extends StatefulWidget {
 }
 
 class _PageLanguageAddState extends State<PageLanguageAdd> {
-  String _stateSelectedVoiceGenderRadio = "male";
   VoicesLibGetVoicesResultModel? _stateSelectedVoice;
   final _controllerName = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -48,14 +47,6 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
     pageProviderModel.setIsLoading(false);
   }
 
-  void onChangeVoiceGenderRadio(String? value) {
-    if (value != null) {
-      setState(() {
-        _stateSelectedVoiceGenderRadio = value;
-      });
-    }
-  }
-
   void onClickAdd() async {
     DialogLib.show(
         context,
@@ -74,8 +65,7 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                         icon: ComponentDialogIcon.loading));
                 var result = await LanguageService.add(LanguageAddParamModel(
                     languageName: _controllerName.text.trim(),
-                    languageTTSArtist: _stateSelectedVoice!.name,
-                    languageTTSGender: _stateSelectedVoiceGenderRadio));
+                    languageTTSArtist: _stateSelectedVoice!.name));
                 if (result > 0) {
                   final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
                   final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
@@ -88,7 +78,6 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                           icon: ComponentDialogIcon.success));
                   _controllerName.text = "";
                   _stateSelectedVoice = ttsProviderModel.voices[0];
-                  _stateSelectedVoiceGenderRadio = "male";
                 } else {
                   DialogLib.show(
                       context,
@@ -146,20 +135,6 @@ class _PageLanguageAddState extends State<PageLanguageAdd> {
                 }),
                 hintText: "ex: en-UK",
               ),
-              Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-              const Text("Gender"),
-              ComponentRadio<String>(
-                title: 'Male',
-                value: 'male',
-                groupValue: _stateSelectedVoiceGenderRadio,
-                onChanged: onChangeVoiceGenderRadio,
-              ),
-              ComponentRadio<String>(
-                title: 'Female',
-                value: 'female',
-                groupValue: _stateSelectedVoiceGenderRadio,
-                onChanged: onChangeVoiceGenderRadio,
-              )
             ],
           ));
   }

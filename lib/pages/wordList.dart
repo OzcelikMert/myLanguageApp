@@ -67,8 +67,6 @@ class _PageWordListState extends State<PageWordList> {
 
     await getWords();
 
-
-
     pageProviderModel.setIsLoading(false);
   }
 

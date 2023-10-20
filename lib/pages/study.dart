@@ -72,20 +72,14 @@ class _PageStudyState extends State<PageStudy> {
           context: context, target: PageConst.routeNames.studyPlan);
       return;
     }
-
-    await VoicesLib.setVoiceSaved(context);
-
     final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
     pageProviderModel.setTitle("Study");
 
+    await VoicesLib.setVoiceSaved(context);
+
+
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context);
-
-    var wordCountReports = await WordService.getCountReport(
-        WordGetCountReportParamModel(
-            wordLanguageId: languageProviderModel.selectedLanguage.languageId,
-            wordStudyType: widget.studyType,
-            wordType: widget.wordType));
 
     var words = await WordService.get(WordGetParamModel(
         wordLanguageId: languageProviderModel.selectedLanguage.languageId,

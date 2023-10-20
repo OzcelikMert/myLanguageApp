@@ -46,10 +46,8 @@ class VoicesLibGetVoicesResultModel {
 class VoicesLibSetVoiceParamModel {
   final String name;
   final String locale;
-  final String gender;
 
   VoicesLibSetVoiceParamModel({
     required this.name,
-    required this.locale,
-    required this.gender,});
+    required this.locale});
 }

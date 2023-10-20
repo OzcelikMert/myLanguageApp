@@ -28,7 +28,6 @@ class PageSettings extends StatefulWidget {
 }
 
 class _PageSettingsState extends State<PageSettings> {
-  String _stateSelectedVoiceGenderRadio = "male";
   VoicesLibGetVoicesResultModel? _stateSelectedVoice;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -56,8 +55,6 @@ class _PageSettingsState extends State<PageSettings> {
             .selectedLanguage.languageTTSArtist);
     setState(() {
       _stateSelectedVoice = findVoice ?? ttsProviderModel.voices[0];
-      _stateSelectedVoiceGenderRadio = languageProviderModel
-          .selectedLanguage.languageTTSGender;
     });
 
     pageProviderModel.setIsLoading(false);
@@ -73,19 +70,10 @@ class _PageSettingsState extends State<PageSettings> {
     await VoicesLib.setVoiceSaved(context, params: VoicesLibSetVoiceParamModel(
       locale: _stateSelectedVoice?.locale ?? "",
       name: _stateSelectedVoice?.name ?? "",
-      gender: _stateSelectedVoiceGenderRadio
     ));
     await (await VoicesLib.flutterTts).speak("Text to speech");
 
     DialogLib.hide(context);
-  }
-
-  void onChangeVoiceGenderRadio(String? value) {
-    if (value != null) {
-      setState(() {
-        _stateSelectedVoiceGenderRadio = value;
-      });
-    }
   }
 
   void onClickSave() async {
@@ -110,8 +98,8 @@ class _PageSettingsState extends State<PageSettings> {
                         whereLanguageId: languageProviderModel
                             .selectedLanguage.languageId,
                         languageTTSArtist:
-                            _stateSelectedVoice!.name,
-                        languageTTSGender: _stateSelectedVoiceGenderRadio), context);
+                            _stateSelectedVoice!.name
+                       ), context);
                 if (result > 0) {
                   DialogLib.show(
                       context,
@@ -173,24 +161,6 @@ class _PageSettingsState extends State<PageSettings> {
                     _stateSelectedVoice = data;
                   }),
                   hintText: "ex: en-UK",
-                ),
-                Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
-                const Text("Gender"),
-                Text(
-                  "Sometimes the selected language code may not support the selected gender. In these cases, you can try other language codes.",
-                  style: TextStyle(fontSize: ThemeConst.fontSizes.sm),
-                ),
-                ComponentRadio<String>(
-                  title: 'Male',
-                  value: 'male',
-                  groupValue: _stateSelectedVoiceGenderRadio,
-                  onChanged: onChangeVoiceGenderRadio,
-                ),
-                ComponentRadio<String>(
-                  title: 'Female',
-                  value: 'female',
-                  groupValue: _stateSelectedVoiceGenderRadio,
-                  onChanged: onChangeVoiceGenderRadio,
                 )
               ],
             ),

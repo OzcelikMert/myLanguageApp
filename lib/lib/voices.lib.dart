@@ -1,6 +1,8 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:my_language_app/lib/provider.lib.dart';
 import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -42,20 +44,9 @@ class VoicesLib {
         value: languageProviderModel
             .selectedLanguage.languageTTSArtist);
     if (voice != null) {
-      String name = voice.name;
-      String locale = voice.locale;
-      String gender = languageProviderModel.selectedLanguage.languageTTSGender;
-
-      if(params != null){
-        name = params.name;
-        locale = params.locale;
-        gender = params.gender;
-      }
-
       await VoicesLib._setVoice({
-        TTSVoiceKeys.keyName: name,
-        TTSVoiceKeys.keyLocale: locale,
-        TTSVoiceKeys.keyGender: gender
+        TTSVoiceKeys.keyName: params != null ? params.name : voice.name,
+        TTSVoiceKeys.keyLocale: params != null ? params.locale : voice.locale
       });
     }
   }

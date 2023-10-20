@@ -99,12 +99,12 @@ class LanguageGetParamModel {
 class LanguageAddParamModel {
   final String languageName;
   final String languageTTSArtist;
-  final String languageTTSGender;
+  String languageTTSGender;
 
   LanguageAddParamModel(
       {required this.languageName,
       required this.languageTTSArtist,
-      required this.languageTTSGender});
+      this.languageTTSGender = "male"});
 }
 
 class LanguageUpdateParamModel {
