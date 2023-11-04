@@ -77,7 +77,6 @@ class _PageStudyState extends State<PageStudy> {
 
     await VoicesLib.setVoiceSaved(context);
 
-
     final languageProviderModel =
         ProviderLib.get<LanguageProviderModel>(context);
 
@@ -129,7 +128,8 @@ class _PageStudyState extends State<PageStudy> {
       _stateTextDisplayed = isDisplayedTarget
           ? _stateCurrentWord!.wordTextTarget
           : _stateCurrentWord!.wordTextNative;
-      _stateTextAnswer = isDisplayedTarget && displayedLanguage != DisplayedLanguageConst.targetVoiceToTarget
+      _stateTextAnswer = isDisplayedTarget &&
+              displayedLanguage != DisplayedLanguageConst.targetVoiceToTarget
           ? _stateCurrentWord!.wordTextNative
           : _stateCurrentWord!.wordTextTarget;
       _stateIsDisplayedTarget = isDisplayedTarget;
@@ -160,7 +160,7 @@ class _PageStudyState extends State<PageStudy> {
     });
   }
 
-  void onClickCheck() async {
+  void onClickCheck({correctStatus = null}) async {
     await DialogLib.show(
         context,
         ComponentDialogOptions(
@@ -168,10 +168,38 @@ class _PageStudyState extends State<PageStudy> {
 
     setState(() {
       _stateIsStudied = true;
-      _stateIsCorrect = MyLibString.removePunctuation(
-              _stateTextAnswer.toString().toLowerCase()) ==
-          MyLibString.removePunctuation(
-              _controllerText.text.toString().toLowerCase().trim());
+      _stateIsCorrect = correctStatus != null
+          ? correctStatus
+          : MyLibString.removePunctuation(
+                  _stateTextAnswer.toString().toLowerCase()) ==
+              MyLibString.removePunctuation(
+                  _controllerText.text.toString().toLowerCase().trim());
+
+      if (_stateIsCorrect == true &&
+          MyLibArray.findSingle(
+              array: _stateStudiedWords,
+              key: DBTableWords.columnId,
+              value: _stateCurrentWord!.wordId) == null
+      ) {
+        _stateWords = MyLibArray.findMulti(
+            array: _stateWords,
+            key: DBTableWords.columnId,
+            value: _stateCurrentWord!.wordId,
+            isLike: false);
+        _stateStudiedWords.add(_stateCurrentWord!);
+      } else if (_stateIsCorrect == false &&
+          MyLibArray.findSingle(
+              array: _stateWords,
+              key: DBTableWords.columnId,
+              value: _stateCurrentWord!.wordId) == null
+      ) {
+        _stateStudiedWords = MyLibArray.findMulti(
+            array: _stateStudiedWords,
+            key: DBTableWords.columnId,
+            value: _stateCurrentWord!.wordId,
+            isLike: false);
+        _stateWords.add(_stateCurrentWord!);
+      }
     });
 
     if (_stateIsCorrect) {
@@ -184,14 +212,6 @@ class _PageStudyState extends State<PageStudy> {
           whereWordId: _stateCurrentWord!.wordId,
           wordIsStudy: 1));
       if (updateWord > 0) {
-        setState(() {
-          _stateWords = MyLibArray.findMulti(
-              array: _stateWords,
-              key: DBTableWords.columnId,
-              value: _stateCurrentWord!.wordId,
-              isLike: false);
-          _stateStudiedWords.add(_stateCurrentWord!);
-        });
         AudioLib.play(AudioConst.positive);
         DialogLib.show(
             context,
@@ -239,7 +259,7 @@ class _PageStudyState extends State<PageStudy> {
           context,
           ComponentDialogOptions(
               title: "Are you sure?",
-              content: "You have selected 'daily'. Are you sure about this?",
+              content: "You will go back, do you want to exit study page?",
               showCancelButton: true,
               icon: ComponentDialogIcon.confirm,
               onPressed: (bool isConfirm) async {
@@ -352,6 +372,23 @@ class _PageStudyState extends State<PageStudy> {
 
       DialogLib.hide(context);
     }
+  }
+
+  void onClickChangeCorrectStatus({correctStatus = true}) async {
+    DialogLib.show(
+        context,
+        ComponentDialogOptions(
+          title: "🤔 Are you sure about that? 🤔",
+          content:
+              "Do you want to change this '${WordTypeConst.getTypeName(widget.wordType)}' status to '${correctStatus == true ? "Correct" : "Wrong"}'? 😶",
+          icon: ComponentDialogIcon.confirm,
+          onPressed: (isConfirm) async {
+            if (isConfirm) {
+              onClickCheck(correctStatus: correctStatus);
+              return false;
+            }
+          },
+        ));
   }
 
   void onClickProgress() async {
@@ -581,7 +618,10 @@ class _PageStudyState extends State<PageStudy> {
                       EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
               _componentProgress(),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
-              [DisplayedLanguageConst.targetVoiceToNative, DisplayedLanguageConst.targetVoiceToTarget].contains(selectedLanguage) &&
+              [
+                        DisplayedLanguageConst.targetVoiceToNative,
+                        DisplayedLanguageConst.targetVoiceToTarget
+                      ].contains(selectedLanguage) &&
                       !_stateIsStudied
                   ? Container()
                   : Text(
@@ -603,6 +643,17 @@ class _PageStudyState extends State<PageStudy> {
                       text: "Next",
                       onPressed: onClickNext,
                       bgColor: ThemeConst.colors.success,
+                    )
+                  : Container(),
+              Padding(padding: EdgeInsets.all(ThemeConst.paddings.sm)),
+              _stateIsStudied
+                  ? ComponentButton(
+                      text: "Set `${_stateIsCorrect ? "Wrong" : "Correct"}`",
+                      onPressed: () => onClickChangeCorrectStatus(
+                          correctStatus: !_stateIsCorrect),
+                      bgColor: _stateIsCorrect
+                          ? ThemeConst.colors.danger
+                          : ThemeConst.colors.warning,
                     )
                   : Container(),
             ],
