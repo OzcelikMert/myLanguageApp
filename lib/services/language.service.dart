@@ -126,6 +126,10 @@ class LanguageService {
       setMap[DBTableLanguages.columnIsAutoVoice] = params.languageIsAutoVoice;
     }
 
+    if (params.languageIsActiveSuccessVoice != null) {
+      setMap[DBTableLanguages.columnIsActiveSuccessVoice] = params.languageIsActiveSuccessVoice;
+    }
+
     var db = await DBConn.instance.database;
     var update = await db.update(
       DBTableLanguages.tableName,
