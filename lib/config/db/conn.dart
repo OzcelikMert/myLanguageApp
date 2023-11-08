@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBConn {
   static const _databaseName = 'myLanguageApp.db';
-  static const _databaseVersion = 13;
+  static const _databaseVersion = 14;
 
   DBConn._privateConstructor();
   static final DBConn instance = DBConn._privateConstructor();

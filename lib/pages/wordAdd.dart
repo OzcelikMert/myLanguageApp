@@ -35,7 +35,6 @@ class _PageWordAddState extends State<PageWordAdd> {
   late WordGetResultModel? _stateWord = null;
   late int _stateSelectedStudyType = StudyTypeConst.daily;
   late int _stateSelectedWordType = WordTypeConst.word;
-  late int _stateIsStudied = 0;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _controllerTextNative = TextEditingController();
   final _controllerTextTarget = TextEditingController();
@@ -66,7 +65,6 @@ class _PageWordAddState extends State<PageWordAdd> {
           _stateWord = word;
           _stateSelectedStudyType = word.wordStudyType;
           _stateSelectedWordType = word.wordType;
-          _stateIsStudied = word.wordIsStudy;
           _controllerTextNative.text = word.wordTextNative;
           _controllerTextTarget.text = word.wordTextTarget;
           _controllerComment.text = word.wordComment;
@@ -107,7 +105,6 @@ class _PageWordAddState extends State<PageWordAdd> {
                       wordTextTarget: _controllerTextTarget.text.trim(),
                       wordComment: _controllerComment.text.trim(),
                       wordStudyType: _stateSelectedStudyType,
-                      wordIsStudy: _stateIsStudied,
                       wordType: _stateSelectedWordType));
                 } else {
                   result = await WordService.add(WordAddParamModel(
@@ -175,14 +172,6 @@ class _PageWordAddState extends State<PageWordAdd> {
     if (value != null) {
       setState(() {
         _stateSelectedStudyType = value;
-      });
-    }
-  }
-
-  void onChangeIsStudied(int? value) {
-    if (value != null) {
-      setState(() {
-        _stateIsStudied = value;
       });
     }
   }
@@ -284,19 +273,6 @@ class _PageWordAddState extends State<PageWordAdd> {
                   value: StudyTypeConst.monthly,
                   groupValue: _stateSelectedStudyType,
                   onChanged: onChangeStudyType,
-                ),
-                const Text("Is Studied"),
-                ComponentRadio<int>(
-                  title: "Yes",
-                  value: 1,
-                  groupValue: _stateIsStudied,
-                  onChanged: onChangeIsStudied,
-                ),
-                ComponentRadio<int>(
-                  title: "No",
-                  value: 0,
-                  groupValue: _stateIsStudied,
-                  onChanged: onChangeIsStudied,
                 )
               ],
             ),

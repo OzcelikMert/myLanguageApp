@@ -17,6 +17,7 @@ class DBTableLanguages {
   static const columnIsSelected = 'languageIsSelected';
   static const columnDisplayedLanguage = 'languageDisplayedLanguage';
   static const columnIsAutoVoice = 'languageIsAutoVoice';
+  static const columnIsActiveSuccessVoice = 'languageIsActiveSuccessVoice';
 
   final Database db;
   DBTableLanguages(this.db);
@@ -38,7 +39,8 @@ class DBTableLanguages {
         $columnMonthlySentenceUpdatedAt TEXT NOT NULL,
         $columnIsSelected INTEGER NOT NULL,
         $columnDisplayedLanguage INTEGER NOT NULL,
-        $columnIsAutoVoice INTEGER NOT NULL
+        $columnIsAutoVoice INTEGER NOT NULL,
+        $columnIsActiveSuccessVoice INTEGER NOT NULL
       )
       ''');
   }

@@ -177,10 +177,10 @@ class _PageStudyState extends State<PageStudy> {
 
       if (_stateIsCorrect == true &&
           MyLibArray.findSingle(
-              array: _stateStudiedWords,
-              key: DBTableWords.columnId,
-              value: _stateCurrentWord!.wordId) == null
-      ) {
+                  array: _stateStudiedWords,
+                  key: DBTableWords.columnId,
+                  value: _stateCurrentWord!.wordId) ==
+              null) {
         _stateWords = MyLibArray.findMulti(
             array: _stateWords,
             key: DBTableWords.columnId,
@@ -189,10 +189,10 @@ class _PageStudyState extends State<PageStudy> {
         _stateStudiedWords.add(_stateCurrentWord!);
       } else if (_stateIsCorrect == false &&
           MyLibArray.findSingle(
-              array: _stateWords,
-              key: DBTableWords.columnId,
-              value: _stateCurrentWord!.wordId) == null
-      ) {
+                  array: _stateWords,
+                  key: DBTableWords.columnId,
+                  value: _stateCurrentWord!.wordId) ==
+              null) {
         _stateStudiedWords = MyLibArray.findMulti(
             array: _stateStudiedWords,
             key: DBTableWords.columnId,
@@ -202,17 +202,21 @@ class _PageStudyState extends State<PageStudy> {
       }
     });
 
-    if (_stateIsCorrect) {
-      final languageProviderModel =
-          ProviderLib.get<LanguageProviderModel>(context);
+    final languageProviderModel =
+        ProviderLib.get<LanguageProviderModel>(context);
 
+    if (_stateIsCorrect) {
       var updateWord = await WordService.update(WordUpdateParamModel(
           whereWordLanguageId:
               languageProviderModel.selectedLanguage.languageId,
           whereWordId: _stateCurrentWord!.wordId,
           wordIsStudy: 1));
       if (updateWord > 0) {
-        AudioLib.play(AudioConst.positive);
+        if (languageProviderModel
+                .selectedLanguage.languageIsActiveSuccessVoice ==
+            1) {
+          AudioLib.play(AudioConst.positive);
+        }
         DialogLib.show(
             context,
             ComponentDialogOptions(
@@ -243,7 +247,10 @@ class _PageStudyState extends State<PageStudy> {
                 icon: ComponentDialogIcon.error));
       }
     } else {
-      AudioLib.play(AudioConst.negative);
+      if (languageProviderModel.selectedLanguage.languageIsActiveSuccessVoice ==
+          1) {
+        AudioLib.play(AudioConst.negative);
+      }
       DialogLib.show(
           context,
           ComponentDialogOptions(
@@ -332,40 +339,22 @@ class _PageStudyState extends State<PageStudy> {
               content: "Loading...", icon: ComponentDialogIcon.loading));
 
       setState(() {
-        _stateWords = _stateWords.map((word) {
-          if (word.wordId == updateData.wordId) {
-            word = updateData;
-          }
-          return word;
-        }).toList();
-        _stateCurrentWord = updateData;
-        if (updateData.wordIsStudy == 1 &&
-            MyLibArray.findSingle(
-                    array: _stateStudiedWords,
-                    key: DBTableWords.columnId,
-                    value: updateData.wordId) ==
-                null) {
-          _stateWords = MyLibArray.findMulti(
-              array: _stateWords,
-              key: DBTableWords.columnId,
-              value: _stateCurrentWord!.wordId,
-              isLike: false);
-          _stateStudiedWords.add(_stateCurrentWord!);
-          _stateIsCorrect = true;
-        } else if (updateData.wordIsStudy == 0 &&
-            MyLibArray.findSingle(
-                    array: _stateWords,
-                    key: DBTableWords.columnId,
-                    value: updateData.wordId) ==
-                null) {
-          _stateStudiedWords = MyLibArray.findMulti(
-              array: _stateStudiedWords,
-              key: DBTableWords.columnId,
-              value: _stateCurrentWord!.wordId,
-              isLike: false);
-          _stateWords.add(_stateCurrentWord!);
-          _stateIsCorrect = false;
+        if (_stateIsCorrect) {
+          _stateStudiedWords = _stateStudiedWords.map((word) {
+            if (word.wordId == updateData.wordId) {
+              word = updateData;
+            }
+            return word;
+          }).toList();
+        } else {
+          _stateWords = _stateWords.map((word) {
+            if (word.wordId == updateData.wordId) {
+              word = updateData;
+            }
+            return word;
+          }).toList();
         }
+        _stateCurrentWord = updateData;
       });
 
       setTextDisplayedAndAnswer(setTTS: false);
@@ -381,6 +370,7 @@ class _PageStudyState extends State<PageStudy> {
           title: "🤔 Are you sure about that? 🤔",
           content:
               "Do you want to change this '${WordTypeConst.getTypeName(widget.wordType)}' status to '${correctStatus == true ? "Correct" : "Wrong"}'? 😶",
+          showCancelButton: true,
           icon: ComponentDialogIcon.confirm,
           onPressed: (isConfirm) async {
             if (isConfirm) {

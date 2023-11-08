@@ -23,6 +23,7 @@ class PageStudySettings extends StatefulWidget {
 class _PageStudySettingsState extends State<PageStudySettings> {
   int _stateSelectedDisplayedLanguage = 1;
   int _stateSelectedIsAutoVoice = 0;
+  int _stateSelectedIsActiveSuccessVoice = 0;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -71,7 +72,8 @@ class _PageStudySettingsState extends State<PageStudySettings> {
                 var updateLanguage = await LanguageService.update(LanguageUpdateParamModel(
                     whereLanguageId: languageProviderModel.selectedLanguage.languageId,
                     languageDisplayedLanguage: _stateSelectedDisplayedLanguage,
-                    languageIsAutoVoice: _stateSelectedIsAutoVoice
+                    languageIsAutoVoice: _stateSelectedIsAutoVoice,
+                    languageIsActiveSuccessVoice: _stateSelectedIsActiveSuccessVoice
                 ), context);
                 if (updateLanguage > 0) {
                   pageProviderModel.setLeadingArgs(true);
@@ -97,6 +99,14 @@ class _PageStudySettingsState extends State<PageStudySettings> {
     if (value != null) {
       setState(() {
         _stateSelectedIsAutoVoice = value;
+      });
+    }
+  }
+
+  void onChangeIsActiveSuccessVoice(int? value) {
+    if (value != null) {
+      setState(() {
+        _stateSelectedIsActiveSuccessVoice = value;
       });
     }
   }
@@ -174,6 +184,19 @@ class _PageStudySettingsState extends State<PageStudySettings> {
               value: 0,
               groupValue: _stateSelectedIsAutoVoice,
               onChanged: onChangeIsAutoVoice,
+            ),
+            const Text("Success Voice"),
+            ComponentRadio<int>(
+              title: "On",
+              value: 1,
+              groupValue: _stateSelectedIsActiveSuccessVoice,
+              onChanged: onChangeIsActiveSuccessVoice,
+            ),
+            ComponentRadio<int>(
+              title: 'Off',
+              value: 0,
+              groupValue: _stateSelectedIsActiveSuccessVoice,
+              onChanged: onChangeIsActiveSuccessVoice,
             )
           ],
         ),
