@@ -54,7 +54,8 @@ class LanguageService {
       DBTableLanguages.columnMonthlySentenceUpdatedAt: date,
       DBTableLanguages.columnIsSelected: 0,
       DBTableLanguages.columnDisplayedLanguage: 0,
-      DBTableLanguages.columnIsAutoVoice: 0
+      DBTableLanguages.columnIsAutoVoice: 0,
+      DBTableLanguages.columnIsActiveSuccessVoice: 1
     });
   }
 
