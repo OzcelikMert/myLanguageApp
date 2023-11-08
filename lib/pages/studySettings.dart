@@ -44,6 +44,7 @@ class _PageStudySettingsState extends State<PageStudySettings> {
     setState(() {
       _stateSelectedDisplayedLanguage = languageProviderModel.selectedLanguage.languageDisplayedLanguage;
       _stateSelectedIsAutoVoice = languageProviderModel.selectedLanguage.languageIsAutoVoice;
+      _stateSelectedIsActiveSuccessVoice = languageProviderModel.selectedLanguage.languageIsActiveSuccessVoice;
     });
 
     pageProviderModel.setIsLoading(false);
