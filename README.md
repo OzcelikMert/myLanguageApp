@@ -7,5 +7,5 @@ list of will do:
     + kelime eklerken ekledigimiz kelimeyi icerne kac tane kelime eklemisiz onceden gosterilsin bu sayede aynii kelimeyi tekrar eklememiz gerekmez(opsiyonel)
     + kelime eklerken nativede optionlsrdan option secinde trsi cikmiyor
     + kelime guncelledigimizde word typi sentence olanlarda sentence isaretli olarak gelmiyor 
-    -? kelimeyi guncelleyince eger calimsa tipi degisirse kelimenin ona gore liste yeniden guncellensin
+    + kelimeyi guncelleyince eger calimsa tipi degisirse kelimenin ona gore liste yeniden guncellensin
     -? kelime ekleme ve liste sayfasini tek bir syafada yap yana kaydirince diger sayfa gelsin
