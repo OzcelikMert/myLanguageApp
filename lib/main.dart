@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_language_app/components/tools/page.dart';
 import 'package:my_language_app/constants/page.const.dart';
+import 'package:my_language_app/lib/provider.lib.dart';
+import 'package:my_language_app/lib/voices.lib.dart';
 import 'package:my_language_app/models/providers/keyboard.provider.model.dart';
 import 'package:my_language_app/models/providers/language.provider.model.dart';
 import 'package:my_language_app/models/providers/page.provider.model.dart';
@@ -41,6 +43,25 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _pageInit();
+    });
+  }
+
+  _pageInit() async {
+    try {
+      final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
+      if (ttsProviderModel.voices.isEmpty) {
+        await ttsProviderModel.setVoices(await VoicesLib.getVoices());
+      }
+    } catch (e) {
+      print("_MyAppState _pageInit tts $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

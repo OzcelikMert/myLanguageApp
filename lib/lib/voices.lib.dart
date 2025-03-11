@@ -11,29 +11,26 @@ import 'package:my_language_app/myLib/variable/array.dart';
 
 class VoicesLib {
   static FlutterTts? _flutterTts;
-  static bool _isInitializing = false;
 
   static Future<FlutterTts> get flutterTts async {
-    if (_flutterTts != null) return _flutterTts!;
-    if (_isInitializing) {
-      await Future.delayed(
-          const Duration(milliseconds: 100)); // Wait if already initializing
-      return _flutterTts!;
+    try {
+      if(_flutterTts == null){
+        print("VoicesLib get flutterTts _flutterTts = FlutterTts()");
+        _flutterTts = FlutterTts();
+
+        if (Platform.isIOS) {
+          await _flutterTts?.setSharedInstance(true);
+          await _flutterTts?.setIosAudioCategory(
+              IosTextToSpeechAudioCategory.playAndRecord,
+              [IosTextToSpeechAudioCategoryOptions.defaultToSpeaker]);
+        } else {
+          await _flutterTts?.setEngine('com.google.android.tts');
+        }
+      }
+    }catch(e) {
+      print("VoicesLib get flutterTts $e");
     }
 
-    _isInitializing = true;
-    _flutterTts = FlutterTts();
-
-    if (Platform.isIOS) {
-      await _flutterTts?.setSharedInstance(true);
-      await _flutterTts?.setIosAudioCategory(
-          IosTextToSpeechAudioCategory.playAndRecord,
-          [IosTextToSpeechAudioCategoryOptions.defaultToSpeaker]);
-    } else {
-      await _flutterTts?.setEngine('com.google.android.tts');
-    }
-
-    _isInitializing = false;
     return _flutterTts!;
   }
 
@@ -63,8 +60,9 @@ class VoicesLib {
 
   static Future<List<VoicesLibGetVoicesResultModel>> getVoices() async {
     try {
+      final tts = await flutterTts;
       List<VoicesLibGetVoicesResultModel> voices = [];
-      List<dynamic> availableVoices = await (await flutterTts).getVoices;
+      List<dynamic> availableVoices = await tts.getVoices;
       if (availableVoices != null) {
         for (var voice in availableVoices) {
           String displayName = voice["name"];

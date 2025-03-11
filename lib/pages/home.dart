@@ -45,15 +45,10 @@ class _PageHomeState extends State<PageHome> {
     final pageProviderModel = ProviderLib.get<PageProviderModel>(context);
     pageProviderModel.setTitle("Select Language");
 
-    final ttsProviderModel = ProviderLib.get<TTSProviderModel>(context);
-    if (ttsProviderModel.voices.isEmpty) {
-      await ttsProviderModel
-          .setVoices(await VoicesLib.getVoices());
-    }
-
     var languages = await LanguageService.get(LanguageGetParamModel());
 
-    var findLanguage = MyLibArray.findSingle(array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
+    var findLanguage = MyLibArray.findSingle(
+        array: languages, key: DBTableLanguages.columnIsSelected, value: 1);
     if (findLanguage != null) {
       onClickSelect(findLanguage);
       return;
@@ -91,9 +86,10 @@ class _PageHomeState extends State<PageHome> {
     if (!pageProviderModel.isLoading) {
       await DialogLib.show(
           context, ComponentDialogOptions(icon: ComponentDialogIcon.loading));
-      updateWord = await LanguageService.update(LanguageUpdateParamModel(
-          whereLanguageId: row.languageId,
-          languageIsSelected: 1), context);
+      updateWord = await LanguageService.update(
+          LanguageUpdateParamModel(
+              whereLanguageId: row.languageId, languageIsSelected: 1),
+          context);
     }
 
     if (updateWord > 0) {
@@ -106,8 +102,7 @@ class _PageHomeState extends State<PageHome> {
         context,
         ComponentDialogOptions(
             title: "Are you sure?",
-            content:
-                "Are you sure want to delete '${row.languageName}'?",
+            content: "Are you sure want to delete '${row.languageName}'?",
             icon: ComponentDialogIcon.confirm,
             showCancelButton: true,
             onPressed: (bool isConfirm) async {
@@ -118,13 +113,16 @@ class _PageHomeState extends State<PageHome> {
                         content: "Deleting...",
                         icon: ComponentDialogIcon.loading));
                 var result = await LanguageService.delete(
-                    LanguageDeleteParamModel(
-                        languageId: row.languageId));
+                    LanguageDeleteParamModel(languageId: row.languageId));
                 if (result > 0) {
-                  await WordService.delete(WordDeleteParamModel(
-                      wordLanguageId: row.languageId));
+                  await WordService.delete(
+                      WordDeleteParamModel(wordLanguageId: row.languageId));
                   setState(() {
-                    _stateLanguages = MyLibArray.findMulti(array: _stateLanguages, key: DBTableLanguages.columnId, value: row.languageId, isLike: false);
+                    _stateLanguages = MyLibArray.findMulti(
+                        array: _stateLanguages,
+                        key: DBTableLanguages.columnId,
+                        value: row.languageId,
+                        isLike: false);
                   });
                   DialogLib.show(
                       context,
@@ -177,8 +175,7 @@ class _PageHomeState extends State<PageHome> {
                   ],
                   cells: [
                     ComponentDataCellModule(
-                      child: (row) =>
-                          Text(row.languageName.toString()),
+                      child: (row) => Text(row.languageName.toString()),
                     ),
                     ComponentDataCellModule(
                       child: (row) => ComponentButton(
