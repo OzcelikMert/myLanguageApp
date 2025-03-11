@@ -37,6 +37,7 @@ class PageStudyPlan extends StatefulWidget {
 class _PageStudyPlanState extends State<PageStudyPlan> {
   late List<WordGetCountReportResultModel> _stateWordCountReports = [];
   late int _stateWordType = WordTypeConst.word;
+  late List<WordGetCountReportResultModel> _stateWordCountReportsForToday = [];
 
   @override
   void initState() {
@@ -75,8 +76,16 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
             wordLanguageId: languageProviderModel.selectedLanguage.languageId,
             wordType: _stateWordType));
 
+    var wordCountReportsForToday = await WordService.getCountReport(
+        WordGetCountReportParamModel(
+            wordLanguageId: languageProviderModel.selectedLanguage.languageId,
+            wordType: _stateWordType,
+            wordUpdatedAt:
+                DateTime.now().toUtc().toIso8601String().split('T').first));
+
     setState(() {
       _stateWordCountReports = wordCountReports;
+      _stateWordCountReportsForToday = wordCountReportsForToday;
     });
   }
 
@@ -200,81 +209,58 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
     }
   }
 
-  void onClickRestart(int type) async {
-    var reports = MyLibArray.findMulti(
-        array: _stateWordCountReports,
-        key: DBTableWords.columnStudyType,
-        value: type);
-    var unstudiedReports = MyLibArray.findMulti(
-        array: reports, key: DBTableWords.columnIsStudy, value: 0);
+  void onClickRestart(int type, bool dailyAim) async {
+    DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            title: "Are you sure? ${dailyAim == true ? "(Today's Aim)" : ""}",
+            content:
+                "You have selected '${StudyTypeConst.getTypeName(type)}'. Are you sure you want to restart your progress?",
+            showCancelButton: true,
+            icon: ComponentDialogIcon.confirm,
+            onPressed: (bool isConfirm) async {
+              if (isConfirm) {
+                await DialogLib.show(
+                    context,
+                    ComponentDialogOptions(
+                        content: "Loading...",
+                        icon: ComponentDialogIcon.loading));
 
-    int totalWordCount = reports.isNotEmpty
-        ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
-        : 0;
-    int unstudiedWordCount = unstudiedReports.isNotEmpty
-        ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
-        : 0;
+                final languageProviderModel =
+                    ProviderLib.get<LanguageProviderModel>(context);
 
-    if (totalWordCount == 0) {
-      DialogLib.show(
-          context,
-          ComponentDialogOptions(
-              content:
-                  "There are no words. Please firstly you must add a word.",
-              icon: ComponentDialogIcon.error));
-    } else if (totalWordCount == unstudiedWordCount) {
-      DialogLib.show(
-          context,
-          ComponentDialogOptions(
-              content:
-                  "There are no studied words. Please firstly you must study a word.",
-              icon: ComponentDialogIcon.error));
-    } else {
-      DialogLib.show(
-          context,
-          ComponentDialogOptions(
-              title: "Are you sure?",
-              content:
-                  "You have selected '${StudyTypeConst.getTypeName(type)}'. Are you sure you want to restart your progress?",
-              showCancelButton: true,
-              icon: ComponentDialogIcon.confirm,
-              onPressed: (bool isConfirm) async {
-                if (isConfirm) {
-                  await DialogLib.show(
+                var wordUpdate = await WordService.update(WordUpdateParamModel(
+                  whereWordLanguageId:
+                      languageProviderModel.selectedLanguage.languageId,
+                  whereWordStudyType: type,
+                  whereWordType: _stateWordType,
+                  whereWordUpdatedAt: dailyAim == true
+                      ? DateTime.now()
+                          .toUtc()
+                          .toIso8601String()
+                          .split('T')
+                          .first
+                      : null,
+                  wordIsStudy: 0,
+                ));
+
+                if (wordUpdate > 0) {
+                  await setWordCountReports();
+                  DialogLib.show(
                       context,
                       ComponentDialogOptions(
-                          content: "Loading...",
-                          icon: ComponentDialogIcon.loading));
-
-                  final languageProviderModel =
-                      ProviderLib.get<LanguageProviderModel>(context);
-
-                  var wordUpdate = await WordService.update(
-                      WordUpdateParamModel(
-                          whereWordLanguageId:
-                              languageProviderModel.selectedLanguage.languageId,
-                          whereWordStudyType: type,
-                          whereWordType: _stateWordType,
-                          wordIsStudy: 0));
-
-                  if (wordUpdate > 0) {
-                    await setWordCountReports();
-                    DialogLib.show(
-                        context,
-                        ComponentDialogOptions(
-                            content: "Restart is successful!",
-                            icon: ComponentDialogIcon.success));
-                  } else {
-                    DialogLib.show(
-                        context,
-                        ComponentDialogOptions(
-                            content: "It couldn't update!",
-                            icon: ComponentDialogIcon.error));
-                  }
-                  return false;
+                          content: "Restart is successful!",
+                          icon: ComponentDialogIcon.success));
+                } else {
+                  DialogLib.show(
+                      context,
+                      ComponentDialogOptions(
+                          content: "It couldn't update!",
+                          icon: ComponentDialogIcon.error));
                 }
-              }));
-    }
+                return false;
+              }
+            }));
   }
 
   Future<void> onClickChangeWordType(int type) async {
@@ -307,24 +293,37 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         value: StudyTypeConst.daily);
     var studiedReports = MyLibArray.findMulti(
         array: reports, key: DBTableWords.columnIsStudy, value: 1);
-    var unstudiedReports = MyLibArray.findMulti(
-        array: reports, key: DBTableWords.columnIsStudy, value: 0);
+
+    int totalWords = reports.isNotEmpty
+        ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
+    int studiedWords = studiedReports.isNotEmpty
+        ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
+
+    var reportsForToday = MyLibArray.findMulti(
+        array: _stateWordCountReportsForToday,
+        key: DBTableWords.columnStudyType,
+        value: StudyTypeConst.daily);
+    var studiedReportsForToday = MyLibArray.findMulti(
+        array: reportsForToday, key: DBTableWords.columnIsStudy, value: 1);
+    int todayAimMax = totalWords;
+    int studiedTodayAim = studiedReportsForToday.isNotEmpty
+        ? studiedReportsForToday.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
 
     return ComponentStudyTypeButton(
-        bgColor: ThemeConst.colors.success,
-        title: StudyTypeConst.getTypeName(StudyTypeConst.daily),
-        onStartPressed: () => onClickStudy(StudyTypeConst.daily),
-        onRestartPressed: () => onClickRestart(StudyTypeConst.daily),
-        lastStudyDate: DateTime.parse(lastStudyDate.toString()),
-        totalWords: reports.isNotEmpty
-            ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0,
-        studiedWords: studiedReports.isNotEmpty
-            ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0,
-        unstudiedWords: unstudiedReports.isNotEmpty
-            ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0);
+      bgColor: ThemeConst.colors.success,
+      title: StudyTypeConst.getTypeName(StudyTypeConst.daily),
+      onStartPressed: () => onClickStudy(StudyTypeConst.daily),
+      onRestartPressed: () => onClickRestart(StudyTypeConst.daily, false),
+      onRestartTodayPressed: () => onClickRestart(StudyTypeConst.daily, true),
+      lastStudyDate: DateTime.parse(lastStudyDate.toString()),
+      totalWords: totalWords,
+      studiedWords: studiedWords,
+      todayAimMax: todayAimMax,
+      studiedTodayAim: studiedTodayAim,
+    );
   }
 
   Widget componentWeekly() {
@@ -332,31 +331,45 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var lastStudyDate = _stateWordType == WordTypeConst.word
         ? languageProviderModel.selectedLanguage.languageWeeklyWordUpdatedAt
-        : languageProviderModel.selectedLanguage.languageWeeklySentenceUpdatedAt;
+        : languageProviderModel
+            .selectedLanguage.languageWeeklySentenceUpdatedAt;
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
         value: StudyTypeConst.weekly);
     var studiedReports = MyLibArray.findMulti(
         array: reports, key: DBTableWords.columnIsStudy, value: 1);
-    var unstudiedReports = MyLibArray.findMulti(
-        array: reports, key: DBTableWords.columnIsStudy, value: 0);
+    int totalWords = reports.isNotEmpty
+        ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
+    int studiedWords = studiedReports.isNotEmpty
+        ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
+    var reportsForToday = MyLibArray.findMulti(
+        array: _stateWordCountReportsForToday,
+        key: DBTableWords.columnStudyType,
+        value: StudyTypeConst.weekly);
+    var studiedReportsForToday = MyLibArray.findMulti(
+        array: reportsForToday, key: DBTableWords.columnIsStudy, value: 1);
+    int todayAimMax = (totalWords / 7).round();
+    int todayAimMaxLimit = totalWords - studiedWords;
+    todayAimMax = todayAimMaxLimit >= todayAimMax ? todayAimMax : todayAimMaxLimit;
+    int studiedTodayAim = studiedReportsForToday.isNotEmpty
+        ? studiedReportsForToday.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
 
     return ComponentStudyTypeButton(
-        bgColor: ThemeConst.colors.danger,
-        title: StudyTypeConst.getTypeName(StudyTypeConst.weekly),
-        onStartPressed: () => onClickStudy(StudyTypeConst.weekly),
-        onRestartPressed: () => onClickRestart(StudyTypeConst.weekly),
-        lastStudyDate: DateTime.parse(lastStudyDate.toString()),
-        totalWords: reports.isNotEmpty
-            ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0,
-        studiedWords: studiedReports.isNotEmpty
-            ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0,
-        unstudiedWords: unstudiedReports.isNotEmpty
-            ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0);
+      bgColor: ThemeConst.colors.danger,
+      title: StudyTypeConst.getTypeName(StudyTypeConst.weekly),
+      onStartPressed: () => onClickStudy(StudyTypeConst.weekly),
+      onRestartPressed: () => onClickRestart(StudyTypeConst.weekly, false),
+      onRestartTodayPressed: () => onClickRestart(StudyTypeConst.weekly, true),
+      lastStudyDate: DateTime.parse(lastStudyDate.toString()),
+      totalWords: totalWords,
+      studiedWords: studiedWords,
+      todayAimMax: todayAimMax,
+      studiedTodayAim: studiedTodayAim,
+    );
   }
 
   Widget componentMonthly() {
@@ -364,31 +377,45 @@ class _PageStudyPlanState extends State<PageStudyPlan> {
         ProviderLib.get<LanguageProviderModel>(context, listen: true);
     var lastStudyDate = _stateWordType == WordTypeConst.word
         ? languageProviderModel.selectedLanguage.languageMonthlyWordUpdatedAt
-        : languageProviderModel.selectedLanguage.languageMonthlySentenceUpdatedAt;
+        : languageProviderModel
+            .selectedLanguage.languageMonthlySentenceUpdatedAt;
     var reports = MyLibArray.findMulti(
         array: _stateWordCountReports,
         key: DBTableWords.columnStudyType,
         value: StudyTypeConst.monthly);
     var studiedReports = MyLibArray.findMulti(
         array: reports, key: DBTableWords.columnIsStudy, value: 1);
-    var unstudiedReports = MyLibArray.findMulti(
-        array: reports, key: DBTableWords.columnIsStudy, value: 0);
+    int totalWords = reports.isNotEmpty
+        ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
+    int studiedWords = studiedReports.isNotEmpty
+        ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
+    var reportsForToday = MyLibArray.findMulti(
+        array: _stateWordCountReportsForToday,
+        key: DBTableWords.columnStudyType,
+        value: StudyTypeConst.monthly);
+    var studiedReportsForToday = MyLibArray.findMulti(
+        array: reportsForToday, key: DBTableWords.columnIsStudy, value: 1);
+    int todayAimMax = (totalWords / 30).round();
+    int todayAimMaxLimit = totalWords - studiedWords;
+    todayAimMax = todayAimMaxLimit >= todayAimMax ? todayAimMax : todayAimMaxLimit;
+    int studiedTodayAim = studiedReportsForToday.isNotEmpty
+        ? studiedReportsForToday.map((e) => e.wordCount).reduce((a, b) => a + b)
+        : 0;
 
     return ComponentStudyTypeButton(
         bgColor: ThemeConst.colors.info,
         title: StudyTypeConst.getTypeName(StudyTypeConst.monthly),
         onStartPressed: () => onClickStudy(StudyTypeConst.monthly),
-        onRestartPressed: () => onClickRestart(StudyTypeConst.monthly),
+        onRestartPressed: () => onClickRestart(StudyTypeConst.monthly, false),
+        onRestartTodayPressed: () =>
+            onClickRestart(StudyTypeConst.monthly, true),
         lastStudyDate: DateTime.parse(lastStudyDate.toString()),
-        totalWords: reports.isNotEmpty
-            ? reports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0,
-        studiedWords: studiedReports.isNotEmpty
-            ? studiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0,
-        unstudiedWords: unstudiedReports.isNotEmpty
-            ? unstudiedReports.map((e) => e.wordCount).reduce((a, b) => a + b)
-            : 0);
+        totalWords: totalWords,
+        studiedWords: studiedWords,
+        todayAimMax: todayAimMax,
+        studiedTodayAim: studiedTodayAim);
   }
 
   @override

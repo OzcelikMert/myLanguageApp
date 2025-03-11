@@ -51,6 +51,7 @@ class _PageStudyState extends State<PageStudy> {
   late bool _stateIsCorrect = false;
   late List<WordGetResultModel> _stateWords = [];
   late List<WordGetResultModel> _stateStudiedWords = [];
+  late List<WordGetResultModel> _stateStudiedWordsForToday = [];
   late WordGetResultModel? _stateCurrentWord = null;
   late String _stateTextDisplayed = "";
   late String _stateTextAnswer = "";
@@ -85,11 +86,22 @@ class _PageStudyState extends State<PageStudy> {
         wordStudyType: widget.studyType,
         wordType: widget.wordType));
 
+    String today = DateTime.now().toUtc().toIso8601String().split('T').first;
+
     setState(() {
       _stateWords = MyLibArray.findMulti(
           array: words, key: DBTableWords.columnIsStudy, value: 0);
       _stateStudiedWords = MyLibArray.findMulti(
           array: words, key: DBTableWords.columnIsStudy, value: 1);
+      _stateStudiedWordsForToday = _stateStudiedWords
+          .where((element) =>
+              DateTime.parse(element.wordUpdatedAt)
+                  .toUtc()
+                  .toIso8601String()
+                  .split('T')
+                  .first ==
+              today)
+          .toList();
     });
     setCurrentWord();
 
@@ -160,6 +172,23 @@ class _PageStudyState extends State<PageStudy> {
     });
   }
 
+  int get getTodayAimMax {
+    int totalWords = _stateWords.length + _stateStudiedWords.length;
+    int division = 1;
+    switch (widget.studyType) {
+      case StudyTypeConst.weekly:
+        division = 7;
+        break;
+      case StudyTypeConst.monthly:
+        division = 30;
+        break;
+    }
+
+    int max = (totalWords / division).round();
+
+    return _stateWords.length >= max ? max : _stateWords.length + _stateStudiedWordsForToday.length;
+  }
+
   void onClickCheck({correctStatus = null}) async {
     await DialogLib.show(
         context,
@@ -168,9 +197,8 @@ class _PageStudyState extends State<PageStudy> {
 
     setState(() {
       _stateIsStudied = true;
-      _stateIsCorrect = correctStatus != null
-          ? correctStatus
-          : MyLibString.removePunctuation(
+      _stateIsCorrect = correctStatus ??
+           MyLibString.removePunctuation(
                   _stateTextAnswer.toString().toLowerCase()) ==
               MyLibString.removePunctuation(
                   _controllerText.text.toString().toLowerCase().trim());
@@ -187,6 +215,7 @@ class _PageStudyState extends State<PageStudy> {
             value: _stateCurrentWord!.wordId,
             isLike: false);
         _stateStudiedWords.add(_stateCurrentWord!);
+        _stateStudiedWordsForToday.add(_stateCurrentWord!);
       } else if (_stateIsCorrect == false &&
           MyLibArray.findSingle(
                   array: _stateWords,
@@ -195,6 +224,11 @@ class _PageStudyState extends State<PageStudy> {
               null) {
         _stateStudiedWords = MyLibArray.findMulti(
             array: _stateStudiedWords,
+            key: DBTableWords.columnId,
+            value: _stateCurrentWord!.wordId,
+            isLike: false);
+        _stateStudiedWordsForToday = MyLibArray.findMulti(
+            array: _stateStudiedWordsForToday,
             key: DBTableWords.columnId,
             value: _stateCurrentWord!.wordId,
             isLike: false);
@@ -217,28 +251,18 @@ class _PageStudyState extends State<PageStudy> {
             1) {
           AudioLib.play(AudioConst.positive);
         }
-        DialogLib.show(
-            context,
-            ComponentDialogOptions(
-              title: "🤗 Correct! 🤗",
-              content: "Congratulations your answer is correct! 🤗",
-              icon: ComponentDialogIcon.success,
-              onPressed: (isConfirm) async {
-                if (isConfirm) {
-                  if (_stateWords.isEmpty) {
-                    AudioLib.play(AudioConst.positive_2);
-                    DialogLib.show(
-                        context,
-                        ComponentDialogOptions(
-                            title: "🤩 Finally Over! 🤩",
-                            content:
-                                "Congratulations, you have mastered all the words. 🤩",
-                            icon: ComponentDialogIcon.success));
-                    return false;
-                  }
-                }
-              },
-            ));
+        if (_stateWords.isEmpty) {
+          AudioLib.play(AudioConst.positive_2);
+          DialogLib.show(
+              context,
+              ComponentDialogOptions(
+                  title: "🤩 Finally Over! 🤩",
+                  content:
+                      "Congratulations, you have mastered all the words. 🤩",
+                  icon: ComponentDialogIcon.success));
+        }else {
+          DialogLib.hide(context);
+        }
       } else {
         DialogLib.show(
             context,
@@ -251,12 +275,7 @@ class _PageStudyState extends State<PageStudy> {
           1) {
         AudioLib.play(AudioConst.negative);
       }
-      DialogLib.show(
-          context,
-          ComponentDialogOptions(
-              title: "😥 Wrong! 😥",
-              content: "Unfortunately your answer is wrong! 😥",
-              icon: ComponentDialogIcon.error));
+      DialogLib.hide(context);
     }
   }
 
@@ -332,6 +351,7 @@ class _PageStudyState extends State<PageStudy> {
         target: PageConst.routeNames.wordEdit,
         arguments: {DBTableWords.columnId: _stateCurrentWord!.wordId},
         safeHistory: true);
+
     if (updateData != null) {
       await DialogLib.show(
           context,
@@ -397,6 +417,45 @@ class _PageStudyState extends State<PageStudy> {
       return 'Please enter some text';
     }
     return null;
+  }
+
+  void onChangeStudyType(int value) async {
+    if(_stateCurrentWord!.wordStudyType == value) return;
+    await DialogLib.show(
+        context,
+        ComponentDialogOptions(
+            content: "Changing...", icon: ComponentDialogIcon.loading));
+
+    final languageProviderModel =
+        ProviderLib.get<LanguageProviderModel>(context);
+
+    var updateWord = await WordService.update(WordUpdateParamModel(
+        whereWordLanguageId: languageProviderModel.selectedLanguage.languageId,
+        whereWordId: _stateCurrentWord!.wordId,
+        wordStudyType: value));
+
+    setState(() {
+      _stateCurrentWord = WordGetResultModel(
+          wordId: _stateCurrentWord!.wordId,
+          wordLanguageId: _stateCurrentWord!.wordLanguageId,
+          wordTextTarget: _stateCurrentWord!.wordTextTarget,
+          wordTextNative: _stateCurrentWord!.wordTextNative,
+          wordComment: _stateCurrentWord!.wordComment,
+          wordCreatedAt: _stateCurrentWord!.wordCreatedAt,
+          wordUpdatedAt: _stateCurrentWord!.wordUpdatedAt,
+          wordStudyType: value,
+          wordIsStudy: _stateCurrentWord!.wordIsStudy,
+          wordType: _stateCurrentWord!.wordType);
+
+      _stateStudiedWords = _stateStudiedWords.map((word) {
+        if (word.wordId == _stateCurrentWord!.wordId) {
+          word = _stateCurrentWord!;
+        }
+        return word;
+      }).toList();
+    });
+
+    DialogLib.hide(context);
   }
 
   Widget _componentAnswer() {
@@ -528,20 +587,25 @@ class _PageStudyState extends State<PageStudy> {
 
   Widget _componentProgress() {
     var totalWords = _stateWords.length + _stateStudiedWords.length;
+    var todayAimMax = getTodayAimMax;
+    var studiedTodayAim = _stateStudiedWordsForToday.length;
     return Column(
       children: [
         GestureDetector(
           onTap: onClickProgress,
-          child: Text(
-            "$totalWords / ${_stateStudiedWords.length}",
-            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
-          ),
+          child: ComponentProgress(
+              maxValue: totalWords.toDouble(),
+              currentValue: _stateStudiedWords.length.toDouble()),
         ),
         Padding(
             padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
         ComponentProgress(
-            maxValue: totalWords.toDouble(),
-            currentValue: _stateStudiedWords.length.toDouble()),
+            maxValue: todayAimMax.toDouble(),
+            currentValue:
+                (studiedTodayAim > todayAimMax ? todayAimMax : studiedTodayAim)
+                    .toDouble(),
+            text: "Today's Aim",
+        ),
       ],
     );
   }
@@ -586,6 +650,35 @@ class _PageStudyState extends State<PageStudy> {
     );
   }
 
+  Widget _componentStudyType() {
+    var currentItem = _stateCurrentWord!;
+
+    return Column(
+      children: [
+        Padding(padding: EdgeInsets.all(ThemeConst.paddings.md)),
+        const Text("Study Type"),
+        ComponentRadio<int>(
+          title: StudyTypeConst.getTypeName(StudyTypeConst.daily),
+          value: StudyTypeConst.daily,
+          groupValue: currentItem.wordStudyType,
+          onChanged: (a) => onChangeStudyType(StudyTypeConst.daily),
+        ),
+        ComponentRadio<int>(
+          title: StudyTypeConst.getTypeName(StudyTypeConst.weekly),
+          value: StudyTypeConst.weekly,
+          groupValue: currentItem.wordStudyType,
+          onChanged: (a) => onChangeStudyType(StudyTypeConst.weekly),
+        ),
+        ComponentRadio<int>(
+          title: StudyTypeConst.getTypeName(StudyTypeConst.monthly),
+          value: StudyTypeConst.monthly,
+          groupValue: currentItem.wordStudyType,
+          onChanged: (a) => onChangeStudyType(StudyTypeConst.monthly),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final languageProviderModel =
@@ -606,6 +699,13 @@ class _PageStudyState extends State<PageStudy> {
               Padding(
                   padding:
                       EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
+              Text(
+                languageProviderModel.selectedLanguage.languageName,
+                style: TextStyle(fontSize: ThemeConst.fontSizes.md),
+              ),
+              Padding(
+                  padding:
+                  EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
               _componentProgress(),
               Padding(padding: EdgeInsets.all(ThemeConst.paddings.xlg)),
               [
@@ -646,6 +746,7 @@ class _PageStudyState extends State<PageStudy> {
                           : ThemeConst.colors.warning,
                     )
                   : Container(),
+              _stateIsStudied ? _componentStudyType() : Container()
             ],
           );
   }

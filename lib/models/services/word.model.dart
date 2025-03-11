@@ -126,11 +126,13 @@ class WordGetCountReportParamModel {
   final int wordLanguageId;
   final int? wordStudyType;
   final int? wordType;
+  final String? wordUpdatedAt;
 
   WordGetCountReportParamModel({
     required this.wordLanguageId,
     this.wordStudyType,
-    this.wordType
+    this.wordType,
+    this.wordUpdatedAt
   });
 }
 
@@ -160,6 +162,7 @@ class WordUpdateParamModel {
   final int? whereWordId;
   final int? whereWordStudyType;
   final int? whereWordType;
+  final String? whereWordUpdatedAt;
   final String? wordTextTarget;
   final String? wordTextNative;
   final String? wordComment;
@@ -172,6 +175,7 @@ class WordUpdateParamModel {
     this.whereWordId,
     this.whereWordStudyType,
     this.whereWordType,
+    this.whereWordUpdatedAt,
     this.wordTextTarget,
     this.wordTextNative,
     this.wordComment,

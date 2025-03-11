@@ -119,6 +119,11 @@ class WordService {
       whereArgs.add(params.wordType);
     }
 
+    if (params.wordUpdatedAt != null) {
+      whereString += "${DBTableWords.columnUpdatedAt} LIKE ? AND ";
+      whereArgs.add('%${params.wordUpdatedAt}%');
+    }
+
     var db = await DBConn.instance.database;
     var result = (await db.query(DBTableWords.tableName,
         columns: [
@@ -205,6 +210,11 @@ class WordService {
     if (params.whereWordType != null) {
       whereString += "${DBTableWords.columnType} = ? AND ";
       whereArgs.add(params.whereWordType);
+    }
+
+    if (params.whereWordUpdatedAt != null) {
+      whereString += "${DBTableWords.columnUpdatedAt} LIKE ? AND ";
+      whereArgs.add('%${params.whereWordUpdatedAt}%');
     }
 
     if (params.wordTextTarget != null) {

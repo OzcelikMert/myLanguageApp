@@ -22,7 +22,7 @@ class ComponentProgress extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              text ?? 'Progress',
+              "${text ?? 'Progress'} (${maxValue.round()} / ${currentValue.round()})",
               style: TextStyle(
                 fontSize: fontSize ?? ThemeConst.fontSizes.sm,
                 fontWeight: FontWeight.w400,

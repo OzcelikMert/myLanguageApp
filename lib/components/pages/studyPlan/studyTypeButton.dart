@@ -10,20 +10,25 @@ class ComponentStudyTypeButton extends StatelessWidget {
   final DateTime lastStudyDate;
   final int totalWords;
   final int studiedWords;
-  final int unstudiedWords;
+  final int todayAimMax;
+  final int studiedTodayAim;
   final Function onStartPressed;
   final Color? bgColor;
   final Function onRestartPressed;
+  final Function onRestartTodayPressed;
 
   ComponentStudyTypeButton(
       {required this.title,
       required this.totalWords,
       required this.onStartPressed,
       required this.studiedWords,
-      required this.unstudiedWords,
+        required this.todayAimMax,
+        required this.studiedTodayAim,
       this.bgColor,
       required this.lastStudyDate,
-      required this.onRestartPressed});
+      required this.onRestartPressed,
+      required this.onRestartTodayPressed
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -57,30 +62,6 @@ class ComponentStudyTypeButton extends StatelessWidget {
           ),
           Padding(
               padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
-          Text(
-            'Total Word Count: $totalWords',
-            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
-          ),
-          Padding(
-              padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
-          Text(
-            'Studied Word Count: $studiedWords',
-            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
-          ),
-          Padding(
-              padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
-          Text(
-            'Unstudied Word Count: $unstudiedWords',
-            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
-          ),
-          Padding(
-              padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
-          Text(
-            'Last Study Date: ${DateFormat.yMd().add_Hm().format(lastStudyDate.toLocal())} (${dateDiff.inDays > 0 ? "${dateDiff.inDays} Days ago" : "${dateDiff.inHours} Hours ago"})',
-            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
-          ),
-          Padding(
-              padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
           Row(
             children: [
               Expanded(flex: 9, child: ComponentProgress(
@@ -92,6 +73,27 @@ class ComponentStudyTypeButton extends StatelessWidget {
                 icon: Icons.restart_alt,
               )),
             ],
+          ),
+          Padding(
+              padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.xsm)),
+          Row(
+            children: [
+              Expanded(flex: 9, child: ComponentProgress(
+                maxValue: todayAimMax.toDouble(),
+                currentValue: studiedTodayAim.toDouble(),
+                text: "Today's Aim",
+              )),
+              Expanded(flex: 1, child: ComponentIconButton(
+                onPressed: () => onRestartTodayPressed(),
+                icon: Icons.restart_alt,
+              )),
+            ],
+          ),
+          Padding(
+              padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.md)),
+          Text(
+            'Last Study Date: ${DateFormat.yMd().add_Hm().format(lastStudyDate.toLocal())} (${dateDiff.inDays > 0 ? "${dateDiff.inDays} Days ago" : "${dateDiff.inHours} Hours ago"})',
+            style: TextStyle(fontSize: ThemeConst.fontSizes.md),
           ),
           Padding(
               padding: EdgeInsets.symmetric(vertical: ThemeConst.paddings.sm)),
