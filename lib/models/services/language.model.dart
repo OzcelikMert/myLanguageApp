@@ -1,4 +1,4 @@
-import 'package:my_language_app/config/db/tables/languages.dart';
+import 'package:mylanguageapp/config/db/tables/languages.dart';
 
 class LanguageGetResultModel {
   final int languageId;

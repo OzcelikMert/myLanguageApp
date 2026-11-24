@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/constants/theme.const.dart';
+import 'package:mylanguageapp/constants/theme.const.dart';
 
 class ComponentProgress extends StatelessWidget {
   final double currentValue;

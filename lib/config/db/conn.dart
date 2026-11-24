@@ -1,6 +1,6 @@
-import 'package:my_language_app/config/db/tables/languages.dart';
-import 'package:my_language_app/config/db/tables/words.dart';
-import 'package:my_language_app/lib/file.lib.dart';
+import 'package:mylanguageapp/config/db/tables/languages.dart';
+import 'package:mylanguageapp/config/db/tables/words.dart';
+import 'package:mylanguageapp/lib/file.lib.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 

@@ -1,4 +1,3 @@
-# myLanguageApp
-Learning a language app
+# mylanguageapp
 
-list of will do:
+A new Flutter project.

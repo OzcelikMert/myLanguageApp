@@ -1,4 +1,4 @@
-import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
+import 'package:mylanguageapp/models/dependencies/tts/voice.model.dart';
 
 class VoicesLibGetVoicesResultModel {
   final String name;

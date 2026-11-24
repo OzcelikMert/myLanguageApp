@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/models/lib/voices.lib.model.dart';
+import 'package:mylanguageapp/models/lib/voices.lib.model.dart';
 
 class TTSProviderModel extends ChangeNotifier {
   List<VoicesLibGetVoicesResultModel> _voices = [];

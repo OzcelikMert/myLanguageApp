@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/elements/autoCompleteTextField.dart';
-import 'package:my_language_app/components/elements/form.dart';
-import 'package:my_language_app/components/elements/radio.dart';
-import 'package:my_language_app/config/db/tables/words.dart';
-import 'package:my_language_app/constants/studyType.const.dart';
-import 'package:my_language_app/constants/theme.const.dart';
-import 'package:my_language_app/constants/wordType.const.dart';
-import 'package:my_language_app/lib/dialog.lib.dart';
-import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
-import 'package:my_language_app/models/providers/language.provider.model.dart';
-import 'package:my_language_app/models/providers/page.provider.model.dart';
-import 'package:my_language_app/models/services/word.model.dart';
-import 'package:my_language_app/services/word.service.dart';
+import 'package:mylanguageapp/components/elements/autoCompleteTextField.dart';
+import 'package:mylanguageapp/components/elements/form.dart';
+import 'package:mylanguageapp/components/elements/radio.dart';
+import 'package:mylanguageapp/config/db/tables/words.dart';
+import 'package:mylanguageapp/constants/studyType.const.dart';
+import 'package:mylanguageapp/constants/theme.const.dart';
+import 'package:mylanguageapp/constants/wordType.const.dart';
+import 'package:mylanguageapp/lib/dialog.lib.dart';
+import 'package:mylanguageapp/lib/provider.lib.dart';
+import 'package:mylanguageapp/models/components/elements/dialog/options.model.dart';
+import 'package:mylanguageapp/models/providers/language.provider.model.dart';
+import 'package:mylanguageapp/models/providers/page.provider.model.dart';
+import 'package:mylanguageapp/models/services/word.model.dart';
+import 'package:mylanguageapp/services/word.service.dart';
 
 class PageWordAdd extends StatefulWidget {
   final BuildContext context;

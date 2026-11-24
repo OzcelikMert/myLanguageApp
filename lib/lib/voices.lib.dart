@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/models/dependencies/tts/voice.model.dart';
+import 'package:mylanguageapp/lib/provider.lib.dart';
+import 'package:mylanguageapp/models/dependencies/tts/voice.model.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:my_language_app/models/lib/voices.lib.model.dart';
-import 'package:my_language_app/models/providers/language.provider.model.dart';
-import 'package:my_language_app/models/providers/tts.provider.model.dart';
-import 'package:my_language_app/myLib/variable/array.dart';
+import 'package:mylanguageapp/models/lib/voices.lib.model.dart';
+import 'package:mylanguageapp/models/providers/language.provider.model.dart';
+import 'package:mylanguageapp/models/providers/tts.provider.model.dart';
+import 'package:mylanguageapp/myLib/variable/array.dart';
 
 class VoicesLib {
   static FlutterTts? _flutterTts;

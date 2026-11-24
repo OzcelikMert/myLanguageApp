@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_language_app/components/elements/button.dart';
-import 'package:my_language_app/components/elements/iconButton.dart';
-import 'package:my_language_app/components/elements/progress.dart';
-import 'package:my_language_app/constants/theme.const.dart';
+import 'package:mylanguageapp/components/elements/button.dart';
+import 'package:mylanguageapp/components/elements/iconButton.dart';
+import 'package:mylanguageapp/components/elements/progress.dart';
+import 'package:mylanguageapp/constants/theme.const.dart';
 
 class ComponentStudyTypeButton extends StatelessWidget {
   final String title;

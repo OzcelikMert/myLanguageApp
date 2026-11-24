@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/tools/page.dart';
-import 'package:my_language_app/constants/page.const.dart';
-import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/lib/voices.lib.dart';
-import 'package:my_language_app/models/providers/keyboard.provider.model.dart';
-import 'package:my_language_app/models/providers/language.provider.model.dart';
-import 'package:my_language_app/models/providers/page.provider.model.dart';
-import 'package:my_language_app/models/providers/tts.provider.model.dart';
-import 'package:my_language_app/pages/settings.dart';
-import 'package:my_language_app/pages/study.dart';
-import 'package:my_language_app/pages/studySettings.dart';
-import 'package:my_language_app/pages/wordAdd.dart';
-import 'package:my_language_app/pages/languageAdd.dart';
-import 'package:my_language_app/pages/home.dart';
-import 'package:my_language_app/pages/wordList.dart';
+import 'package:mylanguageapp/components/tools/page.dart';
+import 'package:mylanguageapp/constants/page.const.dart';
+import 'package:mylanguageapp/lib/provider.lib.dart';
+import 'package:mylanguageapp/lib/voices.lib.dart';
+import 'package:mylanguageapp/models/providers/keyboard.provider.model.dart';
+import 'package:mylanguageapp/models/providers/language.provider.model.dart';
+import 'package:mylanguageapp/models/providers/page.provider.model.dart';
+import 'package:mylanguageapp/models/providers/tts.provider.model.dart';
+import 'package:mylanguageapp/pages/settings.dart';
+import 'package:mylanguageapp/pages/study.dart';
+import 'package:mylanguageapp/pages/studySettings.dart';
+import 'package:mylanguageapp/pages/wordAdd.dart';
+import 'package:mylanguageapp/pages/languageAdd.dart';
+import 'package:mylanguageapp/pages/home.dart';
+import 'package:mylanguageapp/pages/wordList.dart';
 
-import 'package:my_language_app/pages/studyPlan.dart';
+import 'package:mylanguageapp/pages/studyPlan.dart';
 import 'package:provider/provider.dart';
 
 void main() {

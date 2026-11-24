@@ -1,6 +1,6 @@
-import 'package:my_language_app/config/db/conn.dart';
-import 'package:my_language_app/config/db/tables/words.dart';
-import 'package:my_language_app/models/services/word.model.dart';
+import 'package:mylanguageapp/config/db/conn.dart';
+import 'package:mylanguageapp/config/db/tables/words.dart';
+import 'package:mylanguageapp/models/services/word.model.dart';
 
 class WordService {
   static Future<List<WordGetResultModel>> get(WordGetParamModel params) async {

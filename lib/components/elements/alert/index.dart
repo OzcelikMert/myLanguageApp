@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/elements/alert/icons/error.dart';
-import 'package:my_language_app/components/elements/alert/icons/confirm.dart';
-import 'package:my_language_app/components/elements/alert/icons/success.dart';
-import 'package:my_language_app/constants/theme.const.dart';
-import 'package:my_language_app/lib/dialog.lib.dart';
-import 'package:my_language_app/models/components/elements/dialog/options.model.dart';
+import 'package:mylanguageapp/components/elements/alert/icons/error.dart';
+import 'package:mylanguageapp/components/elements/alert/icons/confirm.dart';
+import 'package:mylanguageapp/components/elements/alert/icons/success.dart';
+import 'package:mylanguageapp/constants/theme.const.dart';
+import 'package:mylanguageapp/lib/dialog.lib.dart';
+import 'package:mylanguageapp/models/components/elements/dialog/options.model.dart';
 
 class ComponentDialog extends StatefulWidget {
   final ComponentDialogOptions options;
@@ -20,7 +20,7 @@ class ComponentDialog extends StatefulWidget {
 }
 
 class ComponentDialogState extends State<ComponentDialog>
-    with SingleTickerProviderStateMixin, DialogLib {
+    with SingleTickerProviderStateMixin {
   late AnimationController controller;
 
   late Animation<double> tween;

@@ -1,5 +1,5 @@
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:advanced_searchable_dropdown/advanced_searchable_dropdown.dart';
 
 class ComponentDropdown<T> extends StatelessWidget {
   final List<T> items;
@@ -8,26 +8,39 @@ class ComponentDropdown<T> extends StatelessWidget {
   final String? hintText;
   final T? selectedItem;
 
-  const ComponentDropdown({Key? key, required this.items, this.onChanged, this.itemAsString, this.hintText, this.selectedItem}) : super(key: key);
+  const ComponentDropdown({
+    Key? key,
+    required this.items,
+    this.onChanged,
+    this.itemAsString,
+    this.hintText,
+    this.selectedItem,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return DropdownSearch<T>(
-      popupProps: PopupProps.dialog(
-          showSearchBox: true,
-          searchDelay: Duration(milliseconds: 100),
-          showSelectedItems: false,
-          disabledItemFn: (item) => item == selectedItem,
+    // Map your custom items to SearchableDropDownItem structure
+    final dropdownItems = items.map((item) {
+      final labelText = itemAsString != null ? itemAsString!(item) : item.toString();
+      return SearchableDropDownItem(
+        label: labelText,
+        value: item,
+      );
+    }).toList();
+
+    return SearchableDropDown(
+      menuList: dropdownItems,
+      value: selectedItem,
+      hintText: hintText ?? "Select option",
+      decoration: InputDecoration(
+        labelText: hintText,
+        border: const OutlineInputBorder(),
       ),
-      selectedItem: selectedItem,
-      items: items,
-      itemAsString: itemAsString,
-      onChanged: onChanged,
-      dropdownDecoratorProps: DropDownDecoratorProps(
-        dropdownSearchDecoration: InputDecoration(
-          hintText: hintText,
-        ),
-      ),
+      onSelected: (SearchableDropDownItem? selectedDropDownItem) {
+        if (onChanged != null) {
+          onChanged!(selectedDropDownItem?.value);
+        }
+      },
     );
   }
 }

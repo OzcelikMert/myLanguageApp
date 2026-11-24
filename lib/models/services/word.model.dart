@@ -1,4 +1,4 @@
-import 'package:my_language_app/config/db/tables/words.dart';
+import 'package:mylanguageapp/config/db/tables/words.dart';
 
 class WordGetResultModel {
   final int wordId;

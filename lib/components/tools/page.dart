@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:my_language_app/components/tools/preLoader.dart';
-import 'package:my_language_app/components/tools/sidebar.dart';
-import 'package:my_language_app/constants/page.const.dart';
-import 'package:my_language_app/constants/theme.const.dart';
-import 'package:my_language_app/lib/provider.lib.dart';
-import 'package:my_language_app/models/providers/page.provider.model.dart';
+import 'package:mylanguageapp/components/tools/preLoader.dart';
+import 'package:mylanguageapp/components/tools/sidebar.dart';
+import 'package:mylanguageapp/constants/page.const.dart';
+import 'package:mylanguageapp/constants/theme.const.dart';
+import 'package:mylanguageapp/lib/provider.lib.dart';
+import 'package:mylanguageapp/models/providers/page.provider.model.dart';
 import 'package:provider/provider.dart';
 
 class ComponentPage extends StatefulWidget {

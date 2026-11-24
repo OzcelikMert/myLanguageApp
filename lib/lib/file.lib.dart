@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:device_info/device_info.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -59,10 +59,10 @@ class FileLib {
   }
 
   static Future<List<Map<String, dynamic>>?> importJsonFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['json'], initialDirectory: (await downloadDirectory).path);
-    if(result != null && result.files.isNotEmpty){
+    List<PlatformFile> result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['json'], initialDirectory: (await downloadDirectory).path);
+    if(result.isNotEmpty){
       try {
-        File file = File(result.files.single.path!);
+        File file = File(result[0].path!);
         String contents = await file.readAsString();
         dynamic jsonData = jsonDecode(contents).cast<Map<String, dynamic>>();
         await file.delete();
